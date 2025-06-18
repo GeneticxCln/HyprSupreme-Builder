@@ -492,5 +492,4 @@ echo "4. Create release: Visit GitHub to create v2.0.0 release"
 
 echo ""
 echo -e "${GREEN}✅ Project finalization completed!${NC}"
-EOF
 
