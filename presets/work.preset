@@ -1,0 +1,73 @@
+# HyprSupreme-Builder Preset: Work
+# Productivity-focused configuration for development and work
+
+# Configuration sources to include
+configs=(
+    "ml4w"
+    "jakoolit"
+)
+
+# Components to install
+components=(
+    "hyprland"
+    "waybar"
+    "rofi"
+    "kitty"
+    "themes"
+    "fonts"
+    "scripts"
+)
+
+# Features to enable
+features=(
+    "rounded"
+    "transparency"
+    "workspace_swipe"
+    "performance"
+)
+
+# Specific settings for productivity
+animation_style="smooth"
+blur_strength="light"
+shadow_size="medium"
+corner_radius="10"
+transparency_level="0.95"
+
+# Productivity optimizations
+focus_follows_mouse="true"
+auto_workspace_switching="true"
+smart_gaps="true"
+smart_borders="true"
+
+# ML4W productivity features
+workspace_management="advanced"
+application_rules="productivity"
+keybind_profile="developer"
+
+# Workspace assignments for productivity
+workspace_1="Terminal"      # Development terminals
+workspace_2="Code"          # IDE/Code editors  
+workspace_3="Browser"       # Web browser
+workspace_4="Communication" # Slack, Email, etc.
+workspace_5="Files"         # File managers
+workspace_6="Media"         # Documentation, PDFs
+workspace_7="System"        # System monitoring
+workspace_8="Testing"       # Testing environments
+workspace_9="Virtualization" # VMs, containers
+workspace_10="Miscellaneous"
+
+# Theme preferences for work
+default_theme="catppuccin-latte"  # Light theme for daytime work
+auto_wallpaper="true"             # Change based on time
+wallpaper_effects="subtle"
+
+# Professional appearance
+minimal_waybar="false"
+show_system_info="true"
+productivity_widgets="true"
+
+# Focus and distraction management
+notification_management="smart"
+focus_mode_available="true"
+break_reminders="true"
+

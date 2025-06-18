@@ -1,0 +1,61 @@
+# HyprSupreme-Builder Preset: Gaming
+# Performance-optimized configuration for gaming
+
+# Configuration sources to include
+configs=(
+    "jakoolit"
+    "ml4w"
+)
+
+# Components to install
+components=(
+    "hyprland"
+    "waybar"
+    "rofi"
+    "kitty"
+    "themes"
+    "fonts"
+    "scripts"
+)
+
+# Features to enable
+features=(
+    "performance"
+    "workspace_swipe"
+)
+
+# Specific settings for gaming
+animation_style="fast"
+blur_strength="disabled"
+shadow_size="minimal"
+corner_radius="8"
+transparency_level="1.0"
+
+# Gaming-specific optimizations
+vfr="true"
+vrr="2"
+allow_tearing="true"
+direct_scanout="true"
+
+# Performance priorities
+fps_limit="unlimited"
+optimization_level="maximum"
+disable_effects_gaming="true"
+
+# Gaming workspace rules
+workspace_1="Steam"
+workspace_2="Games"
+workspace_3="Discord"
+workspace_4="Browser"
+workspace_5="System"
+
+# Theme preferences for gaming
+default_theme="gruvbox"  # Dark theme that's easy on the eyes
+auto_wallpaper="false"   # Static wallpaper for consistency
+wallpaper_effects="false"
+
+# Audio optimizations for gaming
+pipewire_quantum="64"
+pipewire_rate="48000"
+audio_latency="low"
+
