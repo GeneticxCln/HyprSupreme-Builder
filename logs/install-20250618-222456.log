@@ -1,0 +1,17 @@
+[34m[INFO](B[m Installing Hyprland...
+[34m[INFO](B[m hyprland is already installed
+[34m[INFO](B[m Installing hyprpaper...
+[32m[SUCCESS](B[m Installed hyprpaper from official repos
+[34m[INFO](B[m hyprlock is already installed
+[34m[INFO](B[m hypridle is already installed
+[34m[INFO](B[m xdg-desktop-portal-hyprland is already installed
+[34m[INFO](B[m Installing qt5-wayland...
+[32m[SUCCESS](B[m Installed qt5-wayland from official repos
+[34m[INFO](B[m qt6-wayland is already installed
+[34m[INFO](B[m polkit-kde-agent is already installed
+[34m[INFO](B[m wl-clipboard is already installed
+[34m[INFO](B[m cliphist is already installed
+[34m[INFO](B[m grim is already installed
+[34m[INFO](B[m slurp is already installed
+[34m[INFO](B[m swappy is already installed
+[32m[SUCCESS](B[m Hyprland installation completed

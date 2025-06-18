@@ -1,14 +1,15 @@
-# 🚀 HyprSupreme-Builder
+# 🚀 HyprSupreme-Builder Enhanced Edition
 
-## Ultimate Hyprland Configuration Builder
+## Ultimate Hyprland Configuration Builder with Advanced Features
 
-**HyprSupreme-Builder** combines the best features from the most popular Hyprland configurations into one powerful, modular installation system.
+**HyprSupreme-Builder Enhanced Edition** combines the best features from the most popular Hyprland configurations into one powerful, modular installation system with **GUI installer, cloud sync, community sharing, and advanced migration tools**.
 
 <div align="center">
 
 ![GitHub Repo stars](https://img.shields.io/github/stars/GeneticxCln/HyprSupreme-Builder?style=for-the-badge&color=cba6f7) 
 ![GitHub last commit](https://img.shields.io/github/last-commit/GeneticxCln/HyprSupreme-Builder?style=for-the-badge&color=b4befe) 
 ![GitHub repo size](https://img.shields.io/github/repo-size/GeneticxCln/HyprSupreme-Builder?style=for-the-badge&color=cba6f7)
+![Version](https://img.shields.io/badge/version-2.0.0-brightgreen?style=for-the-badge)
 
 </div>
 
@@ -54,6 +55,36 @@ This project merges the **best features** from these legendary Hyprland configur
 - **SDDM themes** collection
 - **GTK themes** harmonization
 
+## 🌟 Enhanced Edition Features
+
+### 🎨 **Modern GUI Installer**
+- Beautiful GTK4-based graphical interface
+- Live preview of themes and configurations
+- Multi-page wizard for easy setup
+- Real-time installation progress
+- Component selection with descriptions
+
+### ☁️ **Cloud Synchronization**
+- Secure cloud backup of configurations
+- Cross-device configuration sync
+- Encrypted profile storage
+- Version control for configs
+- Easy restore and migration
+
+### 🌍 **Community Platform**
+- Discover and share themes
+- Rate and review configurations
+- Download community creations
+- User profiles and contributions
+- Local theme caching
+
+### 🔄 **Advanced Migration System**
+- Intelligent config migration
+- Component version tracking
+- Automated backup creation
+- Rollback capabilities
+- Migration planning and preview
+
 ## 🛠️ Installation
 
 ### Quick Install (Recommended)
@@ -67,6 +98,37 @@ git clone https://github.com/GeneticxCln/HyprSupreme-Builder.git
 cd HyprSupreme-Builder
 chmod +x install.sh
 ./install.sh
+```
+
+### Enhanced Edition Usage
+
+#### Command Line Interface
+```bash
+# Launch main installer
+./hyprsupreme install
+
+# Open GUI installer
+./hyprsupreme gui
+
+# Check system status
+./hyprsupreme status
+
+# Cloud synchronization
+./hyprsupreme cloud --sync
+./hyprsupreme cloud --upload profile_name
+./hyprsupreme cloud --download profile_name
+
+# Community features
+./hyprsupreme community --discover
+./hyprsupreme community --upload theme_name
+
+# Configuration migration
+./hyprsupreme migrate --check
+./hyprsupreme migrate --backup
+./hyprsupreme migrate --rollback
+
+# Get help
+./hyprsupreme help
 ```
 
 ### With Preset Configuration

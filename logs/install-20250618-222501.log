@@ -1,0 +1,32 @@
+[34m[INFO](B[m Installing Kitty terminal and related packages...
+[34m[INFO](B[m kitty is already installed
+[34m[INFO](B[m Installing python-pillow...
+[32m[SUCCESS](B[m Installed python-pillow from official repos
+[34m[INFO](B[m imagemagick is already installed
+[34m[INFO](B[m Creating default Kitty configuration...
+[32m[SUCCESS](B[m Default Kitty configuration created
+[32m[SUCCESS](B[m Kitty installation completed
+[34m[INFO](B[m Installing fonts for HyprSupreme...
+[34m[INFO](B[m ttf-jetbrains-mono is already installed
+[34m[INFO](B[m ttf-jetbrains-mono-nerd is already installed
+[34m[INFO](B[m ttf-font-awesome is already installed
+[34m[INFO](B[m ttf-fira-code is already installed
+[34m[INFO](B[m ttf-fira-sans is already installed
+[34m[INFO](B[m ttf-sourcecodepro-nerd is already installed
+[34m[INFO](B[m ttf-meslo-nerd is already installed
+[34m[INFO](B[m Installing ttf-hack-nerd...
+[32m[SUCCESS](B[m Installed ttf-hack-nerd from official repos
+[34m[INFO](B[m noto-fonts is already installed
+[34m[INFO](B[m noto-fonts-emoji is already installed
+[34m[INFO](B[m noto-fonts-cjk is already installed
+[34m[INFO](B[m adobe-source-code-pro-fonts is already installed
+[34m[INFO](B[m Installing adobe-source-sans-fonts...
+[32m[SUCCESS](B[m Installed adobe-source-sans-fonts from official repos
+[34m[INFO](B[m Installing adobe-source-serif-fonts...
+[32m[SUCCESS](B[m Installed adobe-source-serif-fonts from official repos
+[34m[INFO](B[m cantarell-fonts is already installed
+[34m[INFO](B[m Installing inter-font...
+[32m[SUCCESS](B[m Installed inter-font from official repos
+[34m[INFO](B[m Updating font cache...
+[32m[SUCCESS](B[m Font cache updated
+[32m[SUCCESS](B[m Fonts installation completed

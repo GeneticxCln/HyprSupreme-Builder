@@ -1,0 +1,321 @@
+#!/bin/bash
+# HyprSupreme-Builder Main Launcher
+# Central command for accessing all HyprSupreme tools
+
+VERSION="2.0.0"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Colors
+OK="$(tput setaf 2)[OK]$(tput sgr0)"
+ERROR="$(tput setaf 1)[ERROR]$(tput sgr0)"
+INFO="$(tput setaf 4)[INFO]$(tput sgr0)"
+WARN="$(tput setaf 3)[WARN]$(tput sgr0)"
+RESET="$(tput sgr0)"
+
+show_banner() {
+    echo -e "\033[36m"
+    echo "╔═══════════════════════════════════════════════════════════════╗"
+    echo "║                                                               ║"
+    echo "║              🚀 HYPRLAND SUPREME BUILDER 🚀                  ║"
+    echo "║                                                               ║"
+    echo "║          Enhanced Edition v${VERSION} - All Tools            ║"
+    echo "║                                                               ║"
+    echo "║    Installation • GUI • Cloud Sync • Community • Migration   ║"
+    echo "║                                                               ║"
+    echo "╚═══════════════════════════════════════════════════════════════╝"
+    echo -e "\033[0m"
+}
+
+show_help() {
+    show_banner
+    echo
+    echo "Usage: hyprsupreme [command] [options]"
+    echo
+    echo "INSTALLATION COMMANDS:"
+    echo "  install [preset]          Install HyprSupreme configuration"
+    echo "  gui                       Launch GUI installer"
+    echo
+    echo "CONFIGURATION MANAGEMENT:"
+    echo "  config                    Open configuration tool"
+    echo "  status                    Show system status"
+    echo "  backup [name]             Create configuration backup"
+    echo "  restore [backup_id]       Restore from backup"
+    echo
+    echo "CLOUD & COMMUNITY:"
+    echo "  cloud [action]            Cloud sync management"
+    echo "  community [action]        Community themes & sharing"
+    echo "  sync                      Sync configurations to cloud"
+    echo "  discover                  Discover community themes"
+    echo
+    echo "MIGRATION & UPDATES:"
+    echo "  migrate [version]         Migrate to new version"
+    echo "  check                     Check for updates"
+    echo "  rollback [migration_id]   Rollback migration"
+    echo
+    echo "AI ASSISTANT:"
+    echo "  ai [action]               AI-powered configuration assistant"
+    echo "  analyze                   Analyze system for optimal settings"
+    echo "  recommend                 Get AI configuration recommendations"
+    echo
+    echo "PRESETS:"
+    echo "  --preset showcase         Maximum eye-candy setup"
+    echo "  --preset gaming           Gaming-optimized setup"
+    echo "  --preset work             Productivity-focused setup"
+    echo "  --preset minimal          Lightweight setup"
+    echo "  --preset hybrid           Balanced configuration"
+    echo
+    echo "OPTIONS:"
+    echo "  -h, --help               Show this help message"
+    echo "  -v, --version            Show version information"
+    echo "  --debug                  Enable debug mode"
+    echo "  --dry-run                Dry run mode (no changes)"
+    echo
+    echo "EXAMPLES:"
+    echo "  hyprsupreme install --preset gaming"
+    echo "  hyprsupreme gui"
+    echo "  hyprsupreme cloud auth username password"
+    echo "  hyprsupreme community discover -c gaming"
+    echo "  hyprsupreme migrate 2.1.0"
+    echo
+    echo "For detailed help on any command:"
+    echo "  hyprsupreme [command] --help"
+}
+
+show_version() {
+    echo "HyprSupreme-Builder Enhanced Edition v${VERSION}"
+    echo "Ultimate Hyprland Configuration Builder"
+    echo
+    echo "Features:"
+    echo "  ✓ GUI Installer with live preview"
+    echo "  ✓ Cloud configuration sync"
+    echo "  ✓ Community theme sharing"
+    echo "  ✓ Advanced migration system"
+    echo "  ✓ Multi-preset support"
+    echo "  ✓ Backup & rollback system"
+    echo
+    echo "Repository: https://github.com/GeneticxCln/HyprSupreme-Builder"
+}
+
+# Check dependencies
+check_dependencies() {
+    local missing_deps=()
+    
+    # Essential dependencies
+    local deps=("python3" "git" "curl")
+    
+    for dep in "${deps[@]}"; do
+        if ! command -v "$dep" &> /dev/null; then
+            missing_deps+=("$dep")
+        fi
+    done
+    
+    # Python dependencies (check if available)
+    if command -v python3 &> /dev/null; then
+        if ! python3 -c "import gi; gi.require_version('Gtk', '4.0')" 2>/dev/null; then
+            missing_deps+=("python3-gi (GTK4 support)")
+        fi
+        
+        local python_deps=("sqlite3" "requests" "cryptography")
+        for dep in "${python_deps[@]}"; do
+            if ! python3 -c "import $dep" 2>/dev/null; then
+                missing_deps+=("python3-$dep")
+            fi
+        done
+    fi
+    
+    if [ ${#missing_deps[@]} -gt 0 ]; then
+        echo "${WARN} Missing dependencies: ${missing_deps[*]}"
+        echo "${INFO} Please install missing dependencies to use all features"
+        return 1
+    fi
+    
+    return 0
+}
+
+# Main command dispatcher
+main() {
+    local command="$1"
+    shift
+    
+    case "$command" in
+        ""|"-h"|"--help"|"help")
+            show_help
+            ;;
+        "-v"|"--version"|"version")
+            show_version
+            ;;
+        "install")
+            echo "${INFO} Running HyprSupreme installer..."
+            exec "${SCRIPT_DIR}/install.sh" "$@"
+            ;;
+        "gui")
+            echo "${INFO} Launching GUI installer..."
+            if ! check_dependencies; then
+                echo "${ERROR} GUI requires additional dependencies"
+                exit 1
+            fi
+            exec python3 "${SCRIPT_DIR}/gui/hyprsupreme-gui.py" "$@"
+            ;;
+        "config")
+            if [ -f "$HOME/.local/bin/hyprsupreme-config" ]; then
+                exec "$HOME/.local/bin/hyprsupreme-config" "$@"
+            else
+                echo "${ERROR} Configuration tool not found. Please run 'hyprsupreme install' first."
+                exit 1
+            fi
+            ;;
+        "status")
+            if [ -f "$HOME/.local/bin/hyprsupreme-status" ]; then
+                exec "$HOME/.local/bin/hyprsupreme-status" "$@"
+            else
+                echo "${ERROR} Status tool not found. Please run 'hyprsupreme install' first."
+                exit 1
+            fi
+            ;;
+        "cloud")
+            echo "${INFO} Running cloud sync..."
+            exec python3 "${SCRIPT_DIR}/tools/hyprsupreme-cloud.py" "$@"
+            ;;
+        "community")
+            echo "${INFO} Accessing community platform..."
+            exec python3 "${SCRIPT_DIR}/tools/hyprsupreme-community.py" "$@"
+            ;;
+        "migrate")
+            echo "${INFO} Running migration system..."
+            exec python3 "${SCRIPT_DIR}/tools/hyprsupreme-migrate.py" migrate "$@"
+            ;;
+        "check")
+            echo "${INFO} Checking for updates..."
+            exec python3 "${SCRIPT_DIR}/tools/hyprsupreme-migrate.py" check "$@"
+            ;;
+        "rollback")
+            echo "${INFO} Rolling back migration..."
+            exec python3 "${SCRIPT_DIR}/tools/hyprsupreme-migrate.py" rollback "$@"
+            ;;
+        "backup")
+            if [ -n "$1" ]; then
+                echo "${INFO} Creating backup: $1"
+                exec python3 "${SCRIPT_DIR}/tools/hyprsupreme-migrate.py" backup create "$@"
+            else
+                echo "${INFO} Listing backups..."
+                exec python3 "${SCRIPT_DIR}/tools/hyprsupreme-migrate.py" backup list
+            fi
+            ;;
+        "restore")
+            if [ -n "$1" ]; then
+                echo "${INFO} Restoring backup: $1"
+                exec python3 "${SCRIPT_DIR}/tools/hyprsupreme-migrate.py" backup restore "$1"
+            else
+                echo "${ERROR} Please specify backup ID to restore"
+                echo "Usage: hyprsupreme restore [backup_id]"
+                exit 1
+            fi
+            ;;
+        "sync")
+            echo "${INFO} Syncing to cloud..."
+            exec python3 "${SCRIPT_DIR}/tools/hyprsupreme-cloud.py" sync "$@"
+            ;;
+        "discover")
+            echo "${INFO} Discovering community themes..."
+            exec python3 "${SCRIPT_DIR}/tools/hyprsupreme-community.py" discover "$@"
+            ;;
+        "search")
+            echo "${INFO} Searching community..."
+            exec python3 "${SCRIPT_DIR}/tools/hyprsupreme-community.py" search "$@"
+            ;;
+        "download")
+            echo "${INFO} Downloading theme..."
+            exec python3 "${SCRIPT_DIR}/tools/hyprsupreme-community.py" download "$@"
+            ;;
+        "rate")
+            echo "${INFO} Rating theme..."
+            exec python3 "${SCRIPT_DIR}/tools/hyprsupreme-community.py" rate "$@"
+            ;;
+        "ai")
+            echo "${INFO} Launching AI configuration assistant..."
+            exec python3 "${SCRIPT_DIR}/tools/ai_assistant.py" "$@"
+            ;;
+        "analyze")
+            echo "${INFO} Analyzing system for optimal configuration..."
+            exec python3 "${SCRIPT_DIR}/tools/ai_assistant.py" analyze "$@"
+            ;;
+        "optimize")
+            echo "${INFO} Optimizing configuration with AI..."
+            exec python3 "${SCRIPT_DIR}/tools/ai_assistant.py" optimize "$@"
+            ;;
+        "troubleshoot")
+            echo "${INFO} Running AI troubleshooting..."
+            exec python3 "${SCRIPT_DIR}/tools/ai_assistant.py" troubleshoot "$@"
+            ;;
+        "update")
+            echo "${INFO} Updating HyprSupreme..."
+            cd "$SCRIPT_DIR"
+            git pull origin main
+            echo "${OK} HyprSupreme updated!"
+            ;;
+        "doctor")
+            echo "${INFO} Running system diagnostics..."
+            check_dependencies
+            
+            echo
+            echo "System Information:"
+            echo "  OS: $(cat /etc/os-release | grep PRETTY_NAME | cut -d'"' -f2)"
+            echo "  Kernel: $(uname -r)"
+            echo "  Shell: $SHELL"
+            echo "  GPU: $(lspci | grep -E "VGA|3D" | cut -d: -f3 | head -1)"
+            
+            echo
+            echo "HyprSupreme Status:"
+            if [ -d "$HOME/.config/hypr" ]; then
+                echo "  ✓ Hyprland configuration found"
+            else
+                echo "  ✗ Hyprland not configured"
+            fi
+            
+            if [ -f "$HOME/.local/bin/hyprsupreme-config" ]; then
+                echo "  ✓ Management tools installed"
+            else
+                echo "  ✗ Management tools not installed"
+            fi
+            
+            if pgrep -x "Hyprland" > /dev/null; then
+                echo "  ✓ Hyprland is running"
+            else
+                echo "  ✗ Hyprland is not running"
+            fi
+            
+            echo
+            echo "Available Tools:"
+            echo "  ✓ Core installer"
+            echo "  $([ -f "${SCRIPT_DIR}/gui/hyprsupreme-gui.py" ] && echo "✓" || echo "✗") GUI installer"
+            echo "  ✓ Cloud sync"
+            echo "  ✓ Community platform"
+            echo "  ✓ Migration system"
+            ;;
+        "demo")
+            echo "${INFO} Running HyprSupreme demo..."
+            show_banner
+            echo
+            echo "🎬 HyprSupreme Demo Mode"
+            echo "======================="
+            echo
+            echo "This would typically showcase:"
+            echo "  • Live configuration preview"
+            echo "  • Theme switching demo" 
+            echo "  • Animation examples"
+            echo "  • Community themes gallery"
+            echo
+            echo "Demo mode is not yet implemented in this version."
+            echo "Use 'hyprsupreme gui' for the interactive installer!"
+            ;;
+        *)
+            echo "${ERROR} Unknown command: $command"
+            echo "Run 'hyprsupreme --help' for available commands"
+            exit 1
+            ;;
+    esac
+}
+
+# Run main function with all arguments
+main "$@"
+

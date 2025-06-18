@@ -1,0 +1,15 @@
+[34m[INFO](B[m Installing Waybar and related packages...
+[34m[INFO](B[m waybar is already installed
+[34m[INFO](B[m otf-font-awesome is already installed
+[34m[INFO](B[m ttf-jetbrains-mono is already installed
+[34m[INFO](B[m ttf-jetbrains-mono-nerd is already installed
+[34m[INFO](B[m ttf-font-awesome is already installed
+[34m[INFO](B[m Installing ttf-sourcecodepro-nerd...
+[32m[SUCCESS](B[m Installed ttf-sourcecodepro-nerd from official repos
+[34m[INFO](B[m playerctl is already installed
+[34m[INFO](B[m pavucontrol is already installed
+[34m[INFO](B[m Installing bluetuith...
+[31m[ERROR](B[m Failed to install bluetuith - no AUR helper available
+[34m[INFO](B[m Creating default Waybar configuration...
+[32m[SUCCESS](B[m Default Waybar configuration created
+[32m[SUCCESS](B[m Waybar installation completed
