@@ -43,7 +43,7 @@ jobs:
         sha256sum HyprSupreme-Builder-${{ steps.get_version.outputs.VERSION }}.tar.gz > HyprSupreme-Builder-${{ steps.get_version.outputs.VERSION }}.tar.gz.sha256
 
     - name: Create GitHub Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         files: |
           dist/HyprSupreme-Builder-${{ steps.get_version.outputs.VERSION }}.tar.gz
