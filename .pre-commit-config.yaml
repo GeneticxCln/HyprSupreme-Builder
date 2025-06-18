@@ -1,0 +1,166 @@
+# Pre-commit hooks for HyprSupreme-Builder
+# See https://pre-commit.com for more information
+
+repos:
+  # Pre-commit hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-toml
+      - id: check-added-large-files
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: debug-statements
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+
+  # Python formatting with Black
+  - repo: https://github.com/psf/black
+    rev: 23.3.0
+    hooks:
+      - id: black
+        language_version: python3
+        exclude: ^sources/
+
+  # Python import sorting with isort
+  - repo: https://github.com/pycqa/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        args: ["--profile", "black"]
+        exclude: ^sources/
+
+  # Python linting with flake8
+  - repo: https://github.com/pycqa/flake8
+    rev: 6.0.0
+    hooks:
+      - id: flake8
+        args: [--max-line-length=88, --extend-ignore=E203,W503]
+        exclude: ^sources/
+
+  # Python type checking with mypy
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.3.0
+    hooks:
+      - id: mypy
+        additional_dependencies: [types-requests, types-PyYAML]
+        exclude: ^(sources/|tests/)
+
+  # Python security linting with bandit
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.5
+    hooks:
+      - id: bandit
+        args: ["-c", "pyproject.toml"]
+        additional_dependencies: ["bandit[toml]"]
+        exclude: ^(sources/|tests/)
+
+  # Shell script linting with shellcheck
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.9.0.2
+    hooks:
+      - id: shellcheck
+        exclude: ^sources/
+
+  # Dockerfile linting
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.12.0
+    hooks:
+      - id: hadolint-docker
+        args: [--ignore, DL3008, --ignore, DL3009]
+
+  # YAML linting
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.32.0
+    hooks:
+      - id: yamllint
+        args: [--format, parsable, --strict]
+
+  # Markdown linting
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.35.0
+    hooks:
+      - id: markdownlint
+        args: [--fix]
+        exclude: ^sources/
+
+  # Python security scanning
+  - repo: https://github.com/Lucas-C/pre-commit-hooks-safety
+    rev: v1.3.2
+    hooks:
+      - id: python-safety-dependencies-check
+        exclude: ^sources/
+
+  # Detect private keys
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: ^sources/
+
+  # Local hooks for custom checks
+  - repo: local
+    hooks:
+      # Check for TODO/FIXME comments
+      - id: check-todos
+        name: Check for TODO/FIXME comments
+        entry: bash -c 'if grep -r "TODO\|FIXME" --include="*.py" --include="*.sh" --exclude-dir=sources .; then echo "Found TODO/FIXME comments. Please resolve before committing."; exit 1; fi'
+        language: system
+        pass_filenames: false
+
+      # Validate VERSION file format
+      - id: validate-version
+        name: Validate VERSION file format
+        entry: bash -c 'if [[ ! $(cat VERSION) =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then echo "VERSION file must contain semantic version (x.y.z)"; exit 1; fi'
+        language: system
+        files: ^VERSION$
+
+      # Check Python imports
+      - id: check-python-imports
+        name: Check Python imports can be resolved
+        entry: python3 -c "
+import sys
+import ast
+import os
+for root, dirs, files in os.walk('.'):
+    if 'sources' in root or '__pycache__' in root or '.git' in root:
+        continue
+    for file in files:
+        if file.endswith('.py'):
+            filepath = os.path.join(root, file)
+            try:
+                with open(filepath, 'r') as f:
+                    ast.parse(f.read())
+            except SyntaxError as e:
+                print(f'Syntax error in {filepath}: {e}')
+                sys.exit(1)
+print('All Python files have valid syntax')
+"
+        language: system
+        pass_filenames: false
+
+      # Ensure executable files have proper permissions
+      - id: check-executables
+        name: Check executable file permissions
+        entry: bash -c 'find . -name "*.sh" -not -path "./sources/*" -not -executable -exec echo "File {} is not executable" \; -exec exit 1 \;'
+        language: system
+        pass_filenames: false
+
+# Configuration for specific tools
+ci:
+  autofix_commit_msg: |
+    [pre-commit.ci] auto fixes from pre-commit.com hooks
+
+    for more information, see https://pre-commit.ci
+  autofix_prs: true
+  autoupdate_branch: ''
+  autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
+  autoupdate_schedule: weekly
+  skip: [python-safety-dependencies-check, detect-secrets]
+  submodules: false
+

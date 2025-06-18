@@ -1,0 +1,129 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+env.bak/
+venv.bak/
+.venv/
+ENV/
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+Install-Logs/
+
+# Backup files
+*.backup
+*.bak
+backups/
+
+# Testing
+.coverage
+.pytest_cache/
+.tox/
+.cache
+htmlcov/
+.coverage.*
+coverage.xml
+*.cover
+
+# Documentation build
+docs/_build/
+
+# Local development
+.env
+.env.local
+.env.*.local
+
+# Sources (might be large)
+sources/
+
+# Temporary files
+*.tmp
+*.temp
+/tmp/
+
+# Node modules (if any)
+node_modules/
+
+# Cache directories
+.cache/
+.mypy_cache/
+.bandit/
+
+# Virtual environments
+community_venv/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Configuration that might contain secrets
+config/secrets.json
+config/api_keys.json
+
+# Docker related
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# CI/CD
+.github/
+
+# Archives
+*.tar.gz
+*.zip
+*.tar
+*.rar
+
+# Large binaries
+*.bin
+*.exe
+*.dmg
+*.pkg
+*.deb
+*.rpm
+

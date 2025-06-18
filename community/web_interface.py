@@ -194,6 +194,33 @@ class CommunityWebApp:
             success = community.rate_theme(theme_id, rating, review)
             return jsonify({'success': success})
         
+        @app.route('/health')
+        def health_check():
+            """Health check endpoint for monitoring"""
+            try:
+                # Test database connection
+                stats = community.get_statistics()
+                
+                health_status = {
+                    "status": "healthy",
+                    "version": "2.0.0",
+                    "timestamp": datetime.utcnow().isoformat() + "Z",
+                    "database": "connected",
+                    "services": {
+                        "community_platform": "running",
+                        "theme_manager": "running"
+                    }
+                }
+                
+                return jsonify(health_status)
+            except Exception as e:
+                return jsonify({
+                    "status": "unhealthy",
+                    "version": "2.0.0",
+                    "timestamp": datetime.utcnow().isoformat() + "Z",
+                    "error": str(e)
+                }), 500
+
         @app.route('/api/theme/<theme_id>/download', methods=['POST'])
         def download_theme(theme_id):
             """Download theme API"""

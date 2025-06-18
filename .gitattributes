@@ -1,0 +1,86 @@
+# Handle line endings automatically for files detected as text
+# and leave all files detected as binary untouched.
+* text=auto
+
+# The above will handle all files NOT found below
+# These files are text and should be normalized (Convert crlf => lf)
+*.py text eol=lf
+*.sh text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+*.cfg text eol=lf
+*.ini text eol=lf
+*.conf text eol=lf
+
+# Source code
+*.css text eol=lf
+*.html text eol=lf
+*.js text eol=lf
+
+# Documentation
+*.rst text eol=lf
+README text eol=lf
+LICENSE text eol=lf
+CHANGELOG text eol=lf
+CONTRIBUTING text eol=lf
+
+# Docker files
+Dockerfile* text eol=lf
+docker-compose*.yml text eol=lf
+
+# Scripts
+*.bash text eol=lf
+*.fish text eol=lf
+*.zsh text eol=lf
+
+# These files are binary and should be left untouched
+# (binary is a macro for -text -diff)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.mov binary
+*.mp4 binary
+*.mp3 binary
+*.flv binary
+*.fla binary
+*.swf binary
+*.gz binary
+*.zip binary
+*.7z binary
+*.ttf binary
+*.eot binary
+*.woff binary
+*.woff2 binary
+*.pyc binary
+*.pdf binary
+*.so binary
+*.db binary
+*.sqlite binary
+*.sqlite3 binary
+
+# Archive files
+*.tar linguist-generated=true
+*.zip linguist-generated=true
+
+# Generated files
+*.log linguist-generated=true
+*.cache linguist-generated=true
+
+# Exclude from language statistics
+sources/* linguist-vendored
+venv/* linguist-vendored
+community_venv/* linguist-vendored
+node_modules/* linguist-vendored
+*.min.js linguist-vendored
+*.min.css linguist-vendored
+
+# Mark as documentation
+*.md linguist-documentation
+docs/* linguist-documentation
+

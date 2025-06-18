@@ -1,0 +1,60 @@
+# Include documentation
+include README.md
+include LICENSE
+include CHANGELOG.md
+include CONTRIBUTING.md
+include SECURITY.md
+include API_DOCUMENTATION.md
+include TROUBLESHOOTING.md
+include VERSION
+
+# Include configuration files
+include *.yml
+include *.yaml
+include *.toml
+include *.ini
+include *.cfg
+
+# Include scripts
+include *.sh
+recursive-include tools *.py
+recursive-include gui *.py
+recursive-include community *.py
+recursive-include community/templates *.html
+recursive-include community/static *
+
+# Include modules and configs
+recursive-include modules *
+recursive-include presets *
+
+# Include tests
+recursive-include tests *.py
+recursive-include tests *.bats
+
+# Exclude development and build artifacts
+exclude .pre-commit-config.yaml
+exclude setup-dev.sh
+exclude Dockerfile*
+exclude docker-compose*.yml
+exclude .dockerignore
+exclude tox.ini
+
+# Exclude version control and IDE files
+global-exclude .git*
+global-exclude .DS_Store
+global-exclude *.pyc
+global-exclude *.pyo
+global-exclude *.pyd
+global-exclude __pycache__
+global-exclude *.so
+global-exclude .coverage
+global-exclude .pytest_cache
+
+# Exclude sources directory (it's large)
+prune sources
+prune venv
+prune community_venv
+prune logs
+prune backups
+prune .github
+
