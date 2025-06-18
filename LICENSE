@@ -1,0 +1,42 @@
+GNU GENERAL PUBLIC LICENSE
+Version 3, 29 June 2007
+
+Copyright (C) 2025 GeneticxCln and contributors
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+---
+
+ADDITIONAL ATTRIBUTION REQUIREMENTS:
+
+This project integrates and builds upon the work of several outstanding
+Hyprland configuration creators. While this project is licensed under
+GPL-3.0, users and contributors must also respect the original licenses
+and attributions of the integrated configurations:
+
+- JaKooLit's Arch-Hyprland: https://github.com/JaKooLit/Arch-Hyprland
+- ML4W Dotfiles: https://github.com/mylinuxforwork/dotfiles  
+- HyDE (HyprDots): https://github.com/prasanthrangan/hyprdots
+- End-4's Dots: https://github.com/end-4/dots-hyprland
+- Prasanta's HyprDots: https://github.com/prasanthrangan/hyprdots
+
+Each integrated configuration maintains its original copyright and
+licensing terms. This project serves as an integration layer and
+installer system, combining these configurations while preserving
+proper attribution to their original creators.
+
+For commercial use or redistribution, please ensure compliance with
+all original licenses and maintain proper attribution to all
+contributors and original configuration creators.
+

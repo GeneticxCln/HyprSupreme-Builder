@@ -1,0 +1,52 @@
+# HyprSupreme-Builder Preset: Showcase
+# Maximum eye-candy configuration with all visual effects
+
+# Configuration sources to include
+configs=(
+    "jakoolit"
+    "hyde"
+    "end4" 
+    "prasanta"
+)
+
+# Components to install
+components=(
+    "hyprland"
+    "waybar"
+    "rofi"
+    "kitty"
+    "ags"
+    "sddm"
+    "themes"
+    "fonts"
+    "wallpapers"
+    "scripts"
+)
+
+# Features to enable
+features=(
+    "animations"
+    "blur"
+    "shadows"
+    "rounded"
+    "transparency"
+    "workspace_swipe"
+    "auto_theme"
+)
+
+# Specific settings
+animation_style="bounce"
+blur_strength="strong"
+shadow_size="large" 
+corner_radius="15"
+transparency_level="0.85"
+
+# Theme preferences
+default_theme="catppuccin-mocha"
+auto_wallpaper="true"
+wallpaper_effects="true"
+
+# Performance settings
+fps_limit="60"
+optimization_level="minimal"  # Prioritize visuals over performance
+

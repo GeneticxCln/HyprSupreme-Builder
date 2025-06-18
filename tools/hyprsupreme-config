@@ -1,0 +1,220 @@
+#!/bin/bash
+# HyprSupreme-Builder Configuration Manager
+# A tool for managing and customizing your HyprSupreme installation
+
+VERSION="1.0.0"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+
+source "$PROJECT_ROOT/modules/common/functions.sh"
+
+print_banner() {
+    echo -e "${MAGENTA}"
+    echo "╔══════════════════════════════════════════════════╗"
+    echo "║                                                  ║"
+    echo "║           🛠️  HYPRSUPREME CONFIG 🛠️             ║"
+    echo "║                                                  ║"
+    echo "║         Configuration Management Tool            ║"
+    echo "║                                                  ║"
+    echo "╚══════════════════════════════════════════════════╝"
+    echo -e "${RESET}"
+}
+
+show_main_menu() {
+    whiptail --title "HyprSupreme Config Manager" \
+        --menu "Choose an option:" \
+        20 80 10 \
+        "1" "Theme Management" \
+        "2" "Component Configuration" \
+        "3" "Feature Toggle" \
+        "4" "Preset Switching" \
+        "5" "Backup Management" \
+        "6" "System Information" \
+        "7" "Update HyprSupreme" \
+        "8" "Troubleshooting" \
+        "9" "About" \
+        "0" "Exit" \
+        3>&1 1>&2 2>&3
+}
+
+theme_management() {
+    local choice=$(whiptail --title "Theme Management" \
+        --menu "Theme Options:" \
+        20 80 10 \
+        "1" "Switch Theme" \
+        "2" "Install New Theme" \
+        "3" "Create Custom Theme" \
+        "4" "Theme Preview" \
+        "5" "Auto Theme Settings" \
+        "0" "Back to Main Menu" \
+        3>&1 1>&2 2>&3)
+    
+    case $choice in
+        1) switch_theme ;;
+        2) install_theme ;;
+        3) create_theme ;;
+        4) preview_theme ;;
+        5) auto_theme_settings ;;
+        0) return ;;
+    esac
+}
+
+component_config() {
+    local choice=$(whiptail --title "Component Configuration" \
+        --menu "Configure Components:" \
+        20 80 10 \
+        "1" "Hyprland Settings" \
+        "2" "Waybar Configuration" \
+        "3" "Rofi/Launcher Settings" \
+        "4" "Terminal Configuration" \
+        "5" "AGS Widget Settings" \
+        "6" "SDDM Theme Settings" \
+        "0" "Back to Main Menu" \
+        3>&1 1>&2 2>&3)
+    
+    case $choice in
+        1) hyprland_settings ;;
+        2) waybar_config ;;
+        3) rofi_settings ;;
+        4) terminal_config ;;
+        5) ags_settings ;;
+        6) sddm_settings ;;
+        0) return ;;
+    esac
+}
+
+feature_toggle() {
+    local features=(
+        "animations" "Advanced Animations & Effects" "$(get_feature_status animations)"
+        "blur" "Background Blur Effects" "$(get_feature_status blur)"
+        "shadows" "Window Shadows" "$(get_feature_status shadows)"
+        "rounded" "Rounded Corners" "$(get_feature_status rounded)"
+        "transparency" "Window Transparency" "$(get_feature_status transparency)"
+        "workspace_swipe" "Workspace Gestures" "$(get_feature_status workspace_swipe)"
+        "auto_theme" "Automatic Theme Switching" "$(get_feature_status auto_theme)"
+        "performance" "Performance Optimizations" "$(get_feature_status performance)"
+    )
+    
+    local selected=$(whiptail --title "Feature Toggle" \
+        --checklist "Enable/Disable Features:" \
+        20 80 10 "${features[@]}" 3>&1 1>&2 2>&3)
+    
+    if [[ -n "$selected" ]]; then
+        apply_feature_changes "$selected"
+    fi
+}
+
+get_feature_status() {
+    local feature="$1"
+    # Check if feature is enabled (placeholder implementation)
+    if [[ -f "$HOME/.config/hypr/features/$feature.enabled" ]]; then
+        echo "ON"
+    else
+        echo "OFF"
+    fi
+}
+
+switch_theme() {
+    local themes=(
+        "catppuccin-mocha" "Catppuccin Mocha (Dark)"
+        "catppuccin-latte" "Catppuccin Latte (Light)"
+        "nord" "Nord Theme"
+        "dracula" "Dracula Theme"
+        "gruvbox" "Gruvbox Theme"
+        "tokyo-night" "Tokyo Night Theme"
+    )
+    
+    local selected=$(whiptail --title "Switch Theme" \
+        --menu "Choose a theme:" \
+        20 80 10 "${themes[@]}" 3>&1 1>&2 2>&3)
+    
+    if [[ -n "$selected" ]]; then
+        log_info "Switching to theme: $selected"
+        # Implementation for theme switching
+        apply_theme "$selected"
+    fi
+}
+
+system_info() {
+    local gpu_info=$(get_gpu_info)
+    local distro_info="$DISTRO $DISTRO_VERSION"
+    local hyprland_version=$(hyprland --version 2>/dev/null | head -1 || echo "Not installed")
+    local waybar_version=$(waybar --version 2>/dev/null || echo "Not installed")
+    
+    whiptail --title "System Information" \
+        --msgbox "
+HyprSupreme Configuration Info:
+
+Distribution: $distro_info
+GPU: $gpu_info
+Hyprland: $hyprland_version
+Waybar: $waybar_version
+
+Configuration Status:
+- Backup Directory: $HOME/.config/hyprland-backup-*
+- Log Directory: $PROJECT_ROOT/logs/
+- Config Directory: $HOME/.config/hypr/
+
+For detailed logs, check: $PROJECT_ROOT/logs/
+" 20 80
+}
+
+show_help() {
+    whiptail --title "HyprSupreme Config Help" \
+        --msgbox "
+HyprSupreme Configuration Manager
+
+Commands:
+- Theme Management: Switch, install, and customize themes
+- Component Config: Configure individual components
+- Feature Toggle: Enable/disable visual effects
+- Preset Switching: Change between preset configurations
+- Backup Management: Manage configuration backups
+
+For more help, visit:
+https://github.com/GeneticxCln/HyprSupreme-Builder
+
+Issues and support:
+https://github.com/GeneticxCln/HyprSupreme-Builder/issues
+" 20 80
+}
+
+main() {
+    print_banner
+    
+    while true; do
+        choice=$(show_main_menu)
+        
+        case $choice in
+            1) theme_management ;;
+            2) component_config ;;
+            3) feature_toggle ;;
+            4) preset_switching ;;
+            5) backup_management ;;
+            6) system_info ;;
+            7) update_hyprsupreme ;;
+            8) troubleshooting ;;
+            9) show_help ;;
+            0|"") exit 0 ;;
+        esac
+    done
+}
+
+# Placeholder functions (to be implemented)
+apply_theme() { log_info "Theme switching functionality to be implemented"; }
+hyprland_settings() { log_info "Hyprland settings to be implemented"; }
+waybar_config() { log_info "Waybar configuration to be implemented"; }
+rofi_settings() { log_info "Rofi settings to be implemented"; }
+terminal_config() { log_info "Terminal configuration to be implemented"; }
+ags_settings() { log_info "AGS settings to be implemented"; }
+sddm_settings() { log_info "SDDM settings to be implemented"; }
+preset_switching() { log_info "Preset switching to be implemented"; }
+backup_management() { log_info "Backup management to be implemented"; }
+update_hyprsupreme() { log_info "Update functionality to be implemented"; }
+troubleshooting() { log_info "Troubleshooting tools to be implemented"; }
+apply_feature_changes() { log_info "Feature changes to be implemented"; }
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
+fi
+
