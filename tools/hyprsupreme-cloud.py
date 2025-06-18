@@ -12,14 +12,34 @@ import sqlite3
 import requests
 import tarfile
 import tempfile
+import uuid
+import time
+import hmac
 from pathlib import Path
-from datetime import datetime
-from typing import Dict, List, Optional, Tuple
+from datetime import datetime, timedelta
+from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass, asdict
-from cryptography.fernet import Fernet
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-import base64
+# Optional cryptography imports - graceful fallback
+try:
+    from cryptography.fernet import Fernet
+    from cryptography.hazmat.primitives import hashes, serialization
+    from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+    from cryptography.hazmat.primitives.asymmetric import rsa, padding
+    from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+    import base64
+    ENCRYPTION_AVAILABLE = True
+except ImportError:
+    print("Warning: cryptography module not found. Encryption features disabled.")
+    print("Install with: pip install cryptography")
+    ENCRYPTION_AVAILABLE = False
+    
+    # Mock classes for graceful degradation
+    class MockAESGCM:
+        def __init__(self, key): pass
+        def encrypt(self, nonce, data, associated_data): return data
+        def decrypt(self, nonce, data, associated_data): return data
+    
+    AESGCM = MockAESGCM
 
 @dataclass
 class ConfigProfile:
@@ -42,7 +62,7 @@ class ConfigProfile:
     public: bool = False
 
 class HyprSupremeCloud:
-    """Cloud sync manager for HyprSupreme configurations"""
+    """Cloud sync manager for HyprSupreme configurations with advanced encryption"""
     
     def __init__(self, config_dir: str = None):
         self.config_dir = Path(config_dir or os.path.expanduser("~/.config/hyprsupreme"))
@@ -51,20 +71,34 @@ class HyprSupremeCloud:
         self.db_path = self.config_dir / "cloud.db"
         self.settings_path = self.config_dir / "cloud_settings.json"
         self.cache_dir = self.config_dir / "cache"
-        self.cache_dir.mkdir(exist_ok=True)
+        self.encrypted_cache_dir = self.config_dir / "encrypted_cache"
+        self.keys_dir = self.config_dir / "keys"
+        
+        # Create directories with secure permissions
+        for directory in [self.cache_dir, self.encrypted_cache_dir, self.keys_dir]:
+            directory.mkdir(exist_ok=True, mode=0o700)
+        
+        # Cloud endpoints (would be actual API endpoints)
+        self.api_base = "https://api.hyprsupreme.com/v1"  # Placeholder
         
         # Initialize database
         self.init_database()
         
         # Load settings
         self.settings = self.load_settings()
-        
-        # Cloud endpoints (would be actual API endpoints)
-        self.api_base = "https://api.hyprsupreme.com/v1"  # Placeholder
         self.api_key = self.settings.get('api_key')
         
-        # Encryption key for sensitive data
-        self.encryption_key = self.get_or_create_encryption_key()
+        # Device identification
+        self.device_id = self.get_or_create_device_id()
+        self.device_name = self.settings.get('device_name', self.get_default_device_name())
+        
+        # Encryption components
+        self.master_key = self.get_or_create_master_key()
+        self.device_keypair = self.get_or_create_device_keypair()
+        if ENCRYPTION_AVAILABLE:
+            self.aes_gcm = AESGCM(self.master_key)
+        else:
+            self.aes_gcm = MockAESGCM(self.master_key)
         
     def init_database(self):
         """Initialize local database for caching and tracking"""
@@ -143,8 +177,260 @@ class HyprSupremeCloud:
         except Exception as e:
             print(f"Error saving settings: {e}")
             
-    def get_or_create_encryption_key(self) -> Fernet:
-        """Get or create encryption key for sensitive data"""
+    def get_or_create_device_id(self) -> str:
+        """Get or create unique device identifier"""
+        device_file = self.config_dir / ".device_id"
+        
+        if device_file.exists():
+            try:
+                device_id = device_file.read_text().strip()
+                if device_id:
+                    return device_id
+            except Exception:
+                pass
+        
+        # Generate new device ID
+        device_id = str(uuid.uuid4())
+        try:
+            device_file.write_text(device_id)
+            device_file.chmod(0o600)
+        except Exception as e:
+            print(f"Warning: Could not save device ID: {e}")
+        
+        return device_id
+    
+    def get_default_device_name(self) -> str:
+        """Generate default device name"""
+        import socket
+        import getpass
+        hostname = socket.gethostname()
+        username = getpass.getuser()
+        return f"{username}@{hostname}"
+    
+    def get_or_create_master_key(self) -> bytes:
+        """Get or create master encryption key using PBKDF2"""
+        if not ENCRYPTION_AVAILABLE:
+            # Return a simple key for testing
+            return os.urandom(32)
+            
+        key_file = self.keys_dir / "master.key"
+        salt_file = self.keys_dir / "master.salt"
+        
+        if key_file.exists() and salt_file.exists():
+            try:
+                with open(key_file, 'rb') as f:
+                    encrypted_key = f.read()
+                with open(salt_file, 'rb') as f:
+                    salt = f.read()
+                
+                # In real implementation, would prompt for passphrase
+                # For demo, using device-specific data as passphrase source
+                passphrase = f"{self.device_id}:{os.getlogin()}".encode()
+                
+                kdf = PBKDF2HMAC(
+                    algorithm=hashes.SHA256(),
+                    length=32,
+                    salt=salt,
+                    iterations=100000,
+                )
+                key = kdf.derive(passphrase)
+                
+                # Decrypt and return master key
+                f = Fernet(base64.urlsafe_b64encode(key))
+                return f.decrypt(encrypted_key)
+            except Exception as e:
+                print(f"Warning: Could not load master key: {e}")
+        
+        # Generate new master key
+        master_key = os.urandom(32)  # 256-bit key
+        salt = os.urandom(16)
+        
+        try:
+            # Derive encryption key from passphrase
+            passphrase = f"{self.device_id}:{os.getlogin()}".encode()
+            kdf = PBKDF2HMAC(
+                algorithm=hashes.SHA256(),
+                length=32,
+                salt=salt,
+                iterations=100000,
+            )
+            derived_key = kdf.derive(passphrase)
+            
+            # Encrypt master key
+            f = Fernet(base64.urlsafe_b64encode(derived_key))
+            encrypted_master_key = f.encrypt(master_key)
+            
+            # Save encrypted master key and salt
+            key_file.write_bytes(encrypted_master_key)
+            salt_file.write_bytes(salt)
+            
+            # Set secure permissions
+            key_file.chmod(0o600)
+            salt_file.chmod(0o600)
+            
+        except Exception as e:
+            print(f"Warning: Could not save master key: {e}")
+        
+        return master_key
+    
+    def get_or_create_device_keypair(self) -> Tuple[bytes, bytes]:
+        """Get or create RSA keypair for device authentication"""
+        if not ENCRYPTION_AVAILABLE:
+            # Return mock keypair for testing
+            return b"mock_private_key", b"mock_public_key"
+            
+        private_key_file = self.keys_dir / "device_private.pem"
+        public_key_file = self.keys_dir / "device_public.pem"
+        
+        if private_key_file.exists() and public_key_file.exists():
+            try:
+                private_key_bytes = private_key_file.read_bytes()
+                public_key_bytes = public_key_file.read_bytes()
+                return private_key_bytes, public_key_bytes
+            except Exception:
+                pass
+        
+        # Generate new keypair
+        private_key = rsa.generate_private_key(
+            public_exponent=65537,
+            key_size=2048,
+        )
+        
+        # Serialize keys
+        private_key_bytes = private_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption()
+        )
+        
+        public_key_bytes = private_key.public_key().public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo
+        )
+        
+        try:
+            private_key_file.write_bytes(private_key_bytes)
+            public_key_file.write_bytes(public_key_bytes)
+            
+            private_key_file.chmod(0o600)
+            public_key_file.chmod(0o644)
+        except Exception as e:
+            print(f"Warning: Could not save device keypair: {e}")
+        
+        return private_key_bytes, public_key_bytes
+    
+    def encrypt_data(self, data: bytes, additional_data: bytes = None) -> Dict[str, bytes]:
+        """Encrypt data using AES-GCM with timestamp and nonce"""
+        if not ENCRYPTION_AVAILABLE:
+            # Return unencrypted data for testing
+            timestamp = int(time.time()).to_bytes(8, 'big')
+            return {
+                'ciphertext': data,
+                'nonce': os.urandom(12),
+                'timestamp': timestamp,
+                'aad': additional_data or b''
+            }
+            
+        # Generate random nonce
+        nonce = os.urandom(12)  # 96-bit nonce for GCM
+        
+        # Add timestamp to prevent replay attacks
+        timestamp = int(time.time()).to_bytes(8, 'big')
+        
+        # Combine additional authenticated data
+        aad = timestamp + (additional_data or b'')
+        
+        # Encrypt data
+        ciphertext = self.aes_gcm.encrypt(nonce, data, aad)
+        
+        return {
+            'ciphertext': ciphertext,
+            'nonce': nonce,
+            'timestamp': timestamp,
+            'aad': additional_data or b''
+        }
+    
+    def decrypt_data(self, encrypted_data: Dict[str, bytes], additional_data: bytes = None, max_age: int = 3600) -> bytes:
+        """Decrypt data and verify timestamp"""
+        if not ENCRYPTION_AVAILABLE:
+            # Return unencrypted data for testing
+            return encrypted_data['ciphertext']
+            
+        # Verify timestamp to prevent replay attacks
+        timestamp = int.from_bytes(encrypted_data['timestamp'], 'big')
+        current_time = int(time.time())
+        
+        if current_time - timestamp > max_age:
+            raise ValueError("Encrypted data is too old")
+        
+        # Reconstruct AAD
+        aad = encrypted_data['timestamp'] + (additional_data or encrypted_data['aad'])
+        
+        # Decrypt data
+        plaintext = self.aes_gcm.decrypt(
+            encrypted_data['nonce'], 
+            encrypted_data['ciphertext'], 
+            aad
+        )
+        
+        return plaintext
+    
+    def sign_data(self, data: bytes) -> bytes:
+        """Sign data using device private key"""
+        if not ENCRYPTION_AVAILABLE:
+            # Return mock signature for testing
+            return hashlib.sha256(data).digest()
+            
+        private_key_bytes, _ = self.device_keypair
+        
+        private_key = serialization.load_pem_private_key(
+            private_key_bytes,
+            password=None
+        )
+        
+        signature = private_key.sign(
+            data,
+            padding.PSS(
+                mgf=padding.MGF1(hashes.SHA256()),
+                salt_length=padding.PSS.MAX_LENGTH
+            ),
+            hashes.SHA256()
+        )
+        
+        return signature
+    
+    def verify_signature(self, data: bytes, signature: bytes, public_key_bytes: bytes) -> bool:
+        """Verify signature using public key"""
+        if not ENCRYPTION_AVAILABLE:
+            # Simple verification for testing
+            expected_signature = hashlib.sha256(data).digest()
+            return signature == expected_signature
+            
+        try:
+            public_key = serialization.load_pem_public_key(public_key_bytes)
+            
+            public_key.verify(
+                signature,
+                data,
+                padding.PSS(
+                    mgf=padding.MGF1(hashes.SHA256()),
+                    salt_length=padding.PSS.MAX_LENGTH
+                ),
+                hashes.SHA256()
+            )
+            return True
+        except Exception:
+            return False
+    
+    def get_or_create_encryption_key(self):
+        """Get or create legacy encryption key for backward compatibility"""
+        if not ENCRYPTION_AVAILABLE:
+            # Return mock encryption for testing
+            class MockFernet:
+                def encrypt(self, data): return data
+                def decrypt(self, data): return data
+            return MockFernet()
+            
         key_file = self.config_dir / ".encryption_key"
         
         if key_file.exists():

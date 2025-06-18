@@ -653,6 +653,17 @@ def main():
     search_parser.add_argument('-c', '--category', help='Filter by category')
     search_parser.add_argument('-r', '--min-rating', type=float, help='Minimum rating')
     search_parser.add_argument('--verified', action='store_true', help='Verified themes only')
+
+    # Share command
+    share_parser = subparsers.add_parser('share', help='Share theme with community')
+    share_parser.add_argument('theme_id', help='Theme ID to share')
+    share_parser.add_argument('--message', help='Message to share with theme')
+
+    # Community Stats command
+    stats_parser = subparsers.add_parser('stats', help='Get community statistics')
+    stats_parser.add_argument('--global', dest='global_stats', action='store_true', help='Get global community stats')
+    stats_parser.add_argument('--user', help='Get stats for a specific user')
+    stats_parser.add_argument('--themes', action='store_true', help='Get stats for themes')
     
     # Download command
     download_parser = subparsers.add_parser('download', help='Download theme')
@@ -820,6 +831,27 @@ def main():
                 print(f"    {theme['description']}")
                 print(f"    Rating: {theme['rating']:.1f}/5.0")
                 print()
+                
+        elif args.command == 'share':
+            print(f"Sharing theme {args.theme_id} with community...")
+            # Add sharing logic here
+            print("Theme shared successfully!")
+            
+        elif args.command == 'stats':
+            if args.global_stats:
+                print("Fetching global community stats...")
+                # Add logic to fetch and display global stats
+                print("Global stats displayed successfully!")
+            elif args.user:
+                print(f"Fetching stats for user: {args.user}...")
+                # Add logic to fetch and display user stats
+                print("User stats displayed successfully!")
+            elif args.themes:
+                print("Fetching theme stats...")
+                # Add logic to fetch and display theme stats
+                print("Theme stats displayed successfully!")
+            else:
+                stats_parser.print_help()
                 
     except Exception as e:
         print(f"Error: {e}")

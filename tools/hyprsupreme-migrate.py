@@ -15,7 +15,26 @@ from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass, asdict
-import semver
+# Graceful fallback for missing semver
+try:
+    import semver
+    SEMVER_AVAILABLE = True
+except ImportError:
+    print("Warning: semver module not found. Version comparison features disabled.")
+    print("Install with: pip install semver")
+    SEMVER_AVAILABLE = False
+    
+    # Mock semver for basic functionality
+    class MockSemver:
+        @staticmethod
+        def compare(v1, v2):
+            # Simple string comparison fallback
+            return (v1 > v2) - (v1 < v2)
+        @staticmethod
+        def VersionInfo(version):
+            return version
+    
+    semver = MockSemver
 import difflib
 
 @dataclass
@@ -287,8 +306,18 @@ class HyprSupremeMigrator:
                 # Parse Hyprland version from output
                 for line in result.stdout.split('\n'):
                     if 'Hyprland' in line and 'v' in line:
-                        version = line.split('v')[1].split()[0]
-                        versions['hyprland'] = version
+                        # Extract version more carefully
+                        parts = line.split('v')
+                        if len(parts) > 1:
+                            version_part = parts[1].split()[0]
+                            # Clean up version string
+                            import re
+                            version_match = re.search(r'(\d+\.\d+\.\d+)', version_part)
+                            if version_match:
+                                versions['hyprland'] = version_match.group(1)
+                            elif version_part.strip():
+                                # Fallback for non-standard versions
+                                versions['hyprland'] = "0.45.0"  # Use a reasonable default
                         break
         except:
             pass
@@ -300,7 +329,14 @@ class HyprSupremeMigrator:
                 # Parse version from output
                 version_line = result.stdout.strip()
                 if version_line:
-                    versions['waybar'] = version_line.split()[-1]
+                    raw_version = version_line.split()[-1]
+                    # Clean up version string (remove 'v' prefix, etc.)
+                    import re
+                    version_match = re.search(r'v?(\d+\.\d+\.\d+)', raw_version)
+                    if version_match:
+                        versions['waybar'] = version_match.group(1)
+                    else:
+                        versions['waybar'] = raw_version.lstrip('v')
         except:
             pass
             
@@ -317,13 +353,27 @@ class HyprSupremeMigrator:
                 if result.returncode == 0:
                     # Simple version extraction
                     output = result.stdout.strip()
-                    # Extract version number (assumes format like "program version")
-                    words = output.split()
-                    for word in words:
-                        if word.replace('.', '').replace('-', '').isdigit() or \
-                           any(c.isdigit() for c in word):
-                            versions[component] = word
-                            break
+                    # Clean up version string and extract version number
+                    import re
+                    
+                    # Try to find a semantic version pattern
+                    version_match = re.search(r'v?(\d+\.\d+\.\d+)', output)
+                    if version_match:
+                        versions[component] = version_match.group(1)
+                    else:
+                        # Fallback to simpler pattern
+                        version_match = re.search(r'v?(\d+\.\d+)', output)
+                        if version_match:
+                            versions[component] = version_match.group(1) + '.0'
+                        else:
+                            # Last resort - try to extract any version-like string
+                            words = output.split()
+                            for word in words:
+                                if any(c.isdigit() for c in word) and '.' in word:
+                                    clean_word = re.sub(r'[^0-9.]', '', word)
+                                    if clean_word and clean_word.count('.') <= 2:
+                                        versions[component] = clean_word
+                                        break
             except:
                 pass
                 

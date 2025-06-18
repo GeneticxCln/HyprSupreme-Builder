@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}HyprSupreme Community{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white">
+    <nav class="bg-gray-800 border-b border-gray-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <a href="{{ url_for('index') }}" class="text-xl font-bold text-blue-400">
+                        <i class="fas fa-desktop mr-2"></i>HyprSupreme
+                    </a>
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="{{ url_for('discover') }}" class="hover:text-blue-400 px-3 py-2 rounded-md">Discover</a>
+                        <a href="{{ url_for('search') }}" class="hover:text-blue-400 px-3 py-2 rounded-md">Search</a>
+                        <a href="{{ url_for('community_stats') }}" class="hover:text-blue-400 px-3 py-2 rounded-md">Stats</a>
+                        <a href="{{ url_for('leaderboard') }}" class="hover:text-blue-400 px-3 py-2 rounded-md">Leaderboard</a>
+                        <a href="{{ url_for('community_events') }}" class="hover:text-blue-400 px-3 py-2 rounded-md">Events</a>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="{{ url_for('submit_theme') }}" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md">
+                        <i class="fas fa-plus mr-1"></i>Submit Theme
+                    </a>
+                    <a href="{{ url_for('favorites') }}" class="hover:text-blue-400">
+                        <i class="fas fa-heart"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} bg-{% if category == 'error' %}red{% elif category == 'warning' %}yellow{% else %}green{% endif %}-600 text-white px-4 py-2 rounded-md mb-4">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-gray-800 border-t border-gray-700 mt-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="text-center text-gray-400">
+                <p>&copy; 2024 HyprSupreme Community. Made with ❤️ for the Linux community.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+</body>
+</html>

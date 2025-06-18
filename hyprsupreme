@@ -57,6 +57,14 @@ show_help() {
     echo "  analyze                   Analyze system for optimal settings"
     echo "  recommend                 Get AI configuration recommendations"
     echo
+    echo "DISPLAY MANAGEMENT:"
+    echo "  resolution [function]     Manage display resolutions"
+    echo "  scale [125|150|175|200]   Apply fractional scaling"
+    echo
+    echo "APPLICATION MANAGEMENT:"
+    echo "  flatpak [command]         Manage Flatpak applications"
+    echo "  apps flatpak [command]    Application management"
+    echo
     echo "PRESETS:"
     echo "  --preset showcase         Maximum eye-candy setup"
     echo "  --preset gaming           Gaming-optimized setup"
@@ -154,7 +162,7 @@ main() {
                 echo "${ERROR} GUI requires additional dependencies"
                 exit 1
             fi
-            exec python3 "${SCRIPT_DIR}/gui/hyprsupreme-gui.py" "$@"
+            exec "${SCRIPT_DIR}/venv_runner.sh" python3 "${SCRIPT_DIR}/gui/hyprsupreme-gui.py" "$@"
             ;;
         "config")
             if [ -f "$HOME/.local/bin/hyprsupreme-config" ]; then
@@ -174,37 +182,37 @@ main() {
             ;;
         "cloud")
             echo "${INFO} Running cloud sync..."
-            exec python3 "${SCRIPT_DIR}/tools/hyprsupreme-cloud.py" "$@"
+            exec "${SCRIPT_DIR}/venv_runner.sh" python3 "${SCRIPT_DIR}/tools/hyprsupreme-cloud.py" "$@"
             ;;
         "community")
             echo "${INFO} Accessing community platform..."
-            exec python3 "${SCRIPT_DIR}/tools/hyprsupreme-community.py" "$@"
+            exec "${SCRIPT_DIR}/venv_runner.sh" python3 "${SCRIPT_DIR}/tools/hyprsupreme-community.py" "$@"
             ;;
         "migrate")
             echo "${INFO} Running migration system..."
-            exec python3 "${SCRIPT_DIR}/tools/hyprsupreme-migrate.py" migrate "$@"
+            exec "${SCRIPT_DIR}/venv_runner.sh" python3 "${SCRIPT_DIR}/tools/hyprsupreme-migrate.py" migrate "$@"
             ;;
         "check")
             echo "${INFO} Checking for updates..."
-            exec python3 "${SCRIPT_DIR}/tools/hyprsupreme-migrate.py" check "$@"
+            exec "${SCRIPT_DIR}/venv_runner.sh" python3 "${SCRIPT_DIR}/tools/hyprsupreme-migrate.py" check "$@"
             ;;
         "rollback")
             echo "${INFO} Rolling back migration..."
-            exec python3 "${SCRIPT_DIR}/tools/hyprsupreme-migrate.py" rollback "$@"
+            exec "${SCRIPT_DIR}/venv_runner.sh" python3 "${SCRIPT_DIR}/tools/hyprsupreme-migrate.py" rollback "$@"
             ;;
         "backup")
             if [ -n "$1" ]; then
                 echo "${INFO} Creating backup: $1"
-                exec python3 "${SCRIPT_DIR}/tools/hyprsupreme-migrate.py" backup create "$@"
+                exec "${SCRIPT_DIR}/venv_runner.sh" python3 "${SCRIPT_DIR}/tools/hyprsupreme-migrate.py" backup create "$@"
             else
                 echo "${INFO} Listing backups..."
-                exec python3 "${SCRIPT_DIR}/tools/hyprsupreme-migrate.py" backup list
+                exec "${SCRIPT_DIR}/venv_runner.sh" python3 "${SCRIPT_DIR}/tools/hyprsupreme-migrate.py" backup list
             fi
             ;;
         "restore")
             if [ -n "$1" ]; then
                 echo "${INFO} Restoring backup: $1"
-                exec python3 "${SCRIPT_DIR}/tools/hyprsupreme-migrate.py" backup restore "$1"
+                exec "${SCRIPT_DIR}/venv_runner.sh" python3 "${SCRIPT_DIR}/tools/hyprsupreme-migrate.py" backup restore "$1"
             else
                 echo "${ERROR} Please specify backup ID to restore"
                 echo "Usage: hyprsupreme restore [backup_id]"
@@ -213,39 +221,66 @@ main() {
             ;;
         "sync")
             echo "${INFO} Syncing to cloud..."
-            exec python3 "${SCRIPT_DIR}/tools/hyprsupreme-cloud.py" sync "$@"
+            exec "${SCRIPT_DIR}/venv_runner.sh" python3 "${SCRIPT_DIR}/tools/hyprsupreme-cloud.py" sync "$@"
             ;;
         "discover")
             echo "${INFO} Discovering community themes..."
-            exec python3 "${SCRIPT_DIR}/tools/hyprsupreme-community.py" discover "$@"
+            exec "${SCRIPT_DIR}/venv_runner.sh" python3 "${SCRIPT_DIR}/tools/hyprsupreme-community.py" discover "$@"
             ;;
         "search")
             echo "${INFO} Searching community..."
-            exec python3 "${SCRIPT_DIR}/tools/hyprsupreme-community.py" search "$@"
+            exec "${SCRIPT_DIR}/venv_runner.sh" python3 "${SCRIPT_DIR}/tools/hyprsupreme-community.py" search "$@"
             ;;
         "download")
             echo "${INFO} Downloading theme..."
-            exec python3 "${SCRIPT_DIR}/tools/hyprsupreme-community.py" download "$@"
+            exec "${SCRIPT_DIR}/venv_runner.sh" python3 "${SCRIPT_DIR}/tools/hyprsupreme-community.py" download "$@"
             ;;
         "rate")
             echo "${INFO} Rating theme..."
-            exec python3 "${SCRIPT_DIR}/tools/hyprsupreme-community.py" rate "$@"
+            exec "${SCRIPT_DIR}/venv_runner.sh" python3 "${SCRIPT_DIR}/tools/hyprsupreme-community.py" rate "$@"
             ;;
         "ai")
             echo "${INFO} Launching AI configuration assistant..."
-            exec python3 "${SCRIPT_DIR}/tools/ai_assistant.py" "$@"
+            exec "${SCRIPT_DIR}/venv_runner.sh" python3 "${SCRIPT_DIR}/tools/ai_assistant.py" "$@"
             ;;
         "analyze")
             echo "${INFO} Analyzing system for optimal configuration..."
-            exec python3 "${SCRIPT_DIR}/tools/ai_assistant.py" analyze "$@"
+            exec "${SCRIPT_DIR}/venv_runner.sh" python3 "${SCRIPT_DIR}/tools/ai_assistant.py" analyze "$@"
             ;;
         "optimize")
             echo "${INFO} Optimizing configuration with AI..."
-            exec python3 "${SCRIPT_DIR}/tools/ai_assistant.py" optimize "$@"
+            exec "${SCRIPT_DIR}/venv_runner.sh" python3 "${SCRIPT_DIR}/tools/ai_assistant.py" optimize "$@"
             ;;
         "troubleshoot")
             echo "${INFO} Running AI troubleshooting..."
-            exec python3 "${SCRIPT_DIR}/tools/ai_assistant.py" troubleshoot "$@"
+            exec "${SCRIPT_DIR}/venv_runner.sh" python3 "${SCRIPT_DIR}/tools/ai_assistant.py" troubleshoot "$@"
+            ;;
+        "resolution"|"res")
+            echo "${INFO} Managing display resolution..."
+            exec "${SCRIPT_DIR}/tools/resolution_manager.sh" "$@"
+            ;;
+        "scale")
+            echo "${INFO} Managing display scaling..."
+            if [ -n "$1" ]; then
+                exec "${SCRIPT_DIR}/tools/resolution_manager.sh" "scale_$1" "${@:2}"
+            else
+                echo "Available scaling options: 125, 150, 175, 200"
+                echo "Usage: hyprsupreme scale [125|150|175|200] [monitor]"
+            fi
+            ;;
+        "flatpak")
+            echo "${INFO} Managing Flatpak applications..."
+            exec "${SCRIPT_DIR}/tools/flatpak_manager.sh" "$@"
+            ;;
+        "apps")
+            echo "${INFO} Application management..."
+            if [ "$1" = "flatpak" ]; then
+                exec "${SCRIPT_DIR}/tools/flatpak_manager.sh" "${@:2}"
+            else
+                echo "Available app managers:"
+                echo "  flatpak - Manage Flatpak applications"
+                echo "Usage: hyprsupreme apps flatpak [command]"
+            fi
             ;;
         "update")
             echo "${INFO} Updating HyprSupreme..."

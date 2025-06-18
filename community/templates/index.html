@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="bg-gradient-to-r from-blue-600 to-purple-700 py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h1 class="text-4xl md:text-6xl font-bold mb-6">
+            Welcome to HyprSupreme Community
+        </h1>
+        <p class="text-xl md:text-2xl mb-8 opacity-90">
+            Discover, share, and customize amazing Hyprland themes
+        </p>
+        <div class="flex justify-center space-x-4">
+            <a href="{{ url_for('discover') }}" class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100">
+                Explore Themes
+            </a>
+            <a href="{{ url_for('submit_theme') }}" class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600">
+                Submit Your Theme
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <!-- Community Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-16">
+        <div class="bg-gray-800 p-6 rounded-lg text-center">
+            <div class="text-3xl font-bold text-blue-400">{{ stats.total_themes }}</div>
+            <div class="text-gray-400">Themes</div>
+        </div>
+        <div class="bg-gray-800 p-6 rounded-lg text-center">
+            <div class="text-3xl font-bold text-green-400">{{ stats.total_downloads }}</div>
+            <div class="text-gray-400">Downloads</div>
+        </div>
+        <div class="bg-gray-800 p-6 rounded-lg text-center">
+            <div class="text-3xl font-bold text-purple-400">{{ stats.active_users }}</div>
+            <div class="text-gray-400">Active Users</div>
+        </div>
+        <div class="bg-gray-800 p-6 rounded-lg text-center">
+            <div class="text-3xl font-bold text-yellow-400">{{ stats.categories }}</div>
+            <div class="text-gray-400">Categories</div>
+        </div>
+    </div>
+
+    <!-- Featured Themes -->
+    <section class="mb-16">
+        <h2 class="text-3xl font-bold mb-8">Featured Themes</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {% for theme in featured_themes[:3] %}
+            <div class="bg-gray-800 rounded-lg overflow-hidden hover:bg-gray-750 transition-colors">
+                <div class="h-48 bg-gradient-to-r from-blue-500 to-purple-600"></div>
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold mb-2">{{ theme.name }}</h3>
+                    <p class="text-gray-400 mb-4">{{ theme.description[:100] }}...</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-500">by {{ theme.author }}</span>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-yellow-400">
+                                <i class="fas fa-star"></i> {{ theme.rating }}
+                            </span>
+                            <span class="text-gray-500">
+                                <i class="fas fa-download"></i> {{ theme.downloads }}
+                            </span>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('theme_detail', theme_id=theme.id) }}" 
+                       class="block w-full bg-blue-600 hover:bg-blue-700 text-center py-2 rounded-md mt-4">
+                        View Theme
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Trending Themes -->
+    <section>
+        <h2 class="text-3xl font-bold mb-8">Trending This Week</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {% for theme in trending_themes[:4] %}
+            <div class="bg-gray-800 p-4 rounded-lg">
+                <h4 class="font-semibold mb-2">{{ theme.name }}</h4>
+                <p class="text-sm text-gray-400 mb-3">{{ theme.category.title() }}</p>
+                <div class="flex items-center justify-between text-sm">
+                    <span class="text-yellow-400">
+                        <i class="fas fa-star"></i> {{ theme.rating }}
+                    </span>
+                    <span class="text-green-400">
+                        <i class="fas fa-arrow-up"></i> {{ theme.downloads }}
+                    </span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+{% endblock %}
