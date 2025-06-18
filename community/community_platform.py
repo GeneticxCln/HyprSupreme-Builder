@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 # Mock community class for testing without external dependencies
-class MockHyprSupremeCommunity:
+class CommunityPlatform:
     """Mock community platform for testing connectivity"""
     
     def __init__(self):
@@ -214,7 +214,7 @@ def test_connectivity():
     
     # Initialize community platform
     try:
-        community = MockHyprSupremeCommunity()
+        community = CommunityPlatform()
         print("✅ Community platform initialized successfully")
     except Exception as e:
         print(f"❌ Failed to initialize community platform: {e}")
