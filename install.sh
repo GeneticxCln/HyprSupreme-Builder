@@ -79,9 +79,9 @@ detect_distro() {
 
 # Check for AUR helper
 check_aur_helper() {
-    if command -v yay &> /dev/null; then
+    if command -v yay &>/dev/null; then
         AUR_HELPER="yay"
-    elif command -v paru &> /dev/null; then
+    elif command -v paru &>/dev/null; then
         AUR_HELPER="paru"
     else
         echo "${NOTE} No AUR helper found. Installing yay..." | tee -a "$LOG"
@@ -92,7 +92,7 @@ check_aur_helper() {
 
 # Install yay
 install_yay() {
-    if ! command -v git &> /dev/null; then
+    if ! command -v git &>/dev/null; then
         sudo pacman -S --noconfirm git
     fi
     
@@ -118,7 +118,7 @@ install_dependencies() {
     )
     
     for pkg in "${packages[@]}"; do
-        if ! pacman -Qi "$pkg"  /dev/null; then
+        if ! pacman -Qi "$pkg" &>/dev/null; then
             echo "${NOTE} Installing $pkg..." | tee -a "$LOG"
             sudo pacman -S --noconfirm "$pkg" || {
                 echo "${ERROR} Failed to install $pkg" | tee -a "$LOG"
@@ -128,9 +128,9 @@ install_dependencies() {
     done
     
     # Try to install whiptail (might not be available on all distros)
-    if ! pacman -Qi "libnewt"  /dev/null; then
+    if ! pacman -Qi "libnewt" &>/dev/null; then
         echo "${NOTE} Installing dialog tools..." | tee -a "$LOG"
-        sudo pacman -S --noconfirm libnewt 2/dev/null || {
+        sudo pacman -S --noconfirm libnewt 2>/dev/null || {
             echo "${WARN} Could not install whiptail, using simple fallback menus" | tee -a "$LOG"
             USE_SIMPLE_MENUS=true
         }

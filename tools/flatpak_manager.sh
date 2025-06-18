@@ -27,7 +27,7 @@ check_flatpak_setup() {
     print_header "🔍 Checking Flatpak Setup"
     
     # Check if Flatpak is installed
-    if ! command -v flatpak &> /dev/null; then
+    if ! command -v flatpak &>/dev/null; then
         print_error "Flatpak is not installed!"
         echo "Install with: sudo pacman -S flatpak"
         return 1
@@ -330,7 +330,7 @@ troubleshoot_flatpak() {
     
     # Check portal status
     print_info "Portal status:"
-    if command -v portal-test-app &> /dev/null; then
+    if command -v portal-test-app &>/dev/null; then
         echo "Portal test app available"
     else
         print_warning "Consider installing portal test app for debugging"

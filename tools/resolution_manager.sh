@@ -52,7 +52,7 @@ monitor = $monitor, ${resolution}@${refresh}, $position, $scale
 EOF
     
     # Apply configuration
-    if command -v hyprctl &> /dev/null; then
+    if command -v hyprctl &>/dev/null; then
         hyprctl keyword monitor "$monitor,${resolution}@${refresh},$position,$scale"
         print_success "Monitor configuration applied: $monitor at ${resolution}@${refresh}Hz, ${scale}x scale"
     else
@@ -62,7 +62,7 @@ EOF
 
 # Get available monitors
 get_monitors() {
-    if command -v hyprctl &> /dev/null; then
+    if command -v hyprctl &>/dev/null; then
         hyprctl monitors | grep -E "Monitor.*:" | cut -d' ' -f2
     else
         echo "Unable to detect monitors (hyprctl not available)"
@@ -71,7 +71,7 @@ get_monitors() {
 
 # Detect current monitor
 detect_primary_monitor() {
-    if command -v hyprctl &> /dev/null; then
+    if command -v hyprctl &>/dev/null; then
         hyprctl monitors | head -1 | grep -o 'Monitor [^:]*' | cut -d' ' -f2
     else
         echo "eDP-1"  # Default fallback
@@ -397,7 +397,7 @@ monitor = $monitor1, 1920x1080@60, 0x0, 1
 monitor = $monitor2, 1920x1080@60, 1920x0, 1
 EOF
     
-    if command -v hyprctl &> /dev/null; then
+    if command -v hyprctl &>/dev/null; then
         hyprctl keyword monitor "$monitor1,1920x1080@60,0x0,1"
         hyprctl keyword monitor "$monitor2,1920x1080@60,1920x0,1"
     fi
@@ -418,7 +418,7 @@ monitor = $laptop, 1920x1080@60, 0x0, $laptop_scale
 monitor = $external, 1920x1080@60, 1920x0, $external_scale
 EOF
     
-    if command -v hyprctl &> /dev/null; then
+    if command -v hyprctl &>/dev/null; then
         hyprctl keyword monitor "$laptop,1920x1080@60,0x0,$laptop_scale"
         hyprctl keyword monitor "$external,1920x1080@60,1920x0,$external_scale"
     fi
@@ -440,7 +440,7 @@ monitor = $center, 2560x1440@144, 1920x0, 1.25
 monitor = $right, 1920x1080@60, 4480x0, 1
 EOF
     
-    if command -v hyprctl &> /dev/null; then
+    if command -v hyprctl &>/dev/null; then
         hyprctl keyword monitor "$left,1920x1080@60,0x0,1"
         hyprctl keyword monitor "$center,2560x1440@144,1920x0,1.25"
         hyprctl keyword monitor "$right,1920x1080@60,4480x0,1"
@@ -486,7 +486,7 @@ list_functions() {
 
 # Show current configuration
 show_current_config() {
-    if command -v hyprctl &> /dev/null; then
+    if command -v hyprctl &>/dev/null; then
         echo -e "${BLUE}Current Monitor Configuration:${NC}"
         hyprctl monitors
     else
@@ -515,7 +515,7 @@ restore_backup() {
 auto_detect_optimal() {
     local monitor="${1:-$(detect_primary_monitor)}"
     
-    if command -v hyprctl &> /dev/null; then
+    if command -v hyprctl &>/dev/null; then
         local current_info=$(hyprctl monitors | grep -A10 "$monitor")
         local resolution=$(echo "$current_info" | grep -o '[0-9]*x[0-9]*' | head -1)
         

@@ -175,7 +175,7 @@ install_catppuccin_themes() {
         }
         
         # Apply catppuccin colors to papirus
-        if command -v papirus-folders &> /dev/null; then
+        if command -v papirus-folders &>/dev/null; then
             papirus-folders -C cat-mocha-blue 2>/dev/null
         fi
         

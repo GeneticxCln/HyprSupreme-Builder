@@ -406,7 +406,7 @@ create_ags_package_json() {
 EOF
 
     # Install npm dependencies
-    if command -v npm &> /dev/null; then
+    if command -v npm &>/dev/null; then
         log_info "Installing AGS dependencies..."
         cd "$HOME/.config/ags" && npm install --silent 2>/dev/null || log_warn "Failed to install npm dependencies"
     fi

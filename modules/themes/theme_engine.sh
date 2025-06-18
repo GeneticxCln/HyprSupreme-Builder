@@ -581,24 +581,24 @@ preview_theme() {
     # Create preview window with theme colors
     local preview_script="/tmp/theme_preview_$theme_name.sh"
     
-    cat > "$preview_script" << EOF
+    cat > "$preview_script" << 'PREVIEW_EOF'
 #!/bin/bash
 source "$theme_file"
 
 # Create a preview window using kitty with theme colors
-kitty --hold --title "Theme Preview: $theme_name" --override background=\${bg:-#1e1e2e} --override foreground=\${fg:-#cdd6f4} bash -c "
+kitty --hold --title "Theme Preview: $theme_name" --override background=${bg:-#1e1e2e} --override foreground=${fg:-#cdd6f4} bash -c "
 echo 'Theme Preview: $theme_name'
 echo '================================'
 echo 'Colors:'
-echo 'Primary: \${primary:-N/A}'
-echo 'Secondary: \${secondary:-N/A}'
-echo 'Background: \${bg:-N/A}'
-echo 'Foreground: \${fg:-N/A}'
+echo 'Primary: ${primary:-N/A}'
+echo 'Secondary: ${secondary:-N/A}'
+echo 'Background: ${bg:-N/A}'
+echo 'Foreground: ${fg:-N/A}'
 echo ''
 echo 'Press any key to close preview...'
 read -n 1
 "
-EOF
+PREVIEW_EOF
     
     chmod +x "$preview_script"
     "$preview_script" &
