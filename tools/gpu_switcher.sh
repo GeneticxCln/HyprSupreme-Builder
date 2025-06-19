@@ -90,27 +90,61 @@ detect_gpus() {
     
     echo -e "${INFO} Detecting available GPUs..."
     
-    # Intel integrated graphics
-    if lspci | grep -i "intel.*graphics\|intel.*display" > /dev/null; then
-        local intel_gpu=$(lspci | grep -i "intel.*graphics\|intel.*display" | head -1)
-        gpu_data+=("intel:$intel_gpu")
-        echo -e "${SUCCESS} Intel GPU: ${CYAN}$intel_gpu${NC}"
+    # Intel integrated graphics (Desktop and Mobile)
+    if lspci | grep -i "intel.*graphics\|intel.*display\|intel.*vga" > /dev/null; then
+        while IFS= read -r intel_gpu; do
+            local gpu_type=$(detect_intel_gpu_type "$intel_gpu")
+            gpu_data+=("intel:$intel_gpu:$gpu_type")
+            echo -e "${SUCCESS} Intel GPU ($gpu_type): ${CYAN}$intel_gpu${NC}"
+        done < <(lspci | grep -i "intel.*graphics\|intel.*display\|intel.*vga")
     fi
     
-    # AMD graphics
+    # AMD graphics (Desktop and Mobile APUs/dGPUs)
     if lspci | grep -i "amd\|ati" | grep -i "vga\|display\|graphics" > /dev/null; then
         while IFS= read -r amd_gpu; do
-            gpu_data+=("amd:$amd_gpu")
-            echo -e "${SUCCESS} AMD GPU: ${CYAN}$amd_gpu${NC}"
+            local gpu_type=$(detect_amd_gpu_type "$amd_gpu")
+            gpu_data+=("amd:$amd_gpu:$gpu_type")
+            echo -e "${SUCCESS} AMD GPU ($gpu_type): ${CYAN}$amd_gpu${NC}"
         done < <(lspci | grep -i "amd\|ati" | grep -i "vga\|display\|graphics")
     fi
     
-    # NVIDIA graphics
+    # NVIDIA graphics (Desktop and Mobile)
     if lspci | grep -i nvidia > /dev/null; then
         while IFS= read -r nvidia_gpu; do
-            gpu_data+=("nvidia:$nvidia_gpu")
-            echo -e "${SUCCESS} NVIDIA GPU: ${CYAN}$nvidia_gpu${NC}"
+            # Skip audio controllers
+            if echo "$nvidia_gpu" | grep -i "audio" > /dev/null; then
+                continue
+            fi
+            local gpu_type=$(detect_nvidia_gpu_type "$nvidia_gpu")
+            gpu_data+=("nvidia:$nvidia_gpu:$gpu_type")
+            echo -e "${SUCCESS} NVIDIA GPU ($gpu_type): ${CYAN}$nvidia_gpu${NC}"
         done < <(lspci | grep -i nvidia)
+    fi
+    
+    # ARM Mali GPUs (for ARM devices)
+    if [ -d "/sys/class/misc/mali0" ] || [ -f "/sys/kernel/debug/mali/version" ]; then
+        local mali_info=$(detect_mali_gpu)
+        if [ -n "$mali_info" ]; then
+            gpu_data+=("mali:$mali_info:mobile")
+            echo -e "${SUCCESS} ARM Mali GPU (Mobile): ${CYAN}$mali_info${NC}"
+        fi
+    fi
+    
+    # Qualcomm Adreno GPUs (for mobile devices)
+    if [ -d "/sys/class/kgsl/kgsl-3d0" ]; then
+        local adreno_info=$(detect_adreno_gpu)
+        if [ -n "$adreno_info" ]; then
+            gpu_data+=("adreno:$adreno_info:mobile")
+            echo -e "${SUCCESS} Qualcomm Adreno GPU (Mobile): ${CYAN}$adreno_info${NC}"
+        fi
+    fi
+    
+    # PowerVR GPUs (Intel mobile and others)
+    if lspci | grep -i "powervr\|imagination" > /dev/null; then
+        while IFS= read -r powervr_gpu; do
+            gpu_data+=("powervr:$powervr_gpu:mobile")
+            echo -e "${SUCCESS} PowerVR GPU (Mobile): ${CYAN}$powervr_gpu${NC}"
+        done < <(lspci | grep -i "powervr\|imagination")
     fi
     
     # Save detection results
@@ -136,6 +170,184 @@ detect_gpus() {
     
     # Detect current configuration
     detect_current_config
+}
+
+# Detect Intel GPU type (Desktop vs Mobile)
+detect_intel_gpu_type() {
+    local gpu_info="$1"
+    
+    # Mobile Intel GPUs
+    if echo "$gpu_info" | grep -iE "iris.*xe.*graphics|uhd.*graphics.*[0-9]+|hd.*graphics.*[0-9]+|graphics.*[0-9]+" > /dev/null; then
+        # Check for mobile indicators
+        if echo "$gpu_info" | grep -iE "mobile|laptop|m[0-9]+|lp|tiger.*lake|ice.*lake|alder.*lake|rocket.*lake" > /dev/null; then
+            echo "mobile_integrated"
+        # Desktop indicators
+        elif echo "$gpu_info" | grep -iE "desktop|comet.*lake|coffee.*lake|kaby.*lake|skylake|haswell|broadwell" > /dev/null; then
+            echo "desktop_integrated"
+        # Arc GPUs (discrete)
+        elif echo "$gpu_info" | grep -iE "arc.*a[0-9]+|alchemist|battlemage|celestial" > /dev/null; then
+            if echo "$gpu_info" | grep -iE "mobile" > /dev/null; then
+                echo "mobile_discrete"
+            else
+                echo "desktop_discrete"
+            fi
+        else
+            echo "integrated"
+        fi
+    else
+        echo "integrated"
+    fi
+}
+
+# Detect AMD GPU type (APU vs dGPU, Mobile vs Desktop)
+detect_amd_gpu_type() {
+    local gpu_info="$1"
+    
+    # AMD APUs (Integrated)
+    if echo "$gpu_info" | grep -iE "vega.*[0-9]+|radeon.*vega|ryzen.*[0-9]+.*graphics|athlon.*[0-9]+.*graphics" > /dev/null; then
+        if echo "$gpu_info" | grep -iE "mobile|laptop|h[0-9]+|u[0-9]+|hs[0-9]+|barcelo|lucienne|raven.*ridge|picasso|renoir|cezanne|rembrandt|mendocino|phoenix" > /dev/null; then
+            echo "mobile_apu"
+        else
+            echo "desktop_apu"
+        fi
+    # AMD discrete GPUs
+    elif echo "$gpu_info" | grep -iE "radeon.*rx.*[0-9]+|radeon.*r[0-9]+|radeon.*hd.*[0-9]+|radeon.*pro|firepro|wx.*[0-9]+" > /dev/null; then
+        # RDNA3 (RX 7000 series)
+        if echo "$gpu_info" | grep -iE "rx.*7[0-9]+|navi.*3[0-9]" > /dev/null; then
+            if echo "$gpu_info" | grep -iE "mobile|m[0-9]+|xt.*mobile" > /dev/null; then
+                echo "mobile_rdna3"
+            else
+                echo "desktop_rdna3"
+            fi
+        # RDNA2 (RX 6000 series)
+        elif echo "$gpu_info" | grep -iE "rx.*6[0-9]+|navi.*2[0-9]" > /dev/null; then
+            if echo "$gpu_info" | grep -iE "mobile|m[0-9]+|xt.*mobile" > /dev/null; then
+                echo "mobile_rdna2"
+            else
+                echo "desktop_rdna2"
+            fi
+        # RDNA1 (RX 5000 series)
+        elif echo "$gpu_info" | grep -iE "rx.*5[0-9]+|navi.*1[0-9]" > /dev/null; then
+            if echo "$gpu_info" | grep -iE "mobile|m[0-9]+" > /dev/null; then
+                echo "mobile_rdna1"
+            else
+                echo "desktop_rdna1"
+            fi
+        # GCN (Older AMD)
+        elif echo "$gpu_info" | grep -iE "rx.*[1-4][0-9]+|r[0-9]+.*[0-9]+|hd.*[6-9][0-9]+" > /dev/null; then
+            if echo "$gpu_info" | grep -iE "mobile|m[0-9]+" > /dev/null; then
+                echo "mobile_gcn"
+            else
+                echo "desktop_gcn"
+            fi
+        else
+            echo "desktop_discrete"
+        fi
+    else
+        echo "unknown_amd"
+    fi
+}
+
+# Detect NVIDIA GPU type (Mobile vs Desktop, Architecture)
+detect_nvidia_gpu_type() {
+    local gpu_info="$1"
+    
+    # RTX 40 series (Ada Lovelace)
+    if echo "$gpu_info" | grep -iE "rtx.*40[0-9]+|ad10[0-9]|ada.*lovelace" > /dev/null; then
+        if echo "$gpu_info" | grep -iE "mobile|laptop|max-q|ti.*mobile" > /dev/null; then
+            echo "mobile_ada_lovelace"
+        else
+            echo "desktop_ada_lovelace"
+        fi
+    # RTX 30 series (Ampere)
+    elif echo "$gpu_info" | grep -iE "rtx.*30[0-9]+|ga10[0-9]|ampere" > /dev/null; then
+        if echo "$gpu_info" | grep -iE "mobile|laptop|max-q|ti.*mobile" > /dev/null; then
+            echo "mobile_ampere"
+        else
+            echo "desktop_ampere"
+        fi
+    # RTX 20 series (Turing)
+    elif echo "$gpu_info" | grep -iE "rtx.*20[0-9]+|tu10[0-9]|turing" > /dev/null; then
+        if echo "$gpu_info" | grep -iE "mobile|laptop|max-q|ti.*mobile" > /dev/null; then
+            echo "mobile_turing"
+        else
+            echo "desktop_turing"
+        fi
+    # GTX 16 series (Turing)
+    elif echo "$gpu_info" | grep -iE "gtx.*16[0-9]+|tu11[0-9]" > /dev/null; then
+        if echo "$gpu_info" | grep -iE "mobile|laptop|max-q|ti.*mobile" > /dev/null; then
+            echo "mobile_turing_gtx"
+        else
+            echo "desktop_turing_gtx"
+        fi
+    # GTX 10 series (Pascal)
+    elif echo "$gpu_info" | grep -iE "gtx.*10[0-9]+|gp10[0-9]|pascal" > /dev/null; then
+        if echo "$gpu_info" | grep -iE "mobile|laptop|max-q|ti.*mobile" > /dev/null; then
+            echo "mobile_pascal"
+        else
+            echo "desktop_pascal"
+        fi
+    # GTX 900 series (Maxwell)
+    elif echo "$gpu_info" | grep -iE "gtx.*9[0-9]+|gm10[0-9]|gm20[0-9]|maxwell" > /dev/null; then
+        if echo "$gpu_info" | grep -iE "mobile|laptop|m[0-9]+" > /dev/null; then
+            echo "mobile_maxwell"
+        else
+            echo "desktop_maxwell"
+        fi
+    # Older generations
+    elif echo "$gpu_info" | grep -iE "gtx.*[1-8][0-9]+|gt.*[0-9]+|quadro|tesla|titan" > /dev/null; then
+        if echo "$gpu_info" | grep -iE "mobile|laptop|m[0-9]+" > /dev/null; then
+            echo "mobile_legacy"
+        else
+            echo "desktop_legacy"
+        fi
+    else
+        echo "unknown_nvidia"
+    fi
+}
+
+# Detect ARM Mali GPU
+detect_mali_gpu() {
+    local mali_info="Unknown Mali GPU"
+    
+    # Try to get Mali version from debugfs
+    if [ -f "/sys/kernel/debug/mali/version" ]; then
+        mali_info=$(cat /sys/kernel/debug/mali/version 2>/dev/null || echo "Mali GPU")
+    elif [ -d "/sys/class/misc/mali0" ]; then
+        mali_info="Mali GPU (detected via /sys/class/misc/mali0)"
+    fi
+    
+    # Try to detect specific Mali models from device tree or other sources
+    if [ -f "/proc/device-tree/gpu@*/compatible" ]; then
+        local compatible=$(cat /proc/device-tree/gpu@*/compatible 2>/dev/null | tr '\0' ' ')
+        if echo "$compatible" | grep -i mali > /dev/null; then
+            mali_info="$compatible"
+        fi
+    fi
+    
+    echo "$mali_info"
+}
+
+# Detect Qualcomm Adreno GPU
+detect_adreno_gpu() {
+    local adreno_info="Unknown Adreno GPU"
+    
+    # Try to get Adreno info from kgsl
+    if [ -f "/sys/class/kgsl/kgsl-3d0/gpu_model" ]; then
+        adreno_info=$(cat /sys/class/kgsl/kgsl-3d0/gpu_model 2>/dev/null || echo "Adreno GPU")
+    elif [ -d "/sys/class/kgsl/kgsl-3d0" ]; then
+        adreno_info="Adreno GPU (detected via kgsl)"
+    fi
+    
+    # Try to get additional info
+    if [ -f "/sys/class/kgsl/kgsl-3d0/gpu_freq" ]; then
+        local freq=$(cat /sys/class/kgsl/kgsl-3d0/gpu_freq 2>/dev/null)
+        if [ -n "$freq" ]; then
+            adreno_info="$adreno_info @ ${freq}Hz"
+        fi
+    fi
+    
+    echo "$adreno_info"
 }
 
 # Detect current GPU configuration
@@ -492,6 +704,255 @@ switch_to_balanced() {
     log "Switched to balanced mode"
 }
 
+# Detect GPU architecture for optimization
+detect_gpu_architecture() {
+    local arch="unknown"
+    
+    # Check if GPU data exists
+    if [ ! -f "$GPU_CONFIG_FILE" ]; then
+        echo "unknown"
+        return
+    fi
+    
+    # Get primary GPU architecture
+    local nvidia_gpus=$(jq -r '.gpus[] | select(.vendor == "nvidia") | .description' "$GPU_CONFIG_FILE" 2>/dev/null)
+    local amd_gpus=$(jq -r '.gpus[] | select(.vendor == "amd") | .description' "$GPU_CONFIG_FILE" 2>/dev/null)
+    local intel_gpus=$(jq -r '.gpus[] | select(.vendor == "intel") | .description' "$GPU_CONFIG_FILE" 2>/dev/null)
+    
+    # NVIDIA architecture detection
+    if [ -n "$nvidia_gpus" ]; then
+        if echo "$nvidia_gpus" | grep -iE "rtx.*40[0-9]+|ad10[0-9]" > /dev/null; then
+            arch="ada_lovelace"
+        elif echo "$nvidia_gpus" | grep -iE "rtx.*30[0-9]+|ga10[0-9]" > /dev/null; then
+            arch="ampere"
+        elif echo "$nvidia_gpus" | grep -iE "rtx.*20[0-9]+|tu10[0-9]" > /dev/null; then
+            arch="turing"
+        elif echo "$nvidia_gpus" | grep -iE "gtx.*16[0-9]+|tu11[0-9]" > /dev/null; then
+            arch="turing_gtx"
+        elif echo "$nvidia_gpus" | grep -iE "gtx.*10[0-9]+|gp10[0-9]" > /dev/null; then
+            arch="pascal"
+        elif echo "$nvidia_gpus" | grep -iE "gtx.*9[0-9]+|gm[12][0-9]" > /dev/null; then
+            arch="maxwell"
+        else
+            arch="nvidia_legacy"
+        fi
+    # AMD architecture detection
+    elif [ -n "$amd_gpus" ]; then
+        if echo "$amd_gpus" | grep -iE "rx.*7[0-9]+|navi.*3[0-9]" > /dev/null; then
+            arch="rdna3"
+        elif echo "$amd_gpus" | grep -iE "rx.*6[0-9]+|navi.*2[0-9]" > /dev/null; then
+            arch="rdna2"
+        elif echo "$amd_gpus" | grep -iE "rx.*5[0-9]+|navi.*1[0-9]" > /dev/null; then
+            arch="rdna1"
+        elif echo "$amd_gpus" | grep -iE "vega|ryzen.*graphics" > /dev/null; then
+            arch="vega"
+        else
+            arch="gcn"
+        fi
+    # Intel architecture detection
+    elif [ -n "$intel_gpus" ]; then
+        if echo "$intel_gpus" | grep -iE "arc.*a[0-9]+" > /dev/null; then
+            arch="xe_hpg"
+        elif echo "$intel_gpus" | grep -iE "iris.*xe" > /dev/null; then
+            arch="xe_lp"
+        elif echo "$intel_gpus" | grep -iE "uhd.*graphics|hd.*graphics" > /dev/null; then
+            arch="gen_graphics"
+        else
+            arch="intel_legacy"
+        fi
+    fi
+    
+    echo "$arch"
+}
+
+# Detect if system is mobile (laptop/tablet)
+detect_mobile_system() {
+    local is_mobile="false"
+    
+    # Check for battery (most reliable indicator)
+    if [ -d "/sys/class/power_supply" ]; then
+        if ls /sys/class/power_supply/ | grep -iE "bat[0-9]*|battery" > /dev/null 2>&1; then
+            is_mobile="true"
+        fi
+    fi
+    
+    # Check DMI chassis type
+    if [ -f "/sys/class/dmi/id/chassis_type" ]; then
+        local chassis_type=$(cat /sys/class/dmi/id/chassis_type 2>/dev/null)
+        # 8=Portable, 9=Laptop, 10=Notebook, 11=Hand Held, 14=Sub Notebook, 30=Tablet, 31=Convertible, 32=Detachable
+        if echo "$chassis_type" | grep -E "^(8|9|10|11|14|30|31|32)$" > /dev/null; then
+            is_mobile="true"
+        fi
+    fi
+    
+    # Check for mobile-specific hardware indicators
+    if lspci | grep -iE "mobile|laptop|tablet" > /dev/null; then
+        is_mobile="true"
+    fi
+    
+    # Check for lid switch (laptops typically have this)
+    if [ -f "/proc/acpi/button/lid/LID0/state" ] || [ -f "/proc/acpi/button/lid/LID/state" ]; then
+        is_mobile="true"
+    fi
+    
+    # Check systemd-detect-virt for container/VM (usually not mobile)
+    if command -v systemd-detect-virt > /dev/null 2>&1; then
+        if systemd-detect-virt -q; then
+            is_mobile="false"  # VMs/containers are typically not mobile
+        fi
+    fi
+    
+    echo "$is_mobile"
+}
+
+# Get mobile-optimized settings for GPU profile
+get_mobile_gpu_settings() {
+    local profile="$1"
+    local gpu_arch="$2"
+    
+    case "$profile" in
+        "integrated")
+            # Ultra-conservative settings for mobile integrated GPUs
+            echo "    # Mobile integrated GPU ultra-conservative settings"
+            echo "    decoration {"
+            echo "        blur = false"
+            echo "        drop_shadow = false"
+            echo "        rounding = 0"
+            echo "    }"
+            echo "    animations {"
+            echo "        enabled = false"
+            echo "    }"
+            echo "    misc {"
+            echo "        vfr = true"
+            echo "        disable_hyprland_logo = true"
+            echo "        disable_splash_rendering = true"
+            echo "    }"
+            ;;
+        "discrete")
+            # Mobile discrete GPU optimizations
+            case "$gpu_arch" in
+                "ada_lovelace"|"ampere")
+                    # Modern mobile NVIDIA - can handle more effects
+                    echo "    # Mobile NVIDIA $gpu_arch optimizations"
+                    echo "    decoration {"
+                    echo "        blur = true"
+                    echo "        blur_size = 6"
+                    echo "        blur_passes = 2"
+                    echo "        drop_shadow = true"
+                    echo "        shadow_range = 6"
+                    echo "    }"
+                    echo "    animations {"
+                    echo "        enabled = true"
+                    echo "        bezier = mobileBezier, 0.25, 0.1, 0.25, 1"
+                    echo "        animation = windows, 1, 5, mobileBezier"
+                    echo "        animation = windowsOut, 1, 4, default, popin 80%"
+                    echo "        animation = border, 1, 6, default"
+                    echo "        animation = fade, 1, 4, default"
+                    echo "        animation = workspaces, 1, 3, default"
+                    echo "    }"
+                    ;;
+                "turing"|"pascal")
+                    # Older mobile NVIDIA - moderate settings
+                    echo "    # Mobile NVIDIA $gpu_arch moderate settings"
+                    echo "    decoration {"
+                    echo "        blur = true"
+                    echo "        blur_size = 4"
+                    echo "        blur_passes = 1"
+                    echo "        drop_shadow = true"
+                    echo "        shadow_range = 4"
+                    echo "    }"
+                    echo "    animations {"
+                    echo "        enabled = true"
+                    echo "        bezier = mobileBezier, 0.25, 0.1, 0.25, 1"
+                    echo "        animation = windows, 1, 4, mobileBezier"
+                    echo "        animation = windowsOut, 1, 3, default, popin 80%"
+                    echo "        animation = border, 1, 5, default"
+                    echo "        animation = fade, 1, 3, default"
+                    echo "        animation = workspaces, 1, 2, default"
+                    echo "    }"
+                    ;;
+                "rdna3"|"rdna2")
+                    # Modern mobile AMD - good performance
+                    echo "    # Mobile AMD $gpu_arch optimizations"
+                    echo "    decoration {"
+                    echo "        blur = true"
+                    echo "        blur_size = 5"
+                    echo "        blur_passes = 2"
+                    echo "        drop_shadow = true"
+                    echo "        shadow_range = 5"
+                    echo "    }"
+                    echo "    animations {"
+                    echo "        enabled = true"
+                    echo "        bezier = amdBezier, 0.23, 1, 0.32, 1"
+                    echo "        animation = windows, 1, 4, amdBezier"
+                    echo "        animation = windowsOut, 1, 4, default, popin 80%"
+                    echo "        animation = border, 1, 6, default"
+                    echo "        animation = fade, 1, 4, default"
+                    echo "        animation = workspaces, 1, 3, default"
+                    echo "    }"
+                    ;;
+                *)
+                    # Conservative settings for older/unknown mobile dGPUs
+                    echo "    # Mobile discrete GPU conservative settings"
+                    echo "    decoration {"
+                    echo "        blur = false"
+                    echo "        drop_shadow = true"
+                    echo "        shadow_range = 3"
+                    echo "    }"
+                    echo "    animations {"
+                    echo "        enabled = true"
+                    echo "        bezier = conservativeBezier, 0.25, 0.1, 0.25, 1"
+                    echo "        animation = windows, 1, 3, conservativeBezier"
+                    echo "        animation = fade, 1, 2, default"
+                    echo "        animation = workspaces, 1, 2, default"
+                    echo "    }"
+                    ;;
+            esac
+            ;;
+        "power-save")
+            # Extreme power saving for mobile
+            echo "    # Mobile extreme power save settings"
+            echo "    decoration {"
+            echo "        blur = false"
+            echo "        drop_shadow = false"
+            echo "        rounding = 0"
+            echo "    }"
+            echo "    animations {"
+            echo "        enabled = false"
+            echo "    }"
+            echo "    misc {"
+            echo "        vfr = true"
+            echo "        disable_hyprland_logo = true"
+            echo "        disable_splash_rendering = true"
+            echo "        no_cursor_warps = true"
+            echo "    }"
+            ;;
+        "balanced"|"hybrid")
+            # Balanced mobile settings
+            echo "    # Mobile balanced settings"
+            echo "    decoration {"
+            echo "        blur = true"
+            echo "        blur_size = 3"
+            echo "        blur_passes = 1"
+            echo "        drop_shadow = true"
+            echo "        shadow_range = 3"
+            echo "    }"
+            echo "    animations {"
+            echo "        enabled = true"
+            echo "        bezier = mobileBezier, 0.25, 0.1, 0.25, 1"
+            echo "        animation = windows, 1, 3, mobileBezier"
+            echo "        animation = windowsOut, 1, 3, default, popin 80%"
+            echo "        animation = border, 1, 4, default"
+            echo "        animation = fade, 1, 3, default"
+            echo "        animation = workspaces, 1, 2, default"
+            echo "    }"
+            echo "    misc {"
+            echo "        vfr = true"
+            echo "    }"
+            ;;
+    esac
+}
+
 # Update Hyprland configuration for GPU profile
 update_hyprland_config() {
     local profile="$1"
@@ -504,6 +965,10 @@ update_hyprland_config() {
     
     echo -e "${INFO} Updating Hyprland configuration for $profile profile..."
     
+    # Detect GPU architecture for optimization
+    local gpu_arch=$(detect_gpu_architecture)
+    local is_mobile=$(detect_mobile_system)
+    
     # Backup current config
     cp "$hypr_config" "${hypr_config}.gpu_backup.$(date +%Y%m%d_%H%M%S)"
     
@@ -515,82 +980,119 @@ update_hyprland_config() {
         echo
         echo "# GPU_SWITCHER_START - Auto-generated by HyprSupreme GPU Switcher"
         echo "# Profile: $profile"
+        echo "# GPU Architecture: $gpu_arch"
+        echo "# System Type: $([ "$is_mobile" = "true" ] && echo "Mobile" || echo "Desktop")"
         echo "# Generated: $(date)"
         echo
         
-        case "$profile" in
-            "integrated")
-                echo "# Integrated GPU optimizations"
-                echo "decoration {"
-                echo "    blur = false"
-                echo "    drop_shadow = false"
-                echo "}"
-                echo "animations {"
-                echo "    enabled = false"
-                echo "}"
-                echo "misc {"
-                echo "    vfr = true"
-                echo "}"
-                ;;
-            "discrete"|"performance")
-                echo "# Discrete/Performance GPU optimizations"
-                echo "decoration {"
-                echo "    blur = true"
-                echo "    blur_size = 8"
-                echo "    blur_passes = 3"
-                echo "    drop_shadow = true"
-                echo "    shadow_range = 8"
-                echo "}"
-                echo "animations {"
-                echo "    enabled = true"
-                echo "    bezier = myBezier, 0.05, 0.9, 0.1, 1.05"
-                echo "    animation = windows, 1, 7, myBezier"
-                echo "    animation = windowsOut, 1, 7, default, popin 80%"
-                echo "    animation = border, 1, 10, default"
-                echo "    animation = fade, 1, 7, default"
-                echo "    animation = workspaces, 1, 6, default"
-                echo "}"
-                echo "misc {"
-                echo "    vrr = 1"
-                echo "}"
-                ;;
-            "power-save")
-                echo "# Power save optimizations"
-                echo "decoration {"
-                echo "    blur = false"
-                echo "    drop_shadow = false"
-                echo "}"
-                echo "animations {"
-                echo "    enabled = false"
-                echo "}"
-                echo "misc {"
-                echo "    vfr = true"
-                echo "    disable_hyprland_logo = true"
-                echo "}"
-                ;;
-            "balanced"|"hybrid")
-                echo "# Balanced/Hybrid optimizations"
-                echo "decoration {"
-                echo "    blur = true"
-                echo "    blur_size = 4"
-                echo "    blur_passes = 2"
-                echo "    drop_shadow = true"
-                echo "    shadow_range = 4"
-                echo "}"
-                echo "animations {"
-                echo "    enabled = true"
-                echo "    bezier = myBezier, 0.05, 0.9, 0.1, 1.05"
-                echo "    animation = windows, 1, 5, myBezier"
-                echo "    animation = windowsOut, 1, 5, default, popin 80%"
-                echo "    animation = border, 1, 8, default"
-                echo "    animation = fade, 1, 5, default"
-                echo "    animation = workspaces, 1, 4, default"
-                echo "}"
-                echo "misc {"
-                echo "    vfr = true"
-                echo "}"
-                ;;
-        esac
+        # Use mobile-optimized settings if detected as mobile system
+        if [ "$is_mobile" = "true" ]; then
+            get_mobile_gpu_settings "$profile" "$gpu_arch"
+        else
+            # Desktop GPU settings
+            case "$profile" in
+                "integrated")
+                    echo "    # Desktop integrated GPU optimizations"
+                    echo "    decoration {"
+                    echo "        blur = false"
+                    echo "        drop_shadow = false"
+                    echo "    }"
+                    echo "    animations {"
+                    echo "        enabled = false"
+                    echo "    }"
+                    echo "    misc {"
+                    echo "        vfr = true"
+                    echo "    }"
+                    ;;
+                "discrete"|"performance")
+                    echo "    # Desktop discrete/performance GPU optimizations"
+                    case "$gpu_arch" in
+                        "ada_lovelace"|"ampere"|"rdna3"|"rdna2")
+                            # High-end desktop GPUs - full effects
+                            echo "    decoration {"
+                            echo "        blur = true"
+                            echo "        blur_size = 10"
+                            echo "        blur_passes = 4"
+                            echo "        drop_shadow = true"
+                            echo "        shadow_range = 10"
+                            echo "        shadow_offset = 1 2"
+                            echo "    }"
+                            echo "    animations {"
+                            echo "        enabled = true"
+                            echo "        bezier = desktopBezier, 0.05, 0.9, 0.1, 1.05"
+                            echo "        animation = windows, 1, 8, desktopBezier"
+                            echo "        animation = windowsOut, 1, 8, default, popin 80%"
+                            echo "        animation = border, 1, 12, default"
+                            echo "        animation = fade, 1, 8, default"
+                            echo "        animation = workspaces, 1, 7, default"
+                            echo "    }"
+                            echo "    misc {"
+                            echo "        vrr = 1"
+                            echo "        allow_tearing = true"
+                            echo "    }"
+                            ;;
+                        *)
+                            # Mid-range desktop GPUs - moderate effects
+                            echo "    decoration {"
+                            echo "        blur = true"
+                            echo "        blur_size = 8"
+                            echo "        blur_passes = 3"
+                            echo "        drop_shadow = true"
+                            echo "        shadow_range = 8"
+                            echo "    }"
+                            echo "    animations {"
+                            echo "        enabled = true"
+                            echo "        bezier = myBezier, 0.05, 0.9, 0.1, 1.05"
+                            echo "        animation = windows, 1, 7, myBezier"
+                            echo "        animation = windowsOut, 1, 7, default, popin 80%"
+                            echo "        animation = border, 1, 10, default"
+                            echo "        animation = fade, 1, 7, default"
+                            echo "        animation = workspaces, 1, 6, default"
+                            echo "    }"
+                            echo "    misc {"
+                            echo "        vrr = 1"
+                            echo "    }"
+                            ;;
+                    esac
+                    ;;
+                "power-save")
+                    echo "    # Desktop power save optimizations"
+                    echo "    decoration {"
+                    echo "        blur = false"
+                    echo "        drop_shadow = false"
+                    echo "    }"
+                    echo "    animations {"
+                    echo "        enabled = false"
+                    echo "    }"
+                    echo "    misc {"
+                    echo "        vfr = true"
+                    echo "        disable_hyprland_logo = true"
+                    echo "    }"
+                    ;;
+                "balanced"|"hybrid")
+                    echo "    # Desktop balanced/hybrid optimizations"
+                    echo "    decoration {"
+                    echo "        blur = true"
+                    echo "        blur_size = 6"
+                    echo "        blur_passes = 2"
+                    echo "        drop_shadow = true"
+                    echo "        shadow_range = 6"
+                    echo "    }"
+                    echo "    animations {"
+                    echo "        enabled = true"
+                    echo "        bezier = myBezier, 0.05, 0.9, 0.1, 1.05"
+                    echo "        animation = windows, 1, 6, myBezier"
+                    echo "        animation = windowsOut, 1, 6, default, popin 80%"
+                    echo "        animation = border, 1, 9, default"
+                    echo "        animation = fade, 1, 6, default"
+                    echo "        animation = workspaces, 1, 5, default"
+                    echo "    }"
+                    echo "    misc {"
+                    echo "        vfr = true"
+                    echo "    }"
+                    ;;
+            esac
+        fi
         
         # NVIDIA specific settings
         if lspci | grep -i nvidia > /dev/null; then
