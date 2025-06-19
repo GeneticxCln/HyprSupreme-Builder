@@ -12,7 +12,7 @@ authors = [
 maintainers = [
     {name = "HyprSupreme Team", email = "contact@hyprsupreme.dev"}
 ]
-license = {text = "MIT"}
+license = "MIT"
 requires-python = ">=3.8"
 keywords = [
     "hyprland", "wayland", "desktop-environment", "configuration",
@@ -26,7 +26,6 @@ classifiers = [
     "Environment :: Web Environment",
     "Intended Audience :: End Users/Desktop",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
