@@ -334,7 +334,8 @@ class HyprSupremeWindow(Adw.ApplicationWindow):
             ("fonts", "Fonts", "Font collection", True),
             ("wallpapers", "Wallpapers", "Wallpaper collection", True),
             ("scripts", "Scripts", "Utility scripts", True),
-            ("nvidia", "NVIDIA", "NVIDIA optimizations", False)
+            ("nvidia", "NVIDIA", "NVIDIA optimizations", False),
+            ("gpu_switcher", "GPU Switcher", "Advanced GPU switching and optimization", False)
         ]
         
         for comp_id, name, desc, default in optional_components:

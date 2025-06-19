@@ -60,6 +60,8 @@ show_help() {
     echo "DISPLAY MANAGEMENT:"
     echo "  resolution [function]     Manage display resolutions"
     echo "  scale [125|150|175|200]   Apply fractional scaling"
+    echo "  sddm [check|fix]          Check/fix SDDM login screen resolution"
+    echo "  gpu [command]             Advanced GPU switching and optimization"
     echo
     echo "APPLICATION MANAGEMENT:"
     echo "  flatpak [command]         Manage Flatpak applications"
@@ -199,6 +201,26 @@ main() {
         "rollback")
             echo "${INFO} Rolling back migration..."
             exec "${SCRIPT_DIR}/venv_runner.sh" python3 "${SCRIPT_DIR}/tools/hyprsupreme-migrate.py" rollback "$@"
+            ;;
+        "sddm")
+            case "$1" in
+                "check")
+                    echo "${INFO} Checking SDDM resolution configuration..."
+                    exec "${SCRIPT_DIR}/tools/sddm_resolution_checker.sh"
+                    ;;
+                "fix")
+                    echo "${INFO} Fixing SDDM resolution automatically..."
+                    exec "${SCRIPT_DIR}/tools/sddm_resolution_checker.sh" auto
+                    ;;
+                *)
+                    echo "${INFO} Opening SDDM resolution manager..."
+                    exec "${SCRIPT_DIR}/tools/sddm_resolution_checker.sh"
+                    ;;
+            esac
+            ;;
+        "gpu")
+            echo "${INFO} GPU switching and optimization..."
+            exec "${SCRIPT_DIR}/tools/gpu_switcher.sh" "$@"
             ;;
         "backup")
             if [ -n "$1" ]; then
