@@ -1,5 +1,16 @@
 #!/bin/bash
+
+# Source common functions
+SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "$SOURCE_DIR/common/functions.sh"
 # HyprSupreme-Builder - Common Functions
+
+# Exit on any error, undefined variable, or pipe failure
+set -euo pipefail
+
+# Initialize temp directory for cleanup
+TEMP_DIR=$(mktemp -d)
+export TEMP_DIR
 
 # Colors for output
 OK="$(tput setaf 2)[OK]$(tput sgr0)"
@@ -34,28 +45,76 @@ log_note() {
     echo "${NOTE} $1" | tee -a "$LOG"
 }
 
-# Package installation function
+# Ask for user confirmation for package installations
+confirm_package_installation() {
+    local packages=("$@")
+    local package_list=$(printf "%s " "${packages[@]}")
+    
+    if [[ "$UNATTENDED" == "true" ]]; then
+        log_info "Unattended mode: Installing packages without confirmation: $package_list"
+        return 0
+    fi
+    
+    log_note "About to install the following packages: $package_list"
+    echo "Do you want to proceed with the installation? [Y/n]"
+    read -r response
+    
+    case "$response" in
+        [nN][oO]|[nN])
+            log_warn "Package installation cancelled by user"
+            return 1
+            ;;
+        *)
+            log_info "Proceeding with package installation"
+            return 0
+            ;;
+    esac
+}
+
+# Package installation function with user confirmation
 install_packages() {
     local packages=("$@")
+    
+    # Ask for confirmation before installing
+    if ! confirm_package_installation "${packages[@]}"; then
+        log_error "Package installation cancelled"
+        return 1
+    fi
     
     for pkg in "${packages[@]}"; do
         if ! pacman -Qi "$pkg" &> /dev/null; then
             log_info "Installing $pkg..."
             
             # Try official repos first
-            if sudo pacman -S --noconfirm "$pkg" &> /dev/null; then
-                log_success "Installed $pkg from official repos"
-            # Try AUR if not in official repos
-            elif [[ -n "$AUR_HELPER" ]]; then
-                if $AUR_HELPER -S --noconfirm "$pkg" &> /dev/null; then
-                    log_success "Installed $pkg from AUR"
+            if [[ "$UNATTENDED" == "true" ]]; then
+                if sudo pacman -S --noconfirm "$pkg" &> /dev/null; then
+                    log_success "Installed $pkg from official repos"
+                elif [[ -n "$AUR_HELPER" ]]; then
+                    if $AUR_HELPER -S --noconfirm "$pkg" &> /dev/null; then
+                        log_success "Installed $pkg from AUR"
+                    else
+                        log_error "Failed to install $pkg"
+                        return 1
+                    fi
                 else
-                    log_error "Failed to install $pkg"
+                    log_error "Failed to install $pkg - no AUR helper available"
                     return 1
                 fi
             else
-                log_error "Failed to install $pkg - no AUR helper available"
-                return 1
+                # Interactive mode - let user confirm each package
+                if sudo pacman -S "$pkg" &> /dev/null; then
+                    log_success "Installed $pkg from official repos"
+                elif [[ -n "$AUR_HELPER" ]]; then
+                    if $AUR_HELPER -S "$pkg" &> /dev/null; then
+                        log_success "Installed $pkg from AUR"
+                    else
+                        log_error "Failed to install $pkg"
+                        return 1
+                    fi
+                else
+                    log_error "Failed to install $pkg - no AUR helper available"
+                    return 1
+                fi
             fi
         else
             log_info "$pkg is already installed"
@@ -151,6 +210,107 @@ enable_service() {
 # Check if command exists
 command_exists() {
     command -v "$1" &> /dev/null
+}
+
+# Comprehensive sudo validation
+validate_sudo_access() {
+    local script_name="${1:-$(basename "$0")}"
+    
+    # Check if running as root (which we don't want)
+    if [[ $EUID -eq 0 ]]; then
+        log_error "This script should NOT be run as root!"
+        log_error "Please run as a regular user with sudo privileges."
+        exit 1
+    fi
+    
+    # Check if sudo command exists
+    if ! command_exists sudo; then
+        log_error "sudo is not installed on this system"
+        log_error "Please install sudo: pacman -S sudo"
+        exit 1
+    fi
+    
+    # Check if user is in sudo group or has sudo privileges
+    if ! groups | grep -q -E '(wheel|sudo|admin)'; then
+        log_warn "User is not in wheel/sudo/admin group"
+        log_info "Checking if sudo access is configured anyway..."
+    fi
+    
+    # Test sudo access without password prompt first
+    if sudo -n true 2>/dev/null; then
+        log_success "Sudo access validated (passwordless)"
+        return 0
+    fi
+    
+    # Test sudo access with password prompt
+    log_info "Testing sudo access (may prompt for password)..."
+    if sudo -v 2>/dev/null; then
+        log_success "Sudo access validated"
+        # Keep sudo timestamp fresh for the duration of the script
+        keep_sudo_alive &
+        SUDO_KEEPER_PID=$!
+        trap 'kill $SUDO_KEEPER_PID 2>/dev/null' EXIT
+        return 0
+    else
+        log_error "Sudo access validation failed!"
+        log_error "This script requires sudo privileges to:"
+        log_error "  • Install packages with pacman"
+        log_error "  • Enable/start system services"
+        log_error "  • Modify system configuration files"
+        log_error "  • Install fonts and themes"
+        log_error ""
+        log_error "Please ensure your user has sudo privileges:"
+        log_error "  1. Add user to wheel group: sudo usermod -aG wheel \$USER"
+        log_error "  2. Uncomment wheel group in /etc/sudoers"
+        log_error "  3. Or contact your system administrator"
+        exit 1
+    fi
+}
+
+# Keep sudo timestamp alive during long operations
+keep_sudo_alive() {
+    while true; do
+        sleep 60
+        sudo -n true 2>/dev/null || break
+    done
+}
+
+# Validate specific sudo command before execution
+validate_sudo_command() {
+    local command="$1"
+    local description="$2"
+    
+    if ! sudo -n true 2>/dev/null; then
+        log_info "Sudo access required for: $description"
+        if ! sudo -v; then
+            log_error "Cannot obtain sudo access for: $command"
+            return 1
+        fi
+    fi
+    
+    return 0
+}
+
+# Execute command with sudo validation
+sudo_execute() {
+    local description="$1"
+    shift
+    local command=("$@")
+    
+    log_info "Executing: $description"
+    
+    if ! validate_sudo_command "${command[*]}" "$description"; then
+        log_error "Failed to validate sudo access for: $description"
+        return 1
+    fi
+    
+    if sudo "${command[@]}"; then
+        log_success "Successfully executed: $description"
+        return 0
+    else
+        log_error "Failed to execute: $description"
+        return 1
+    fi
 }
 
 # Get GPU info

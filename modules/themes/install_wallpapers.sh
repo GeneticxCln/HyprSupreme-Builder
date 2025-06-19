@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Error handling
+set -euo pipefail
+
 # HyprSupreme-Builder - Wallpapers Installation Module
 
 source "$(dirname "$0")/../common/functions.sh"

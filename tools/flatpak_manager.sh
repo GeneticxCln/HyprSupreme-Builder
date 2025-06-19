@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Error handling
+set -euo pipefail
+
 # HyprSupreme Flatpak Manager
 # Comprehensive Flatpak integration and optimization for perfect app compatibility
 

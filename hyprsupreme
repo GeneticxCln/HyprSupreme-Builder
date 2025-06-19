@@ -323,43 +323,48 @@ main() {
             echo "${OK} HyprSupreme updated!"
             ;;
         "doctor")
-            echo "${INFO} Running system diagnostics..."
-            check_dependencies
-            
-            echo
-            echo "System Information:"
-            echo "  OS: $(cat /etc/os-release | grep PRETTY_NAME | cut -d'"' -f2)"
-            echo "  Kernel: $(uname -r)"
-            echo "  Shell: $SHELL"
-            echo "  GPU: $(lspci | grep -E "VGA|3D" | cut -d: -f3 | head -1)"
-            
-            echo
-            echo "HyprSupreme Status:"
-            if [ -d "$HOME/.config/hypr" ]; then
-                echo "  ✓ Hyprland configuration found"
+            echo "${INFO} Running comprehensive system diagnostics..."
+            if [ -x "${SCRIPT_DIR}/check_system.sh" ]; then
+                "${SCRIPT_DIR}/check_system.sh"
             else
-                echo "  ✗ Hyprland not configured"
+                echo "${WARNING} Comprehensive validation tool not found, running basic checks"
+                check_dependencies
+                
+                echo
+                echo "System Information:"
+                echo "  OS: $(cat /etc/os-release | grep PRETTY_NAME | cut -d'"' -f2)"
+                echo "  Kernel: $(uname -r)"
+                echo "  Shell: $SHELL"
+                echo "  GPU: $(lspci | grep -E "VGA|3D" | cut -d: -f3 | head -1)"
+                
+                echo
+                echo "HyprSupreme Status:"
+                if [ -d "$HOME/.config/hypr" ]; then
+                    echo "  ✓ Hyprland configuration found"
+                else
+                    echo "  ✗ Hyprland not configured"
+                fi
+                
+                if [ -f "$HOME/.local/bin/hyprsupreme-config" ]; then
+                    echo "  ✓ Management tools installed"
+                else
+                    echo "  ✗ Management tools not installed"
+                fi
+                
+                if pgrep -x "Hyprland" > /dev/null; then
+                    echo "  ✓ Hyprland is running"
+                else
+                    echo "  ✗ Hyprland is not running"
+                fi
+                
+                echo
+                echo "Available Tools:"
+                echo "  ✓ Core installer"
+                echo "  $([ -f "${SCRIPT_DIR}/gui/hyprsupreme-gui.py" ] && echo "✓" || echo "✗") GUI installer"
+                echo "  ✓ Cloud sync"
+                echo "  ✓ Community platform"
+                echo "  ✓ Migration system"
             fi
-            
-            if [ -f "$HOME/.local/bin/hyprsupreme-config" ]; then
-                echo "  ✓ Management tools installed"
-            else
-                echo "  ✗ Management tools not installed"
-            fi
-            
-            if pgrep -x "Hyprland" > /dev/null; then
-                echo "  ✓ Hyprland is running"
-            else
-                echo "  ✗ Hyprland is not running"
-            fi
-            
-            echo
-            echo "Available Tools:"
-            echo "  ✓ Core installer"
-            echo "  $([ -f "${SCRIPT_DIR}/gui/hyprsupreme-gui.py" ] && echo "✓" || echo "✗") GUI installer"
-            echo "  ✓ Cloud sync"
-            echo "  ✓ Community platform"
-            echo "  ✓ Migration system"
             ;;
         "demo")
             echo "${INFO} Running HyprSupreme demo..."

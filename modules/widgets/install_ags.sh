@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Error handling
+set -euo pipefail
+
 # HyprSupreme-Builder - AGS (Aylur's GTK Shell) Installation Module
 
 source "$(dirname "$0")/../common/functions.sh"

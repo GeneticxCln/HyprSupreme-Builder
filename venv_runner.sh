@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Error handling
+set -euo pipefail
+
 # Virtual Environment Runner for HyprSupreme-Builder
 # This script runs Python tools with the virtual environment
 

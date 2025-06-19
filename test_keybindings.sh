@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Error handling
+set -euo pipefail
+
 # /* ---- 💫 HyprSupreme Keybinding Test Script 💫 ---- */
 # Test script to validate Hyprland keybindings functionality
 

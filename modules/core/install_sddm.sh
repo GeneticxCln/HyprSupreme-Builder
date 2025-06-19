@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Error handling
+set -euo pipefail
+
 # HyprSupreme-Builder - SDDM Installation Module
 
 source "$(dirname "$0")/../common/functions.sh"
@@ -59,12 +63,12 @@ detect_display_resolution() {
     
     # Method 3: Try reading from /sys/class/drm
     if [[ -z "$resolution" ]]; then
-        for mode_file in /sys/class/drm/card*/card*-*/modes 2>/dev/null; do
-            if [[ -r "$mode_file" ]]; then
+        for mode_file in /sys/class/drm/card*/card*-*/modes; do
+            if [[ -r "$mode_file" ]] 2>/dev/null; then
                 resolution=$(head -1 "$mode_file" 2>/dev/null)
                 break
             fi
-        done
+        done 2>/dev/null
     fi
     
     # Method 4: Fallback - check common resolutions

@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Error handling
+set -euo pipefail
+
 # HyprSupreme Community Platform Connectivity Test
 
 echo "🔧 HyprSupreme Community Platform Connectivity Test"

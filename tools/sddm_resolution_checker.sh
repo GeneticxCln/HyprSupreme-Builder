@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Error handling
+set -euo pipefail
+
 # HyprSupreme SDDM Resolution Checker and Fixer
 # Detects and fixes display resolution issues for SDDM login screen
 

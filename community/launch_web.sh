@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Error handling
+set -euo pipefail
+
 # Simple launcher for HyprSupreme Community Web Interface
 
 echo "🚀 Launching HyprSupreme Community Web Interface..."

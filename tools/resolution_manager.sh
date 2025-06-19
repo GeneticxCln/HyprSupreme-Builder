@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Error handling
+set -euo pipefail
+
 # HyprSupreme Resolution Manager
 # Comprehensive resolution and scaling function library
 
