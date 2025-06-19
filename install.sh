@@ -174,6 +174,14 @@ select_components() {
         "kitty" "Kitty Terminal (Fallback)" "OFF"
         "ags" "Aylur's GTK Shell (Widgets)" "OFF"
         "sddm" "Display Manager" "OFF"
+        "system-utils" "System Utilities (File/Package/Volume Mgr)" "ON"
+        "notifications" "Notification System (Mako/Dunst)" "ON"
+        "audio" "Audio System (PipeWire/Controls)" "ON"
+        "bluetooth" "Bluetooth System & Controls" "ON"
+        "network" "Network & WiFi Management" "ON"
+        "power" "Power Management & Battery" "ON"
+        "theme-switcher" "Theme Switcher & Manager" "ON"
+        "workspace-time" "Workspace & Time Management" "ON"
         "themes" "GTK & Icon Themes" "ON"
         "fonts" "Font Collection" "ON"
         "wallpapers" "Wallpaper Collection" "ON"
@@ -354,6 +362,30 @@ install_components() {
                 ;;
             "sddm")
                 ./modules/core/install_sddm.sh
+                ;;
+            "system-utils")
+                ./modules/core/install_system_utils.sh
+                ;;
+            "notifications")
+                ./modules/core/install_notifications.sh
+                ;;
+            "audio")
+                ./modules/core/install_audio.sh
+                ;;
+            "bluetooth")
+                ./modules/core/install_bluetooth.sh
+                ;;
+            "network")
+                ./modules/core/install_network.sh
+                ;;
+            "power")
+                ./modules/core/install_power.sh
+                ;;
+            "theme-switcher")
+                ./modules/core/install_theme_switcher.sh
+                ;;
+            "workspace-time")
+                ./modules/core/install_workspace_time.sh
                 ;;
             "themes")
                 ./modules/themes/install_themes.sh
