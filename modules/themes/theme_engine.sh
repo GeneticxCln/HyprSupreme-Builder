@@ -712,6 +712,8 @@ EOF
     log_success "Auto theming configured"
 }
 
+}
+
 # Run if called directly
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     case "$1" in

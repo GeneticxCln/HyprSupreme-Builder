@@ -456,7 +456,7 @@ class HyprSupremeMigrator:
             changelog.append(f"• {rule.name}: {rule.description}")
         return changelog
         
-    def create_backup(self, name: str, description: str = "", components: List[str] = None) -> str:
+    def create_backup(self, name: str, description: str = "", components: List[str] = None, auto_created: bool = False) -> str:
         """Create configuration backup"""
         backup_id = hashlib.sha256(f"{name}_{datetime.now().isoformat()}".encode()).hexdigest()[:16]
         backup_path = self.backups_dir / f"backup_{backup_id}.tar.gz"
