@@ -3,6 +3,23 @@
 
 source "$(dirname "$0")/../common/functions.sh"
 
+# Validate sudo access before starting
+validate_sudo_access "install_hyprland.sh"
+
+# Error handling
+error_exit() {
+    echo "[ERROR] $1" >&2
+    exit 1
+}
+
+# Check if common functions exist
+FUNCTIONS_FILE="$(dirname "$0")/../common/functions.sh"
+if [[ ! -f "$FUNCTIONS_FILE" ]]; then
+    error_exit "Common functions file not found: $FUNCTIONS_FILE"
+fi
+
+source "$FUNCTIONS_FILE"
+
 install_hyprland() {
     log_info "Installing Hyprland..."
     

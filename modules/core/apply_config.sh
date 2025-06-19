@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Error handling
+set -euo pipefail
+
 # HyprSupreme-Builder - Configuration Application Module
 
 source "$(dirname "$0")/../common/functions.sh"

@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Error handling
+set -euo pipefail
+
 # HyprSupreme-Builder - Unified Theme Engine
 
 source "$(dirname "$0")/../common/functions.sh"
@@ -581,7 +585,7 @@ preview_theme() {
     # Create preview window with theme colors
     local preview_script="/tmp/theme_preview_$theme_name.sh"
     
-    cat > "$preview_script" << EOF
+    cat > "$preview_script" << 'PREVIEW_EOF'
 #!/bin/bash
 source "$theme_file"
 
@@ -598,7 +602,7 @@ echo ''
 echo 'Press any key to close preview...'
 read -n 1
 "
-EOF
+PREVIEW_EOF
     
     chmod +x "$preview_script"
     "$preview_script" &

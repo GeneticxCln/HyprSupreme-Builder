@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Error handling
+set -euo pipefail
+
 # HyprSupreme Community Platform Verification Script
 
 echo "🔍 Verifying HyprSupreme Community Platform Setup"

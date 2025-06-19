@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Error handling
+set -euo pipefail
+
 # HyprSupreme Community Platform Startup Script
 
 echo "🚀 Starting HyprSupreme Community Platform..."

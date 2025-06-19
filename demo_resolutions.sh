@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Error handling
+set -euo pipefail
+
 # HyprSupreme Resolution Management Demo
 # Demonstrates all resolution functions and capabilities
 
