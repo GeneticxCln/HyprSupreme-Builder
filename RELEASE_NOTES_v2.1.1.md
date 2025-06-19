@@ -32,6 +32,14 @@
 
 ## ✨ **New Features**
 
+### 📚 **Enhanced Documentation Suite**
+- **COMPATIBILITY.md**: Comprehensive 700+ line compatibility guide
+- **Performance Benchmarks**: Detailed system requirements and performance expectations
+- **Mobile & ARM64 Support**: Raspberry Pi, Chromebooks, and embedded device documentation
+- **Virtualization Guide**: Docker, VM, and cloud platform support (AWS, GCP, Azure)
+- **Hardware Matrix**: Specific laptop, desktop, and GPU compatibility details
+- **Version-Specific Support**: Detailed distribution version compatibility
+
 ### 🎨 **Enhanced Theme System**
 - **5 Built-in Themes**: Catppuccin (Mocha/Latte), Nord, Dracula, Gruvbox, Tokyo Night
 - **Dynamic Color Extraction**: Generate themes from wallpapers automatically
