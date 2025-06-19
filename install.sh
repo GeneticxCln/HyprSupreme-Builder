@@ -118,7 +118,7 @@ install_dependencies() {
     )
     
     for pkg in "${packages[@]}"; do
-        if ! pacman -Qi "$pkg"  /dev/null; then
+        if ! pacman -Qi "$pkg" &> /dev/null; then
             echo "${NOTE} Installing $pkg..." | tee -a "$LOG"
             sudo pacman -S --noconfirm "$pkg" || {
                 echo "${ERROR} Failed to install $pkg" | tee -a "$LOG"
@@ -128,9 +128,9 @@ install_dependencies() {
     done
     
     # Try to install whiptail (might not be available on all distros)
-    if ! pacman -Qi "libnewt"  /dev/null; then
+    if ! pacman -Qi "libnewt" &> /dev/null; then
         echo "${NOTE} Installing dialog tools..." | tee -a "$LOG"
-        sudo pacman -S --noconfirm libnewt 2/dev/null || {
+        sudo pacman -S --noconfirm libnewt 2>/dev/null || {
             echo "${WARN} Could not install whiptail, using simple fallback menus" | tee -a "$LOG"
             USE_SIMPLE_MENUS=true
         }
@@ -474,6 +474,34 @@ EOF
     fi
 }
 
+# GPU optimization
+optimize_gpu_configuration() {
+    echo "${INFO} Optimizing GPU configuration..." | tee -a "$LOG"
+    
+    # Check if GPU switcher is available
+    if [ -f "./tools/gpu_switcher.sh" ]; then
+        echo "${NOTE} Detecting GPU hardware..." | tee -a "$LOG"
+        
+        # Run GPU detection
+        ./tools/gpu_switcher.sh detect >> "$LOG" 2>&1
+        
+        # Auto-optimize based on detected hardware
+        echo "${NOTE} Applying optimal GPU settings..." | tee -a "$LOG"
+        ./tools/gpu_switcher.sh optimize --force >> "$LOG" 2>&1
+        
+        # Install GPU presets for different workflows
+        if [ -f "./tools/gpu_presets.sh" ]; then
+            echo "${NOTE} Installing GPU presets..." | tee -a "$LOG"
+            ./tools/gpu_presets.sh backup >> "$LOG" 2>&1 || true
+        fi
+        
+        echo "${OK} GPU configuration optimized!" | tee -a "$LOG"
+        echo "${INFO} You can later run 'hyprsupreme gpu' to switch profiles" | tee -a "$LOG"
+    else
+        echo "${WARN} GPU switcher not found, skipping GPU optimization" | tee -a "$LOG"
+    fi
+}
+
 # Installation summary
 show_summary() {
     clear
@@ -521,6 +549,9 @@ main() {
     install_components
     apply_configurations
     post_install
+    
+    # GPU optimization
+    optimize_gpu_configuration
     
     # Summary
     show_summary

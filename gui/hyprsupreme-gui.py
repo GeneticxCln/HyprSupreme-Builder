@@ -107,6 +107,7 @@ class HyprSupremeWindow(Adw.ApplicationWindow):
         self.setup_config_page()
         self.setup_component_page()
         self.setup_feature_page()
+        self.setup_gpu_page()
         self.setup_preview_page()
         self.setup_install_page()
         
@@ -413,6 +414,181 @@ class HyprSupremeWindow(Adw.ApplicationWindow):
         feature_page.add(visual_group)
         feature_page.add(system_group)
         self.main_stack.add_titled(feature_page, "features", "Features")
+        
+    def setup_gpu_page(self):
+        """Setup GPU management and optimization page"""
+        gpu_page = Adw.PreferencesPage()
+        gpu_page.set_title("GPU Management")
+        gpu_page.set_description("Configure GPU switching and optimization")
+        
+        # GPU Status Group
+        status_group = Adw.PreferencesGroup()
+        status_group.set_title("GPU Status")
+        status_group.set_description("Current GPU configuration and hardware")
+        
+        # Auto-detect button
+        detect_row = Adw.ActionRow()
+        detect_row.set_title("Detect GPUs")
+        detect_row.set_subtitle("Scan for available graphics hardware")
+        
+        detect_button = Gtk.Button(label="Detect")
+        detect_button.add_css_class("suggested-action")
+        detect_button.connect("clicked", self.on_gpu_detect_clicked)
+        detect_row.add_suffix(detect_button)
+        status_group.add(detect_row)
+        
+        # GPU information display
+        self.gpu_info_row = Adw.ActionRow()
+        self.gpu_info_row.set_title("Detected GPUs")
+        self.gpu_info_row.set_subtitle("No GPUs detected yet")
+        
+        gpu_status_button = Gtk.Button(label="Show Status")
+        gpu_status_button.connect("clicked", self.on_gpu_status_clicked)
+        self.gpu_info_row.add_suffix(gpu_status_button)
+        status_group.add(self.gpu_info_row)
+        
+        gpu_page.add(status_group)
+        
+        # GPU Profiles Group
+        profiles_group = Adw.PreferencesGroup()
+        profiles_group.set_title("GPU Profiles")
+        profiles_group.set_description("Switch between different GPU configurations")
+        
+        # Profile options
+        gpu_profiles = [
+            ("integrated", "Integrated GPU", "Use integrated graphics for power saving", "battery-symbolic"),
+            ("discrete", "Discrete GPU", "Use dedicated graphics for performance", "applications-games-symbolic"),
+            ("hybrid", "Hybrid Mode", "Automatic switching based on workload", "applications-system-symbolic"),
+            ("performance", "Performance Mode", "Maximum performance settings", "applications-multimedia-symbolic"),
+            ("power-save", "Power Save", "Optimize for battery life", "battery-low-symbolic"),
+            ("balanced", "Balanced", "Balance performance and power", "preferences-other-symbolic")
+        ]
+        
+        profile_radio_group = None
+        self.gpu_profile_radios = {}
+        
+        for profile_id, name, desc, icon in gpu_profiles:
+            row = Adw.ActionRow()
+            row.set_title(name)
+            row.set_subtitle(desc)
+            
+            # Icon
+            profile_icon = Gtk.Image.new_from_icon_name(icon)
+            row.add_prefix(profile_icon)
+            
+            # Radio button
+            radio = Gtk.CheckButton()
+            if profile_radio_group is None:
+                profile_radio_group = radio
+            else:
+                radio.set_group(profile_radio_group)
+                
+            radio.connect("toggled", self.on_gpu_profile_selected, profile_id)
+            row.add_suffix(radio)
+            
+            self.gpu_profile_radios[profile_id] = radio
+            profiles_group.add(row)
+            
+        gpu_page.add(profiles_group)
+        
+        # GPU Presets Group
+        presets_group = Adw.PreferencesGroup()
+        presets_group.set_title("Application Presets")
+        presets_group.set_description("Optimize GPU settings for specific workflows")
+        
+        # Gaming preset
+        gaming_row = Adw.ActionRow()
+        gaming_row.set_title("Gaming Preset")
+        gaming_row.set_subtitle("Ultra-low latency for competitive gaming")
+        gaming_icon = Gtk.Image.new_from_icon_name("applications-games-symbolic")
+        gaming_row.add_prefix(gaming_icon)
+        
+        gaming_button = Gtk.Button(label="Apply")
+        gaming_button.connect("clicked", self.on_apply_gpu_preset, "gaming-competitive")
+        gaming_row.add_suffix(gaming_button)
+        presets_group.add(gaming_row)
+        
+        # Content creation preset
+        content_row = Adw.ActionRow()
+        content_row.set_title("Content Creation")
+        content_row.set_subtitle("Optimized for video/photo editing")
+        content_icon = Gtk.Image.new_from_icon_name("applications-multimedia-symbolic")
+        content_row.add_prefix(content_icon)
+        
+        content_button = Gtk.Button(label="Apply")
+        content_button.connect("clicked", self.on_apply_gpu_preset, "content-creation")
+        content_row.add_suffix(content_button)
+        presets_group.add(content_row)
+        
+        # Productivity preset
+        productivity_row = Adw.ActionRow()
+        productivity_row.set_title("Productivity")
+        productivity_row.set_subtitle("Balanced for office work")
+        productivity_icon = Gtk.Image.new_from_icon_name("applications-office-symbolic")
+        productivity_row.add_prefix(productivity_icon)
+        
+        productivity_button = Gtk.Button(label="Apply")
+        productivity_button.connect("clicked", self.on_apply_gpu_preset, "productivity")
+        productivity_row.add_suffix(productivity_button)
+        presets_group.add(productivity_row)
+        
+        gpu_page.add(presets_group)
+        
+        # GPU Scheduler Group
+        scheduler_group = Adw.PreferencesGroup()
+        scheduler_group.set_title("Intelligent Scheduler")
+        scheduler_group.set_description("Automatically switch GPU profiles based on running applications")
+        
+        # Enable scheduler
+        scheduler_row = Adw.ActionRow()
+        scheduler_row.set_title("Enable GPU Scheduler")
+        scheduler_row.set_subtitle("Automatic profile switching based on workload")
+        
+        self.scheduler_switch = Gtk.Switch()
+        self.scheduler_switch.connect("state-set", self.on_scheduler_toggled)
+        scheduler_row.add_suffix(self.scheduler_switch)
+        scheduler_group.add(scheduler_row)
+        
+        # Scheduler settings
+        scheduler_settings_row = Adw.ActionRow()
+        scheduler_settings_row.set_title("Scheduler Settings")
+        scheduler_settings_row.set_subtitle("Configure automatic switching rules")
+        
+        scheduler_settings_button = Gtk.Button(label="Configure")
+        scheduler_settings_button.connect("clicked", self.on_scheduler_settings_clicked)
+        scheduler_settings_row.add_suffix(scheduler_settings_button)
+        scheduler_group.add(scheduler_settings_row)
+        
+        gpu_page.add(scheduler_group)
+        
+        # GPU Monitoring Group
+        monitoring_group = Adw.PreferencesGroup()
+        monitoring_group.set_title("GPU Monitoring")
+        monitoring_group.set_description("Real-time GPU performance monitoring")
+        
+        # Launch monitor
+        monitor_row = Adw.ActionRow()
+        monitor_row.set_title("GPU Monitor")
+        monitor_row.set_subtitle("Real-time performance and thermal monitoring")
+        
+        monitor_button = Gtk.Button(label="Launch Monitor")
+        monitor_button.connect("clicked", self.on_gpu_monitor_clicked)
+        monitor_row.add_suffix(monitor_button)
+        monitoring_group.add(monitor_row)
+        
+        # Benchmark
+        benchmark_row = Adw.ActionRow()
+        benchmark_row.set_title("GPU Benchmark")
+        benchmark_row.set_subtitle("Test GPU performance and compare configurations")
+        
+        benchmark_button = Gtk.Button(label="Run Benchmark")
+        benchmark_button.connect("clicked", self.on_gpu_benchmark_clicked)
+        benchmark_row.add_suffix(benchmark_button)
+        monitoring_group.add(benchmark_row)
+        
+        gpu_page.add(monitoring_group)
+        
+        self.main_stack.add_titled(gpu_page, "gpu", "GPU Management")
         
     def setup_preview_page(self):
         """Setup advanced configuration preview page"""
@@ -1311,6 +1487,318 @@ class HyprSupremeWindow(Adw.ApplicationWindow):
             dialog = Adw.MessageDialog.new(self, "Save Failed", f"Could not save preview: {str(e)}")
             dialog.add_response("ok", "OK")
             dialog.present()
+            
+    # GPU Management Event Handlers
+    def on_gpu_detect_clicked(self, button):
+        """Handle GPU detection button click"""
+        def run_detection():
+            try:
+                # Run GPU detection
+                result = subprocess.run(
+                    ["./tools/gpu_switcher.sh", "detect"],
+                    capture_output=True,
+                    text=True,
+                    timeout=30
+                )
+                
+                if result.returncode == 0:
+                    # Parse GPU detection output
+                    gpu_info = self.parse_gpu_detection_output(result.stdout)
+                    GLib.idle_add(self.update_gpu_info, gpu_info, True)
+                else:
+                    GLib.idle_add(self.update_gpu_info, f"Detection failed: {result.stderr}", False)
+                    
+            except subprocess.TimeoutExpired:
+                GLib.idle_add(self.update_gpu_info, "Detection timed out", False)
+            except Exception as e:
+                GLib.idle_add(self.update_gpu_info, f"Detection error: {str(e)}", False)
+        
+        # Disable button during detection
+        button.set_sensitive(False)
+        button.set_label("Detecting...")
+        
+        # Run in background thread
+        thread = threading.Thread(target=run_detection)
+        thread.daemon = True
+        thread.start()
+        
+    def parse_gpu_detection_output(self, output: str) -> str:
+        """Parse GPU detection output"""
+        lines = output.strip().split('\n')
+        gpu_lines = [line for line in lines if '✓' in line and 'GPU' in line]
+        
+        if gpu_lines:
+            return f"Found {len(gpu_lines)} GPU(s): " + ", ".join([line.split(': ')[1] if ': ' in line else line for line in gpu_lines])
+        else:
+            return "No GPUs detected"
+            
+    def update_gpu_info(self, info: str, success: bool):
+        """Update GPU information display"""
+        self.gpu_info_row.set_subtitle(info)
+        
+        # Re-enable detect button
+        detect_button = self.gpu_info_row.get_parent().get_first_child().get_last_child()
+        if detect_button:
+            detect_button.set_sensitive(True)
+            detect_button.set_label("Detect")
+            
+        return False  # Don't repeat
+        
+    def on_gpu_status_clicked(self, button):
+        """Show detailed GPU status"""
+        def run_status():
+            try:
+                result = subprocess.run(
+                    ["./tools/gpu_switcher.sh", "status"],
+                    capture_output=True,
+                    text=True,
+                    timeout=10
+                )
+                
+                if result.returncode == 0:
+                    GLib.idle_add(self.show_gpu_status_dialog, result.stdout)
+                else:
+                    GLib.idle_add(self.show_gpu_status_dialog, f"Status check failed: {result.stderr}")
+                    
+            except Exception as e:
+                GLib.idle_add(self.show_gpu_status_dialog, f"Status error: {str(e)}")
+        
+        thread = threading.Thread(target=run_status)
+        thread.daemon = True
+        thread.start()
+        
+    def show_gpu_status_dialog(self, status_text: str):
+        """Show GPU status in a dialog"""
+        dialog = Adw.MessageDialog.new(self, "GPU Status", status_text)
+        dialog.add_response("ok", "OK")
+        dialog.present()
+        return False
+        
+    def on_gpu_profile_selected(self, radio, profile_id):
+        """Handle GPU profile selection"""
+        if radio.get_active():
+            self.switch_gpu_profile(profile_id)
+            
+    def switch_gpu_profile(self, profile_id: str):
+        """Switch to selected GPU profile"""
+        def run_switch():
+            try:
+                result = subprocess.run(
+                    ["./tools/gpu_switcher.sh", "switch", profile_id, "--force"],
+                    capture_output=True,
+                    text=True,
+                    timeout=30
+                )
+                
+                if result.returncode == 0:
+                    GLib.idle_add(self.show_gpu_switch_result, profile_id, True, "Profile switched successfully")
+                else:
+                    GLib.idle_add(self.show_gpu_switch_result, profile_id, False, f"Switch failed: {result.stderr}")
+                    
+            except Exception as e:
+                GLib.idle_add(self.show_gpu_switch_result, profile_id, False, f"Switch error: {str(e)}")
+        
+        thread = threading.Thread(target=run_switch)
+        thread.daemon = True
+        thread.start()
+        
+    def show_gpu_switch_result(self, profile: str, success: bool, message: str):
+        """Show GPU profile switch result"""
+        if success:
+            dialog = Adw.MessageDialog.new(
+                self, 
+                "Profile Switched", 
+                f"Successfully switched to {profile} profile. You may need to restart your session for all changes to take effect."
+            )
+            dialog.add_response("ok", "OK")
+        else:
+            dialog = Adw.MessageDialog.new(self, "Switch Failed", message)
+            dialog.add_response("ok", "OK")
+            
+        dialog.present()
+        return False
+        
+    def on_apply_gpu_preset(self, button, preset_name):
+        """Apply GPU preset for specific workflow"""
+        def run_preset():
+            try:
+                result = subprocess.run(
+                    ["./tools/gpu_presets.sh", "apply", preset_name, "--force"],
+                    capture_output=True,
+                    text=True,
+                    timeout=30
+                )
+                
+                if result.returncode == 0:
+                    GLib.idle_add(self.show_preset_result, preset_name, True, "Preset applied successfully")
+                else:
+                    GLib.idle_add(self.show_preset_result, preset_name, False, f"Preset failed: {result.stderr}")
+                    
+            except Exception as e:
+                GLib.idle_add(self.show_preset_result, preset_name, False, f"Preset error: {str(e)}")
+        
+        button.set_sensitive(False)
+        button.set_label("Applying...")
+        
+        thread = threading.Thread(target=run_preset)
+        thread.daemon = True
+        thread.start()
+        
+    def show_preset_result(self, preset: str, success: bool, message: str):
+        """Show GPU preset application result"""
+        if success:
+            dialog = Adw.MessageDialog.new(
+                self, 
+                "Preset Applied", 
+                f"Successfully applied {preset} preset. GPU settings have been optimized for this workflow."
+            )
+        else:
+            dialog = Adw.MessageDialog.new(self, "Preset Failed", message)
+            
+        dialog.add_response("ok", "OK")
+        dialog.present()
+        
+        # Re-enable button
+        for preset_group in [group for group in self.main_stack.get_pages() if "preset" in str(group)]:
+            # Find and re-enable the button
+            pass  # Implementation would find and re-enable the specific button
+            
+        return False
+        
+    def on_scheduler_toggled(self, switch, state):
+        """Handle GPU scheduler toggle"""
+        def run_scheduler_toggle():
+            try:
+                if state:
+                    result = subprocess.run(
+                        ["./tools/gpu_scheduler.sh", "start"],
+                        capture_output=True,
+                        text=True,
+                        timeout=10
+                    )
+                else:
+                    result = subprocess.run(
+                        ["./tools/gpu_scheduler.sh", "stop"],
+                        capture_output=True,
+                        text=True,
+                        timeout=10
+                    )
+                
+                action = "started" if state else "stopped"
+                if result.returncode == 0:
+                    GLib.idle_add(self.show_scheduler_result, action, True, f"Scheduler {action} successfully")
+                else:
+                    GLib.idle_add(self.show_scheduler_result, action, False, f"Failed to {action[:-2]} scheduler: {result.stderr}")
+                    GLib.idle_add(lambda: switch.set_active(not state))  # Revert switch state
+                    
+            except Exception as e:
+                GLib.idle_add(self.show_scheduler_result, action, False, f"Scheduler error: {str(e)}")
+                GLib.idle_add(lambda: switch.set_active(not state))  # Revert switch state
+        
+        thread = threading.Thread(target=run_scheduler_toggle)
+        thread.daemon = True
+        thread.start()
+        
+    def show_scheduler_result(self, action: str, success: bool, message: str):
+        """Show scheduler operation result"""
+        if success:
+            toast_text = f"GPU scheduler {action}"
+            # Would show toast notification here
+        else:
+            dialog = Adw.MessageDialog.new(self, "Scheduler Error", message)
+            dialog.add_response("ok", "OK")
+            dialog.present()
+            
+        return False
+        
+    def on_scheduler_settings_clicked(self, button):
+        """Open scheduler settings"""
+        dialog = Adw.MessageDialog.new(
+            self, 
+            "Scheduler Settings", 
+            "GPU scheduler configuration will open the configuration file. This feature will be enhanced in a future update."
+        )
+        dialog.add_response("ok", "OK")
+        dialog.add_response("open", "Open Config")
+        dialog.set_default_response("ok")
+        
+        def on_response(dialog, response):
+            if response == "open":
+                try:
+                    subprocess.run(["./tools/gpu_scheduler.sh", "config"], check=True)
+                except Exception as e:
+                    error_dialog = Adw.MessageDialog.new(self, "Error", f"Could not open scheduler config: {str(e)}")
+                    error_dialog.add_response("ok", "OK")
+                    error_dialog.present()
+            dialog.close()
+            
+        dialog.connect("response", on_response)
+        dialog.present()
+        
+    def on_gpu_monitor_clicked(self, button):
+        """Launch GPU monitor"""
+        try:
+            # Launch GPU monitor in a new terminal
+            subprocess.Popen([
+                "gnome-terminal", "--", 
+                "bash", "-c", 
+                "cd '{}' && ./tools/gpu_switcher.sh monitor; read -p 'Press Enter to close...'".format(os.getcwd())
+            ])
+        except Exception as e:
+            dialog = Adw.MessageDialog.new(
+                self, 
+                "Monitor Error", 
+                f"Could not launch GPU monitor: {str(e)}\n\nTry running './tools/gpu_switcher.sh monitor' in a terminal."
+            )
+            dialog.add_response("ok", "OK")
+            dialog.present()
+            
+    def on_gpu_benchmark_clicked(self, button):
+        """Run GPU benchmark"""
+        def run_benchmark():
+            try:
+                result = subprocess.run(
+                    ["./tools/gpu_switcher.sh", "benchmark"],
+                    capture_output=True,
+                    text=True,
+                    timeout=60  # Benchmarks can take time
+                )
+                
+                if result.returncode == 0:
+                    GLib.idle_add(self.show_benchmark_result, True, result.stdout)
+                else:
+                    GLib.idle_add(self.show_benchmark_result, False, f"Benchmark failed: {result.stderr}")
+                    
+            except subprocess.TimeoutExpired:
+                GLib.idle_add(self.show_benchmark_result, False, "Benchmark timed out")
+            except Exception as e:
+                GLib.idle_add(self.show_benchmark_result, False, f"Benchmark error: {str(e)}")
+        
+        button.set_sensitive(False)
+        button.set_label("Running Benchmark...")
+        
+        thread = threading.Thread(target=run_benchmark)
+        thread.daemon = True
+        thread.start()
+        
+    def show_benchmark_result(self, success: bool, message: str):
+        """Show GPU benchmark results"""
+        if success:
+            dialog = Adw.MessageDialog.new(
+                self, 
+                "Benchmark Complete", 
+                f"GPU benchmark completed successfully.\n\n{message[:500]}{'...' if len(message) > 500 else ''}"
+            )
+        else:
+            dialog = Adw.MessageDialog.new(self, "Benchmark Failed", message)
+            
+        dialog.add_response("ok", "OK")
+        dialog.present()
+        
+        # Re-enable benchmark button
+        # Implementation would find and re-enable the specific button
+        
+        return False
 
 def main():
     """Main entry point"""

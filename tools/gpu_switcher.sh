@@ -100,12 +100,12 @@ detect_gpus() {
     fi
     
     # AMD graphics (Desktop and Mobile APUs/dGPUs)
-    if lspci | grep -i "amd\|ati" | grep -i "vga\|display\|graphics" > /dev/null; then
+    if lspci | grep -iE "(advanced micro devices|amd|ati technologies)" | grep -i "vga\|display\|graphics" > /dev/null; then
         while IFS= read -r amd_gpu; do
             local gpu_type=$(detect_amd_gpu_type "$amd_gpu")
             gpu_data+=("amd:$amd_gpu:$gpu_type")
             echo -e "${SUCCESS} AMD GPU ($gpu_type): ${CYAN}$amd_gpu${NC}"
-        done < <(lspci | grep -i "amd\|ati" | grep -i "vga\|display\|graphics")
+        done < <(lspci | grep -iE "(advanced micro devices|amd|ati technologies)" | grep -i "vga\|display\|graphics")
     fi
     
     # NVIDIA graphics (Desktop and Mobile)
@@ -1115,6 +1115,8 @@ update_hyprland_config() {
 
 # Auto-optimize current configuration
 optimize_current() {
+    local force_flag="${1:-false}"
+    
     echo -e "${INFO} Auto-optimizing current GPU configuration..."
     
     # Detect current hardware
@@ -1152,11 +1154,14 @@ optimize_current() {
     echo -e "${INFO} Recommended profile: ${CYAN}$optimal_profile${NC}"
     echo
     
-    read -p "Apply recommended profile? (Y/n): " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Nn]$ ]]; then
-        echo -e "${INFO} Optimization cancelled."
-        exit 0
+    # Skip confirmation if force flag is set
+    if [ "$force_flag" != "true" ]; then
+        read -p "Apply recommended profile? (Y/n): " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Nn]$ ]]; then
+            echo -e "${INFO} Optimization cancelled."
+            exit 0
+        fi
     fi
     
     switch_profile "$optimal_profile" true
@@ -1344,7 +1349,11 @@ main() {
             show_status
             ;;
         "optimize")
-            optimize_current
+            local force_flag=false
+            if [ "${2:-}" = "--force" ]; then
+                force_flag=true
+            fi
+            optimize_current "$force_flag"
             ;;
         "power")
             show_power_info

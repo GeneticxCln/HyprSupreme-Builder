@@ -61,7 +61,11 @@ show_help() {
     echo "  resolution [function]     Manage display resolutions"
     echo "  scale [125|150|175|200]   Apply fractional scaling"
     echo "  sddm [check|fix]          Check/fix SDDM login screen resolution"
+    echo
+    echo "GPU MANAGEMENT:"
     echo "  gpu [command]             Advanced GPU switching and optimization"
+    echo "  presets [command]         GPU presets for specific workflows"
+    echo "  scheduler [command]       Intelligent automatic GPU scheduling"
     echo
     echo "APPLICATION MANAGEMENT:"
     echo "  flatpak [command]         Manage Flatpak applications"
@@ -221,6 +225,14 @@ main() {
         "gpu")
             echo "${INFO} GPU switching and optimization..."
             exec "${SCRIPT_DIR}/tools/gpu_switcher.sh" "$@"
+            ;;
+        "presets")
+            echo "${INFO} GPU presets for specific workflows..."
+            exec "${SCRIPT_DIR}/tools/gpu_presets.sh" "$@"
+            ;;
+        "scheduler")
+            echo "${INFO} Intelligent GPU scheduling..."
+            exec "${SCRIPT_DIR}/tools/gpu_scheduler.sh" "$@"
             ;;
         "backup")
             if [ -n "$1" ]; then
