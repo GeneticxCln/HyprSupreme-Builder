@@ -137,7 +137,12 @@ EOF
 # Get current states
 wifi_status=$(nmcli -t -f WIFI general)
 bluetooth_status=$(bluetoothctl show | grep "Powered: yes" >/dev/null && echo "on" || echo "off")
-dnd_status="off"  # TODO: implement DND status check
+# Check if Do Not Disturb is enabled
+if command -v dunstctl &> /dev/null; then
+    dnd_status=$(dunstctl is-paused && echo "on" || echo "off")
+else
+    dnd_status="off"  # Default to off if dunst is not available
+fi
 
 # Create menu
 menu="󰖩 WiFi ($wifi_status)

@@ -1,6 +1,6 @@
 <div align="center">
 
-![HyprSupreme-Builder Banner](.github/assets/banner.svg)
+![HyprSupreme-Builder Banner](.github/assets/animated-banner.svg)
 
 # ⭐ HyprSupreme-Builder
 
@@ -132,6 +132,14 @@
 - **API Integration**: RESTful API for external integrations
 - **Testing Framework**: Comprehensive test suite
 
+## 📊 Project Statistics
+
+<div align="center">
+
+![Statistics Dashboard](.github/assets/stats-dashboard.svg)
+
+</div>
+
 ## 🚀 Quick Start
 
 <div align="center">
@@ -190,6 +198,22 @@ open http://localhost:5000
 # Validate all keybindings
 ./test_keybindings.sh
 ```
+
+## 🎮 Keybindings Guide
+
+<div align="center">
+
+![Keybindings Guide](.github/assets/keybindings-guide.svg)
+
+</div>
+
+## 🎨 Theme Gallery
+
+<div align="center">
+
+![Theme Gallery](.github/assets/theme-gallery.svg)
+
+</div>
 
 ## 📚 Documentation
 

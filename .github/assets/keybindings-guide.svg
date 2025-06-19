@@ -1,0 +1,170 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700">
+  <defs>
+    <linearGradient id="keyboardBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2c3e50;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#34495e;stop-opacity:1"/>
+    </linearGradient>
+    
+    <linearGradient id="keyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ecf0f1;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#bdc3c7;stop-opacity:1"/>
+    </linearGradient>
+    
+    <linearGradient id="specialKey" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3498db;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#2980b9;stop-opacity:1"/>
+    </linearGradient>
+    
+    <filter id="keyGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1000" height="700" fill="url(#keyboardBg)" rx="15"/>
+  
+  <!-- Title -->
+  <text x="500" y="40" font-family="Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle" fill="#ffffff">
+    🎮 Essential Keybindings Guide
+  </text>
+  
+  <!-- Keyboard Layout -->
+  <g transform="translate(100, 80)">
+    <!-- Keyboard base -->
+    <rect width="800" height="300" rx="15" fill="#1a1a1a" stroke="#555" stroke-width="2"/>
+    
+    <!-- Super Key (highlighted) -->
+    <g transform="translate(50, 50)">
+      <rect width="60" height="50" rx="8" fill="url(#specialKey)" filter="url(#keyGlow)">
+        <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite"/>
+      </rect>
+      <text x="30" y="32" font-family="Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#ffffff">SUPER</text>
+    </g>
+    
+    <!-- Number keys -->
+    <g transform="translate(150, 50)">
+      <rect width="40" height="40" rx="5" fill="url(#keyGradient)"/>
+      <text x="20" y="26" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#2c3e50">1</text>
+    </g>
+    
+    <g transform="translate(200, 50)">
+      <rect width="40" height="40" rx="5" fill="url(#keyGradient)"/>
+      <text x="20" y="26" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#2c3e50">2</text>
+    </g>
+    
+    <g transform="translate(250, 50)">
+      <rect width="40" height="40" rx="5" fill="url(#keyGradient)"/>
+      <text x="20" y="26" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#2c3e50">3</text>
+    </g>
+    
+    <!-- Letters -->
+    <g transform="translate(200, 150)">
+      <rect width="40" height="40" rx="5" fill="url(#keyGradient)"/>
+      <text x="20" y="26" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#2c3e50">Q</text>
+    </g>
+    
+    <g transform="translate(250, 150)">
+      <rect width="40" height="40" rx="5" fill="url(#keyGradient)"/>
+      <text x="20" y="26" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#2c3e50">W</text>
+    </g>
+    
+    <g transform="translate(300, 150)">
+      <rect width="40" height="40" rx="5" fill="url(#keyGradient)"/>
+      <text x="20" y="26" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#2c3e50">E</text>
+    </g>
+    
+    <!-- Enter key -->
+    <g transform="translate(600, 150)">
+      <rect width="80" height="40" rx="5" fill="url(#specialKey)"/>
+      <text x="40" y="26" font-family="Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#ffffff">ENTER</text>
+    </g>
+    
+    <!-- Space bar -->
+    <g transform="translate(250, 220)">
+      <rect width="200" height="40" rx="5" fill="url(#keyGradient)"/>
+      <text x="100" y="26" font-family="Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#2c3e50">SPACE</text>
+    </g>
+  </g>
+  
+  <!-- Keybinding Examples -->
+  <g transform="translate(50, 420)">
+    <rect width="900" height="250" rx="10" fill="#1e1e1e" stroke="#444" stroke-width="1"/>
+    
+    <!-- Title -->
+    <text x="450" y="30" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#ffffff">
+      Most Used Combinations
+    </text>
+    
+    <!-- Keybinding rows -->
+    <g transform="translate(50, 50)">
+      <!-- Row 1 -->
+      <g>
+        <rect width="150" height="35" rx="5" fill="#3498db" opacity="0.8"/>
+        <text x="75" y="23" font-family="Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#ffffff">SUPER + Return</text>
+        <text x="200" y="23" font-family="Arial, sans-serif" font-size="14" fill="#ffffff">→ Open Terminal</text>
+      </g>
+      
+      <!-- Row 2 -->
+      <g transform="translate(0, 45)">
+        <rect width="150" height="35" rx="5" fill="#e74c3c" opacity="0.8"/>
+        <text x="75" y="23" font-family="Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#ffffff">SUPER + D</text>
+        <text x="200" y="23" font-family="Arial, sans-serif" font-size="14" fill="#ffffff">→ Application Launcher</text>
+      </g>
+      
+      <!-- Row 3 -->
+      <g transform="translate(0, 90)">
+        <rect width="150" height="35" rx="5" fill="#f39c12" opacity="0.8"/>
+        <text x="75" y="23" font-family="Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#ffffff">SUPER + H</text>
+        <text x="200" y="23" font-family="Arial, sans-serif" font-size="14" fill="#ffffff">→ Show Keybinding Hints</text>
+      </g>
+      
+      <!-- Row 4 -->
+      <g transform="translate(0, 135)">
+        <rect width="150" height="35" rx="5" fill="#27ae60" opacity="0.8"/>
+        <text x="75" y="23" font-family="Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#ffffff">SUPER + Print</text>
+        <text x="200" y="23" font-family="Arial, sans-serif" font-size="14" fill="#ffffff">→ Take Screenshot</text>
+      </g>
+    </g>
+    
+    <!-- Right column -->
+    <g transform="translate(450, 50)">
+      <!-- Row 1 -->
+      <g>
+        <rect width="150" height="35" rx="5" fill="#9b59b6" opacity="0.8"/>
+        <text x="75" y="23" font-family="Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#ffffff">SUPER + 1-0</text>
+        <text x="200" y="23" font-family="Arial, sans-serif" font-size="14" fill="#ffffff">→ Switch Workspaces</text>
+      </g>
+      
+      <!-- Row 2 -->
+      <g transform="translate(0, 45)">
+        <rect width="150" height="35" rx="5" fill="#1abc9c" opacity="0.8"/>
+        <text x="75" y="23" font-family="Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#ffffff">SUPER + Q</text>
+        <text x="200" y="23" font-family="Arial, sans-serif" font-size="14" fill="#ffffff">→ Close Window</text>
+      </g>
+      
+      <!-- Row 3 -->
+      <g transform="translate(0, 90)">
+        <rect width="150" height="35" rx="5" fill="#e67e22" opacity="0.8"/>
+        <text x="75" y="23" font-family="Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#ffffff">SUPER + F</text>
+        <text x="200" y="23" font-family="Arial, sans-serif" font-size="14" fill="#ffffff">→ Toggle Fullscreen</text>
+      </g>
+      
+      <!-- Row 4 -->
+      <g transform="translate(0, 135)">
+        <rect width="150" height="35" rx="5" fill="#34495e" opacity="0.8"/>
+        <text x="75" y="23" font-family="Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#ffffff">SUPER + Arrows</text>
+        <text x="200" y="23" font-family="Arial, sans-serif" font-size="14" fill="#ffffff">→ Move Focus</text>
+      </g>
+    </g>
+  </g>
+  
+  <!-- Footer note -->
+  <text x="500" y="690" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#bdc3c7">
+    💡 145+ keybindings available - Run ./test_keybindings.sh to validate all shortcuts
+  </text>
+</svg>
+

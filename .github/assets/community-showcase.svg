@@ -1,0 +1,233 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800">
+  <defs>
+    <linearGradient id="browserGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1"/>
+    </linearGradient>
+    
+    <linearGradient id="windowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f8f9fa;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#e9ecef;stop-opacity:1"/>
+    </linearGradient>
+    
+    <linearGradient id="cardGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#f1f3f4;stop-opacity:1"/>
+    </linearGradient>
+    
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="800" fill="url(#browserGradient)" rx="0"/>
+  
+  <!-- Browser Window -->
+  <g transform="translate(100, 50)">
+    <!-- Window frame -->
+    <rect width="1000" height="700" rx="12" fill="#ffffff" filter="url(#shadow)"/>
+    
+    <!-- Browser header -->
+    <rect width="1000" height="60" rx="12" fill="#f8f9fa"/>
+    <rect x="0" y="48" width="1000" height="12" fill="#f8f9fa"/>
+    
+    <!-- Traffic lights -->
+    <circle cx="25" cy="30" r="8" fill="#ff5f57"/>
+    <circle cx="50" cy="30" r="8" fill="#ffbd2e"/>
+    <circle cx="75" cy="30" r="8" fill="#28ca42"/>
+    
+    <!-- Address bar -->
+    <rect x="120" y="15" width="700" height="30" rx="15" fill="#ffffff" stroke="#dee2e6" stroke-width="1"/>
+    <text x="140" y="33" font-family="Arial, sans-serif" font-size="12" fill="#6c757d">🔒 localhost:5000 - HyprSupreme Community Platform</text>
+    
+    <!-- Navigation tabs -->
+    <rect x="850" y="15" width="60" height="30" rx="5" fill="#007bff"/>
+    <text x="880" y="33" font-family="Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#ffffff">Refresh</text>
+    
+    <rect x="920" y="15" width="60" height="30" rx="5" fill="#28a745"/>
+    <text x="950" y="33" font-family="Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#ffffff">Share</text>
+  </g>
+  
+  <!-- Website Content -->
+  <g transform="translate(120, 130)">
+    <!-- Header -->
+    <rect width="960" height="80" fill="url(#windowGradient)" rx="8"/>
+    <text x="480" y="30" font-family="Arial, sans-serif" font-size="24" font-weight="bold" text-anchor="middle" fill="#2c3e50">
+      🌐 HyprSupreme Community Platform
+    </text>
+    <text x="480" y="55" font-family="Arial, sans-serif" font-size="14" text-anchor="middle" fill="#6c757d">
+      Discover, Share, and Collaborate on Hyprland Themes
+    </text>
+    
+    <!-- Navigation Menu -->
+    <g transform="translate(0, 100)">
+      <rect width="960" height="50" fill="#343a40" rx="5"/>
+      
+      <g transform="translate(50, 15)">
+        <rect width="80" height="20" rx="3" fill="#007bff"/>
+        <text x="40" y="14" font-family="Arial, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" fill="#ffffff">Discover</text>
+      </g>
+      
+      <g transform="translate(150, 15)">
+        <rect width="80" height="20" rx="3" fill="#28a745"/>
+        <text x="40" y="14" font-family="Arial, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" fill="#ffffff">Browse</text>
+      </g>
+      
+      <g transform="translate(250, 15)">
+        <rect width="80" height="20" rx="3" fill="#ffc107"/>
+        <text x="40" y="14" font-family="Arial, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" fill="#000000">Upload</text>
+      </g>
+      
+      <g transform="translate(350, 15)">
+        <rect width="80" height="20" rx="3" fill="#dc3545"/>
+        <text x="40" y="14" font-family="Arial, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" fill="#ffffff">My Themes</text>
+      </g>
+    </g>
+    
+    <!-- Featured Themes Grid -->
+    <g transform="translate(0, 180)">
+      <text x="0" y="20" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#2c3e50">
+        🔥 Featured Themes
+      </text>
+      
+      <!-- Theme Card 1 -->
+      <g transform="translate(0, 40)">
+        <rect width="200" height="150" rx="8" fill="url(#cardGradient)" filter="url(#shadow)"/>
+        <rect x="10" y="10" width="180" height="100" rx="5" fill="#1a1a2e"/>
+        <text x="100" y="125" font-family="Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#2c3e50">Catppuccin Supreme</text>
+        <text x="100" y="140" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="#6c757d">⭐ 4.8 | 156 downloads</text>
+        
+        <!-- Fake theme preview -->
+        <rect x="15" y="15" width="170" height="90" rx="3" fill="#1e1e2e"/>
+        <rect x="20" y="20" width="160" height="15" rx="2" fill="#313244"/>
+        <circle cx="30" cy="27.5" r="3" fill="#f38ba8"/>
+        <circle cx="40" cy="27.5" r="3" fill="#a6e3a1"/>
+        <circle cx="50" cy="27.5" r="3" fill="#f9e2af"/>
+        
+        <rect x="20" y="40" width="50" height="60" rx="2" fill="#45475a"/>
+        <rect x="80" y="40" width="100" height="30" rx="2" fill="#585b70"/>
+        <rect x="80" y="75" width="100" height="25" rx="2" fill="#6c7086"/>
+      </g>
+      
+      <!-- Theme Card 2 -->
+      <g transform="translate(220, 40)">
+        <rect width="200" height="150" rx="8" fill="url(#cardGradient)" filter="url(#shadow)"/>
+        <rect x="10" y="10" width="180" height="100" rx="5" fill="#0d1117"/>
+        <text x="100" y="125" font-family="Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#2c3e50">Tokyo Night</text>
+        <text x="100" y="140" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="#6c757d">⭐ 4.9 | 203 downloads</text>
+        
+        <!-- Fake theme preview -->
+        <rect x="15" y="15" width="170" height="90" rx="3" fill="#1a1b26"/>
+        <rect x="20" y="20" width="160" height="15" rx="2" fill="#24283b"/>
+        <circle cx="30" cy="27.5" r="3" fill="#f7768e"/>
+        <circle cx="40" cy="27.5" r="3" fill="#9ece6a"/>
+        <circle cx="50" cy="27.5" r="3" fill="#e0af68"/>
+        
+        <rect x="20" y="40" width="50" height="60" rx="2" fill="#414868"/>
+        <rect x="80" y="40" width="100" height="30" rx="2" fill="#565f89"/>
+        <rect x="80" y="75" width="100" height="25" rx="2" fill="#737aa2"/>
+      </g>
+      
+      <!-- Theme Card 3 -->
+      <g transform="translate(440, 40)">
+        <rect width="200" height="150" rx="8" fill="url(#cardGradient)" filter="url(#shadow)"/>
+        <rect x="10" y="10" width="180" height="100" rx="5" fill="#fafafa"/>
+        <text x="100" y="125" font-family="Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#2c3e50">Nordic Light</text>
+        <text x="100" y="140" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="#6c757d">⭐ 4.6 | 98 downloads</text>
+        
+        <!-- Fake theme preview -->
+        <rect x="15" y="15" width="170" height="90" rx="3" fill="#ffffff"/>
+        <rect x="20" y="20" width="160" height="15" rx="2" fill="#eceff4"/>
+        <circle cx="30" cy="27.5" r="3" fill="#bf616a"/>
+        <circle cx="40" cy="27.5" r="3" fill="#a3be8c"/>
+        <circle cx="50" cy="27.5" r="3" fill="#ebcb8b"/>
+        
+        <rect x="20" y="40" width="50" height="60" rx="2" fill="#e5e9f0"/>
+        <rect x="80" y="40" width="100" height="30" rx="2" fill="#d8dee9"/>
+        <rect x="80" y="75" width="100" height="25" rx="2" fill="#4c566a"/>
+      </g>
+      
+      <!-- Theme Card 4 -->
+      <g transform="translate(660, 40)">
+        <rect width="200" height="150" rx="8" fill="url(#cardGradient)" filter="url(#shadow)"/>
+        <rect x="10" y="10" width="180" height="100" rx="5" fill="#282828"/>
+        <text x="100" y="125" font-family="Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#2c3e50">Gruvbox Material</text>
+        <text x="100" y="140" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="#6c757d">⭐ 4.7 | 134 downloads</text>
+        
+        <!-- Fake theme preview -->
+        <rect x="15" y="15" width="170" height="90" rx="3" fill="#282828"/>
+        <rect x="20" y="20" width="160" height="15" rx="2" fill="#3c3836"/>
+        <circle cx="30" cy="27.5" r="3" fill="#fb4934"/>
+        <circle cx="40" cy="27.5" r="3" fill="#b8bb26"/>
+        <circle cx="50" cy="27.5" r="3" fill="#fabd2f"/>
+        
+        <rect x="20" y="40" width="50" height="60" rx="2" fill="#504945"/>
+        <rect x="80" y="40" width="100" height="30" rx="2" fill="#665c54"/>
+        <rect x="80" y="75" width="100" height="25" rx="2" fill="#7c6f64"/>
+      </g>
+    </g>
+    
+    <!-- Statistics Panel -->
+    <g transform="translate(0, 380)">
+      <rect width="960" height="100" rx="8" fill="#f8f9fa" stroke="#dee2e6" stroke-width="1"/>
+      
+      <text x="20" y="25" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#2c3e50">
+        📊 Community Stats
+      </text>
+      
+      <!-- Stats boxes -->
+      <g transform="translate(50, 40)">
+        <rect width="120" height="45" rx="5" fill="#007bff" opacity="0.1"/>
+        <text x="60" y="20" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#007bff">2,847</text>
+        <text x="60" y="35" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="#6c757d">Total Downloads</text>
+      </g>
+      
+      <g transform="translate(200, 40)">
+        <rect width="120" height="45" rx="5" fill="#28a745" opacity="0.1"/>
+        <text x="60" y="20" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#28a745">156</text>
+        <text x="60" y="35" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="#6c757d">Themes Available</text>
+      </g>
+      
+      <g transform="translate(350, 40)">
+        <rect width="120" height="45" rx="5" fill="#ffc107" opacity="0.1"/>
+        <text x="60" y="20" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#ffc107">47</text>
+        <text x="60" y="35" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="#6c757d">Active Contributors</text>
+      </g>
+      
+      <g transform="translate(500, 40)">
+        <rect width="120" height="45" rx="5" fill="#dc3545" opacity="0.1"/>
+        <text x="60" y="20" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#dc3545">4.8</text>
+        <text x="60" y="35" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="#6c757d">Average Rating</text>
+      </g>
+      
+      <g transform="translate(650, 40)">
+        <rect width="120" height="45" rx="5" fill="#6f42c1" opacity="0.1"/>
+        <text x="60" y="20" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#6f42c1">11</text>
+        <text x="60" y="35" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="#6c757d">Categories</text>
+      </g>
+    </g>
+    
+    <!-- Footer -->
+    <g transform="translate(0, 500)">
+      <rect width="960" height="40" rx="5" fill="#343a40"/>
+      <text x="480" y="25" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#ffffff">
+        💻 Access the platform: ./launch_web.sh → http://localhost:5000
+      </text>
+    </g>
+  </g>
+  
+  <!-- Floating notification -->
+  <g transform="translate(800, 200)">
+    <rect width="300" height="60" rx="8" fill="#28a745" filter="url(#shadow)" opacity="0.9">
+      <animate attributeName="opacity" values="0;0.9;0.9;0" dur="4s" repeatCount="indefinite"/>
+    </rect>
+    <text x="150" y="25" font-family="Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#ffffff">
+      🎉 New theme uploaded!
+    </text>
+    <text x="150" y="40" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="#ffffff">
+      "Cyberpunk Neon" by @developer
+    </text>
+  </g>
+</svg>
+

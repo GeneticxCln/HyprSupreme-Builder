@@ -109,6 +109,29 @@ confirm_package_installation() {
 
 # Detect distribution
 detect_distro() {
+    echo "${INFO} Detecting system distribution and OS type..." | tee -a "$LOG"
+    
+    # Use enhanced distribution support if available
+    if [ -f "modules/common/distro_support.sh" ]; then
+        source modules/common/distro_support.sh
+        if detect_distribution; then
+            echo "${OK} Enhanced distribution detection successful" | tee -a "$LOG"
+            echo "${INFO} OS: $OS_TYPE" | tee -a "$LOG"
+            echo "${INFO} Distribution: $DISTRO_NAME ($DISTRO_ID) $DISTRO_VERSION" | tee -a "$LOG"
+            echo "${INFO} Package Manager: $PACKAGE_MANAGER" | tee -a "$LOG"
+            return 0
+        else
+            echo "${WARN} Enhanced detection failed, falling back to basic detection" | tee -a "$LOG"
+        fi
+    fi
+    
+    # Fallback to basic detection for Linux only
+    if [[ "$(uname -s)" != "Linux" ]]; then
+        echo "${ERROR} This script currently supports Linux distributions only in fallback mode" | tee -a "$LOG"
+        echo "${INFO} Please use the enhanced distribution support module" | tee -a "$LOG"
+        exit 1
+    fi
+    
     if [ -f /etc/os-release ]; then
         . /etc/os-release
         DISTRO=$ID
@@ -122,10 +145,36 @@ detect_distro() {
         arch|endeavouros|cachyos|manjaro|garuda)
             PACKAGE_MANAGER="pacman"
             AUR_HELPER=""
+            echo "${OK} Arch-based distribution detected" | tee -a "$LOG"
+            ;;
+        ubuntu|debian|linuxmint|pop|elementary)
+            PACKAGE_MANAGER="apt"
+            AUR_HELPER=""
+            echo "${OK} Debian-based distribution detected" | tee -a "$LOG"
+            echo "${WARN} Limited support - some packages may need manual compilation" | tee -a "$LOG"
+            ;;
+        fedora|rhel|centos|rocky|almalinux)
+            PACKAGE_MANAGER="dnf"
+            AUR_HELPER=""
+            echo "${OK} Red Hat-based distribution detected" | tee -a "$LOG"
+            echo "${WARN} Limited support - some packages may need COPR repos" | tee -a "$LOG"
+            ;;
+        opensuse*|suse)
+            PACKAGE_MANAGER="zypper"
+            AUR_HELPER=""
+            echo "${OK} openSUSE distribution detected" | tee -a "$LOG"
+            echo "${WARN} Limited support - some packages may not be available" | tee -a "$LOG"
             ;;
         *)
             echo "${ERROR} Unsupported distribution: $DISTRO" | tee -a "$LOG"
-            echo "${INFO} Currently supported: Arch, EndeavourOS, CachyOS, Manjaro, Garuda" | tee -a "$LOG"
+            echo "${INFO} Supported distributions:" | tee -a "$LOG"
+            echo "  • Arch Linux family: Arch, EndeavourOS, CachyOS, Manjaro, Garuda" | tee -a "$LOG"
+            echo "  • Debian family: Ubuntu, Debian, Linux Mint, Pop!_OS, Elementary" | tee -a "$LOG"
+            echo "  • Red Hat family: Fedora, RHEL, CentOS, Rocky, AlmaLinux" | tee -a "$LOG"
+            echo "  • SUSE family: openSUSE Leap, openSUSE Tumbleweed" | tee -a "$LOG"
+            echo "  • Other: Void Linux, Gentoo, Alpine, NixOS" | tee -a "$LOG"
+            echo "  • BSD: FreeBSD, OpenBSD, NetBSD" | tee -a "$LOG"
+            echo "${NOTE} Use enhanced distribution support for more systems" | tee -a "$LOG"
             exit 1
             ;;
     esac
@@ -1037,6 +1086,14 @@ main() {
     
     # Pre-installation checks
     check_root
+    
+    # Initialize performance optimization
+    if [ -f "modules/core/performance_optimizer.sh" ]; then
+        source modules/core/performance_optimizer.sh
+        init_performance
+        export PERFORMANCE_START=$(monitor_performance "HyprSupreme Installation")
+    fi
+    
     # Load and run distribution detection
     if [ -f "modules/common/distro_support.sh" ]; then
         source modules/common/distro_support.sh
@@ -1045,7 +1102,17 @@ main() {
         detect_distro  # Fallback to original function
     fi
     
-    check_system_dependencies
+    # Comprehensive dependency validation
+    if [ -f "modules/core/dependency_validator.sh" ]; then
+        source modules/core/dependency_validator.sh
+        if ! validate_all_dependencies; then
+            log_warn "Some dependencies missing - attempting auto-fix..."
+            auto_fix_dependencies
+        fi
+    else
+        check_system_dependencies
+    fi
+    
     install_dependencies
     check_aur_helper
     
@@ -1070,6 +1137,28 @@ main() {
     
     # GPU optimization
     optimize_gpu_configuration
+    
+    # Complete performance monitoring
+    if [[ -n "${PERFORMANCE_START:-}" ]]; then
+        complete_performance_monitor "HyprSupreme Installation" "$PERFORMANCE_START"
+        restore_performance
+        echo "${INFO} Performance report: ~/.cache/hyprsupreme/performance.log" | tee -a "$LOG"
+    fi
+    
+    # Run comprehensive test suite if available
+    if [ -f "modules/core/test_framework.sh" ] && [[ "$UNATTENDED" != "true" ]]; then
+        echo "${INFO} Run post-installation tests? [Y/n]"
+        read -r response
+        case "$response" in
+            [nN][oO]|[nN])
+                echo "${NOTE} Skipping post-installation tests" | tee -a "$LOG"
+                ;;
+            *)
+                echo "${NOTE} Running post-installation tests..." | tee -a "$LOG"
+                bash modules/core/test_framework.sh all | tee -a "$LOG"
+                ;;
+        esac
+    fi
     
     # Summary
     show_summary

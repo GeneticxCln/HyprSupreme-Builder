@@ -57,12 +57,13 @@ fallback_warp_install() {
         flatpak install -y flathub dev.warp.Warp
         
         # Create symlink for easy access
-        sudo mkdir -p /usr/local/bin
-        sudo tee /usr/local/bin/warp-terminal > /dev/null << 'EOF'
+        local local_bin="${HOME}/.local/bin"
+        mkdir -p "$local_bin"
+        cat > "$local_bin/warp-terminal" << 'EOF'
 #!/bin/bash
 exec flatpak run dev.warp.Warp "$@"
 EOF
-        sudo chmod +x /usr/local/bin/warp-terminal
+        chmod +x "$local_bin/warp-terminal"
         
     else
         log_error "Cannot install Warp terminal - no suitable package manager found"

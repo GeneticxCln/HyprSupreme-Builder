@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Source common functions
-SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-source "$SOURCE_DIR/common/functions.sh"
 # HyprSupreme-Builder - Common Functions
 
 # Exit on any error, undefined variable, or pipe failure

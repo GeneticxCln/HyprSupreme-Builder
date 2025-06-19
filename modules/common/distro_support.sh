@@ -10,7 +10,7 @@ source "$SCRIPT_DIR/functions.sh"
 
 # Distribution detection and package manager setup
 detect_distribution() {
-    log_info "Detecting Linux distribution..."
+    log_info "Detecting system distribution..."
     
     # Initialize variables
     DISTRO_ID=""
@@ -21,6 +21,58 @@ detect_distribution() {
     SEARCH_CMD=""
     UPDATE_CMD=""
     AUR_SUPPORT="false"
+    OS_TYPE="linux"  # Default to Linux
+    
+    # Detect operating system type first
+    case "$(uname -s)" in
+        Linux*)
+            OS_TYPE="linux"
+            detect_linux_distribution
+            ;;
+        FreeBSD*)
+            OS_TYPE="freebsd"
+            setup_freebsd_system
+            ;;
+        OpenBSD*)
+            OS_TYPE="openbsd"
+            setup_openbsd_system
+            ;;
+        NetBSD*)
+            OS_TYPE="netbsd"
+            setup_netbsd_system
+            ;;
+        Darwin*)
+            OS_TYPE="macos"
+            setup_macos_system
+            ;;
+        *)
+            log_error "Unsupported operating system: $(uname -s)"
+            log_info "This installer currently supports Linux, FreeBSD, OpenBSD, NetBSD, and macOS"
+            return 1
+            ;;
+    esac
+    
+    # Export variables for use by other scripts
+    export DISTRO_ID DISTRO_NAME DISTRO_VERSION OS_TYPE
+    export PACKAGE_MANAGER INSTALL_CMD SEARCH_CMD UPDATE_CMD AUR_SUPPORT
+    
+    log_success "System setup completed"
+    log_info "OS Type: $OS_TYPE"
+    log_info "Distribution: $DISTRO_NAME ($DISTRO_ID) $DISTRO_VERSION"
+    log_info "Package Manager: $PACKAGE_MANAGER"
+    log_info "AUR Support: $AUR_SUPPORT"
+}
+
+# Linux distribution detection
+detect_linux_distribution() {
+    # Check for NixOS first (has unique detection)
+    if [[ -f /etc/NIXOS ]]; then
+        DISTRO_ID="nixos"
+        DISTRO_NAME="NixOS"
+        DISTRO_VERSION=$(nixos-version 2>/dev/null | cut -d' ' -f1 || echo "unknown")
+        setup_nixos_system
+        return
+    fi
     
     # Read /etc/os-release for distribution info
     if [[ -f /etc/os-release ]]; then
@@ -34,15 +86,17 @@ detect_distribution() {
         DISTRO_NAME="$DISTRIB_DESCRIPTION"
         DISTRO_VERSION="$DISTRIB_RELEASE"
     else
-        log_error "Cannot detect distribution. /etc/os-release not found."
-        return 1
+        log_warn "Cannot detect distribution. /etc/os-release not found."
+        log_info "Attempting fallback detection..."
+        detect_package_manager_fallback
+        return
     fi
     
-    log_info "Detected: $DISTRO_NAME ($DISTRO_ID) $DISTRO_VERSION"
+    log_info "Detected Linux distribution: $DISTRO_NAME ($DISTRO_ID) $DISTRO_VERSION"
     
     # Set package manager and commands based on distribution
     case "$DISTRO_ID" in
-        arch|endeavouros|cachyos|manjaro|garuda|artix)
+        arch|endeavouros|cachyos|manjaro|garuda|artix|blackarch)
             PACKAGE_MANAGER="pacman"
             INSTALL_CMD="sudo pacman -S"
             SEARCH_CMD="pacman -Ss"
@@ -50,7 +104,7 @@ detect_distribution() {
             AUR_SUPPORT="true"
             setup_arch_like_system
             ;;
-        ubuntu|debian|linuxmint|pop|elementary|zorin)
+        ubuntu|debian|linuxmint|pop|elementary|zorin|kali|parrot|raspbian)
             PACKAGE_MANAGER="apt"
             INSTALL_CMD="sudo apt install"
             SEARCH_CMD="apt search"
@@ -58,7 +112,7 @@ detect_distribution() {
             AUR_SUPPORT="false"
             setup_debian_like_system
             ;;
-        fedora|rhel|centos|rocky|almalinux)
+        fedora|rhel|centos|rocky|almalinux|ol|nobara)
             PACKAGE_MANAGER="dnf"
             INSTALL_CMD="sudo dnf install"
             SEARCH_CMD="dnf search"
@@ -66,7 +120,7 @@ detect_distribution() {
             AUR_SUPPORT="false"
             setup_fedora_like_system
             ;;
-        opensuse*|suse)
+        opensuse*|suse|tumbleweed)
             PACKAGE_MANAGER="zypper"
             INSTALL_CMD="sudo zypper install"
             SEARCH_CMD="zypper search"
@@ -82,7 +136,7 @@ detect_distribution() {
             AUR_SUPPORT="false"
             setup_void_system
             ;;
-        gentoo)
+        gentoo|funtoo)
             PACKAGE_MANAGER="portage"
             INSTALL_CMD="sudo emerge"
             SEARCH_CMD="emerge --search"
@@ -98,20 +152,24 @@ detect_distribution() {
             AUR_SUPPORT="false"
             setup_alpine_system
             ;;
+        nixos)
+            # This should be caught above, but fallback
+            setup_nixos_system
+            ;;
+        solus)
+            PACKAGE_MANAGER="eopkg"
+            INSTALL_CMD="sudo eopkg install"
+            SEARCH_CMD="eopkg search"
+            UPDATE_CMD="sudo eopkg update-repo && sudo eopkg upgrade"
+            AUR_SUPPORT="false"
+            setup_solus_system
+            ;;
         *)
             log_warn "Distribution '$DISTRO_ID' is not officially supported"
             log_info "Attempting to detect package manager..."
             detect_package_manager_fallback
             ;;
     esac
-    
-    # Export variables for use by other scripts
-    export DISTRO_ID DISTRO_NAME DISTRO_VERSION
-    export PACKAGE_MANAGER INSTALL_CMD SEARCH_CMD UPDATE_CMD AUR_SUPPORT
-    
-    log_success "Distribution setup completed"
-    log_info "Package Manager: $PACKAGE_MANAGER"
-    log_info "AUR Support: $AUR_SUPPORT"
 }
 
 # Fallback package manager detection
@@ -383,6 +441,151 @@ setup_alpine_system() {
     fi
     
     log_warn "Note: Alpine uses musl libc which may cause compatibility issues"
+}
+
+# NixOS system setup
+setup_nixos_system() {
+    log_info "Setting up NixOS system support..."
+    
+    DISTRO_ID="nixos"
+    DISTRO_NAME="NixOS"
+    PACKAGE_MANAGER="nix"
+    INSTALL_CMD="nix-env -iA"
+    SEARCH_CMD="nix search"
+    UPDATE_CMD="sudo nixos-rebuild switch --upgrade"
+    AUR_SUPPORT="false"
+    
+    # Check if flakes are enabled
+    if nix --version | grep -q "2\.[4-9]\|[3-9]\."; then
+        log_info "Nix flakes support detected"
+        export NIX_FLAKES_ENABLED="true"
+    fi
+    
+    log_warn "Note: NixOS requires configuration.nix modifications for system packages"
+    log_info "Consider using home-manager for user-level package management"
+}
+
+# FreeBSD system setup
+setup_freebsd_system() {
+    log_info "Setting up FreeBSD system support..."
+    
+    DISTRO_ID="freebsd"
+    DISTRO_NAME="FreeBSD"
+    DISTRO_VERSION=$(freebsd-version 2>/dev/null | cut -d'-' -f1 || echo "unknown")
+    PACKAGE_MANAGER="pkg"
+    INSTALL_CMD="sudo pkg install"
+    SEARCH_CMD="pkg search"
+    UPDATE_CMD="sudo pkg update && sudo pkg upgrade"
+    AUR_SUPPORT="false"
+    
+    # Enable ports if available
+    if [[ -d /usr/ports ]]; then
+        log_info "FreeBSD ports tree detected"
+        export FREEBSD_PORTS_AVAILABLE="true"
+    fi
+    
+    log_warn "Note: Hyprland support on FreeBSD is experimental"
+    log_info "Consider using LinuxBSD compatibility layer"
+}
+
+# OpenBSD system setup
+setup_openbsd_system() {
+    log_info "Setting up OpenBSD system support..."
+    
+    DISTRO_ID="openbsd"
+    DISTRO_NAME="OpenBSD"
+    DISTRO_VERSION=$(uname -r 2>/dev/null || echo "unknown")
+    PACKAGE_MANAGER="pkg_add"
+    INSTALL_CMD="sudo pkg_add"
+    SEARCH_CMD="pkg_info -Q"
+    UPDATE_CMD="sudo pkg_add -u"
+    AUR_SUPPORT="false"
+    
+    log_warn "Note: Hyprland is not officially supported on OpenBSD"
+    log_info "Consider using dwm or i3 alternatives"
+}
+
+# NetBSD system setup
+setup_netbsd_system() {
+    log_info "Setting up NetBSD system support..."
+    
+    DISTRO_ID="netbsd"
+    DISTRO_NAME="NetBSD"
+    DISTRO_VERSION=$(uname -r 2>/dev/null || echo "unknown")
+    PACKAGE_MANAGER="pkgin"
+    INSTALL_CMD="sudo pkgin install"
+    SEARCH_CMD="pkgin search"
+    UPDATE_CMD="sudo pkgin update && sudo pkgin upgrade"
+    AUR_SUPPORT="false"
+    
+    # Check for pkgsrc
+    if [[ -d /usr/pkgsrc ]]; then
+        log_info "NetBSD pkgsrc detected"
+        export NETBSD_PKGSRC_AVAILABLE="true"
+    fi
+    
+    log_warn "Note: Hyprland is not officially supported on NetBSD"
+}
+
+# macOS system setup
+setup_macos_system() {
+    log_info "Setting up macOS system support..."
+    
+    DISTRO_ID="macos"
+    DISTRO_NAME="macOS"
+    DISTRO_VERSION=$(sw_vers -productVersion 2>/dev/null || echo "unknown")
+    
+    # Check for package managers
+    if command_exists brew; then
+        PACKAGE_MANAGER="brew"
+        INSTALL_CMD="brew install"
+        SEARCH_CMD="brew search"
+        UPDATE_CMD="brew update && brew upgrade"
+    elif command_exists port; then
+        PACKAGE_MANAGER="macports"
+        INSTALL_CMD="sudo port install"
+        SEARCH_CMD="port search"
+        UPDATE_CMD="sudo port selfupdate && sudo port upgrade outdated"
+    else
+        log_warn "No package manager found. Installing Homebrew..."
+        install_homebrew
+    fi
+    
+    AUR_SUPPORT="false"
+    
+    log_warn "Note: Hyprland is not available on macOS (Wayland compositor)"
+    log_info "Consider using Yabai or Rectangle for window management"
+}
+
+# Install Homebrew on macOS
+install_homebrew() {
+    log_info "Installing Homebrew package manager..."
+    
+    if ! command_exists curl; then
+        log_error "curl is required to install Homebrew"
+        return 1
+    fi
+    
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    
+    # Update PATH
+    if [[ -f /opt/homebrew/bin/brew ]]; then
+        export PATH="/opt/homebrew/bin:$PATH"
+        PACKAGE_MANAGER="brew"
+        INSTALL_CMD="brew install"
+        SEARCH_CMD="brew search"
+        UPDATE_CMD="brew update && brew upgrade"
+    else
+        log_error "Failed to install Homebrew"
+        return 1
+    fi
+}
+
+# Solus system setup
+setup_solus_system() {
+    log_info "Setting up Solus system support..."
+    
+    log_warn "Note: Limited Hyprland support on Solus"
 }
 
 # Get package name for current distribution

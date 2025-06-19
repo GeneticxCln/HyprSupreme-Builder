@@ -123,24 +123,25 @@ repos:
       # Check Python imports
       - id: check-python-imports
         name: Check Python imports can be resolved
-        entry: python3 -c "
-import sys
-import ast
-import os
-for root, dirs, files in os.walk('.'):
-    if 'sources' in root or '__pycache__' in root or '.git' in root:
-        continue
-    for file in files:
-        if file.endswith('.py'):
-            filepath = os.path.join(root, file)
-            try:
-                with open(filepath, 'r') as f:
-                    ast.parse(f.read())
-            except SyntaxError as e:
-                print(f'Syntax error in {filepath}: {e}')
-                sys.exit(1)
-print('All Python files have valid syntax')
-"
+        entry: |
+          python3 -c "
+          import sys
+          import ast
+          import os
+          for root, dirs, files in os.walk('.'):
+              if 'sources' in root or '__pycache__' in root or '.git' in root:
+                  continue
+              for file in files:
+                  if file.endswith('.py'):
+                      filepath = os.path.join(root, file)
+                      try:
+                          with open(filepath, 'r') as f:
+                              ast.parse(f.read())
+                      except SyntaxError as e:
+                          print(f'Syntax error in {filepath}: {e}')
+                          sys.exit(1)
+          print('All Python files have valid syntax')
+          "
         language: system
         pass_filenames: false
 

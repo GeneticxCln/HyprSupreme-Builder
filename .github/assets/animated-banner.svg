@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400" class="banner">
+  <defs>
+    <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1">
+        <animate attributeName="stop-color" values="#667eea;#764ba2;#f093fb;#667eea" dur="4s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1">
+        <animate attributeName="stop-color" values="#764ba2;#f093fb;#4facfe;#764ba2" dur="4s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+    
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1"/>
+      <stop offset="50%" style="stop-color:#f8f9fa;stop-opacity:1">
+        <animate attributeName="stop-color" values="#f8f9fa;#fff;#e9ecef;#f8f9fa" dur="3s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" style="stop-color:#ffffff;stop-opacity:1"/>
+    </linearGradient>
+    
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <filter id="shadow">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="400" fill="url(#gradient1)" rx="20"/>
+  
+  <!-- Floating particles -->
+  <circle r="3" fill="#ffffff" opacity="0.6">
+    <animate attributeName="cx" values="50;1150;50" dur="20s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="100;300;100" dur="15s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.3;0.8;0.3" dur="3s" repeatCount="indefinite"/>
+  </circle>
+  
+  <circle r="2" fill="#ffffff" opacity="0.4">
+    <animate attributeName="cx" values="200;1000;200" dur="25s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="150;250;150" dur="18s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.2;0.6;0.2" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  
+  <circle r="4" fill="#ffffff" opacity="0.5">
+    <animate attributeName="cx" values="800;100;800" dur="30s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="80;320;80" dur="20s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.4;0.9;0.4" dur="2.5s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Main Title -->
+  <text x="600" y="180" font-family="Arial, sans-serif" font-size="72" font-weight="bold" text-anchor="middle" fill="url(#textGradient)" filter="url(#glow)">
+    HyprSupreme-Builder
+    <animate attributeName="y" values="180;175;180" dur="2s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="600" y="230" font-family="Arial, sans-serif" font-size="24" text-anchor="middle" fill="#ffffff" opacity="0.9" filter="url(#shadow)">
+    The Ultimate Hyprland Configuration Suite
+  </text>
+  
+  <!-- Feature badges -->
+  <g transform="translate(200, 280)">
+    <rect width="120" height="35" rx="17.5" fill="#28a745" opacity="0.9">
+      <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite"/>
+    </rect>
+    <text x="60" y="23" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#ffffff">AI-Powered</text>
+  </g>
+  
+  <g transform="translate(340, 280)">
+    <rect width="140" height="35" rx="17.5" fill="#007bff" opacity="0.9">
+      <animate attributeName="opacity" values="0.7;1;0.7" dur="2.2s" repeatCount="indefinite"/>
+    </rect>
+    <text x="70" y="23" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#ffffff">Community-Driven</text>
+  </g>
+  
+  <g transform="translate(500, 280)">
+    <rect width="140" height="35" rx="17.5" fill="#ffc107" opacity="0.9">
+      <animate attributeName="opacity" values="0.7;1;0.7" dur="1.8s" repeatCount="indefinite"/>
+    </rect>
+    <text x="70" y="23" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#000000">Production-Ready</text>
+  </g>
+  
+  <g transform="translate(660, 280)">
+    <rect width="140" height="35" rx="17.5" fill="#6f42c1" opacity="0.9">
+      <animate attributeName="opacity" values="0.7;1;0.7" dur="2.4s" repeatCount="indefinite"/>
+    </rect>
+    <text x="70" y="23" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#ffffff">Enterprise-Grade</text>
+  </g>
+  
+  <!-- Decorative elements -->
+  <polygon points="100,50 120,90 80,90" fill="#ffffff" opacity="0.3">
+    <animateTransform attributeName="transform" type="rotate" values="0 100 70;360 100 70" dur="10s" repeatCount="indefinite"/>
+  </polygon>
+  
+  <polygon points="1100,320 1120,360 1080,360" fill="#ffffff" opacity="0.3">
+    <animateTransform attributeName="transform" type="rotate" values="360 1100 340;0 1100 340" dur="8s" repeatCount="indefinite"/>
+  </polygon>
+</svg>
+

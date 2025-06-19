@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=HyprSupreme Driver Manager
 Comment=Manage hardware drivers automatically
-Exec=/home/alex/HyprSupreme-Builder/gui/driver_manager_gui.sh
+Exec=hyprsupreme-drivers
 Icon=preferences-system-hardware
 Type=Application
 Categories=System;Settings;Hardware;

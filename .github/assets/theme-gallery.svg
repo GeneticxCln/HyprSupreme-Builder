@@ -1,0 +1,333 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 900">
+  <defs>
+    <linearGradient id="galleryBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f0f23;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#1a1a2e;stop-opacity:1"/>
+    </linearGradient>
+    
+    <filter id="themeGlow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <filter id="cardShadow">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1400" height="900" fill="url(#galleryBg)"/>
+  
+  <!-- Title -->
+  <text x="700" y="50" font-family="Arial, sans-serif" font-size="32" font-weight="bold" text-anchor="middle" fill="#ffffff">
+    🎨 Theme Gallery - 45+ Stunning Themes
+  </text>
+  
+  <text x="700" y="80" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#a8b3cf">
+    Professional, community-curated themes for every workflow
+  </text>
+  
+  <!-- Theme Grid -->
+  <!-- Row 1 -->
+  <!-- Catppuccin Mocha -->
+  <g transform="translate(100, 120)">
+    <rect width="300" height="200" rx="15" fill="#1e1e2e" filter="url(#cardShadow)"/>
+    <!-- Fake desktop -->
+    <rect x="10" y="10" width="280" height="160" rx="8" fill="#181825"/>
+    <!-- Waybar -->
+    <rect x="15" y="15" width="270" height="30" rx="4" fill="#313244"/>
+    <circle cx="30" cy="30" r="4" fill="#f38ba8"/>
+    <circle cx="45" cy="30" r="4" fill="#a6e3a1"/>
+    <circle cx="60" cy="30" r="4" fill="#f9e2af"/>
+    <text x="150" y="33" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="#cdd6f4">Workspace 1</text>
+    <text x="270" y="33" font-family="Arial, sans-serif" font-size="8" text-anchor="end" fill="#cdd6f4">14:30</text>
+    
+    <!-- Windows -->
+    <rect x="20" y="55" width="120" height="80" rx="5" fill="#45475a"/>
+    <rect x="25" y="60" width="110" height="20" rx="2" fill="#585b70"/>
+    <text x="80" y="73" font-family="Arial, sans-serif" font-size="8" text-anchor="middle" fill="#cdd6f4">Terminal</text>
+    
+    <rect x="160" y="55" width="120" height="80" rx="5" fill="#585b70"/>
+    <rect x="165" y="60" width="110" height="20" rx="2" fill="#6c7086"/>
+    <text x="220" y="73" font-family="Arial, sans-serif" font-size="8" text-anchor="middle" fill="#cdd6f4">Browser</text>
+    
+    <!-- Wallpaper elements -->
+    <circle cx="50" cy="150" r="8" fill="#fab387" opacity="0.3"/>
+    <circle cx="250" cy="100" r="12" fill="#cba6f7" opacity="0.2"/>
+    
+    <!-- Theme name -->
+    <text x="150" y="190" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#f38ba8">
+      Catppuccin Mocha
+    </text>
+  </g>
+  
+  <!-- Tokyo Night -->
+  <g transform="translate(450, 120)">
+    <rect width="300" height="200" rx="15" fill="#1a1b26" filter="url(#cardShadow)"/>
+    <!-- Fake desktop -->
+    <rect x="10" y="10" width="280" height="160" rx="8" fill="#16161e"/>
+    <!-- Waybar -->
+    <rect x="15" y="15" width="270" height="30" rx="4" fill="#24283b"/>
+    <circle cx="30" cy="30" r="4" fill="#f7768e"/>
+    <circle cx="45" cy="30" r="4" fill="#9ece6a"/>
+    <circle cx="60" cy="30" r="4" fill="#e0af68"/>
+    <text x="150" y="33" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="#c0caf5">Workspace 1</text>
+    <text x="270" y="33" font-family="Arial, sans-serif" font-size="8" text-anchor="end" fill="#c0caf5">14:30</text>
+    
+    <!-- Windows -->
+    <rect x="20" y="55" width="120" height="80" rx="5" fill="#414868"/>
+    <rect x="25" y="60" width="110" height="20" rx="2" fill="#565f89"/>
+    <text x="80" y="73" font-family="Arial, sans-serif" font-size="8" text-anchor="middle" fill="#c0caf5">Terminal</text>
+    
+    <rect x="160" y="55" width="120" height="80" rx="5" fill="#565f89"/>
+    <rect x="165" y="60" width="110" height="20" rx="2" fill="#737aa2"/>
+    <text x="220" y="73" font-family="Arial, sans-serif" font-size="8" text-anchor="middle" fill="#c0caf5">Browser</text>
+    
+    <!-- Wallpaper elements -->
+    <circle cx="60" cy="140" r="6" fill="#bb9af7" opacity="0.4"/>
+    <circle cx="240" cy="110" r="10" fill="#7dcfff" opacity="0.3"/>
+    
+    <!-- Theme name -->
+    <text x="150" y="190" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#7aa2f7">
+      Tokyo Night
+    </text>
+  </g>
+  
+  <!-- Gruvbox Material -->
+  <g transform="translate(800, 120)">
+    <rect width="300" height="200" rx="15" fill="#282828" filter="url(#cardShadow)"/>
+    <!-- Fake desktop -->
+    <rect x="10" y="10" width="280" height="160" rx="8" fill="#1d2021"/>
+    <!-- Waybar -->
+    <rect x="15" y="15" width="270" height="30" rx="4" fill="#3c3836"/>
+    <circle cx="30" cy="30" r="4" fill="#fb4934"/>
+    <circle cx="45" cy="30" r="4" fill="#b8bb26"/>
+    <circle cx="60" cy="30" r="4" fill="#fabd2f"/>
+    <text x="150" y="33" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="#ebdbb2">Workspace 1</text>
+    <text x="270" y="33" font-family="Arial, sans-serif" font-size="8" text-anchor="end" fill="#ebdbb2">14:30</text>
+    
+    <!-- Windows -->
+    <rect x="20" y="55" width="120" height="80" rx="5" fill="#504945"/>
+    <rect x="25" y="60" width="110" height="20" rx="2" fill="#665c54"/>
+    <text x="80" y="73" font-family="Arial, sans-serif" font-size="8" text-anchor="middle" fill="#ebdbb2">Terminal</text>
+    
+    <rect x="160" y="55" width="120" height="80" rx="5" fill="#665c54"/>
+    <rect x="165" y="60" width="110" height="20" rx="2" fill="#7c6f64"/>
+    <text x="220" y="73" font-family="Arial, sans-serif" font-size="8" text-anchor="middle" fill="#ebdbb2">Browser</text>
+    
+    <!-- Wallpaper elements -->
+    <circle cx="45" cy="145" r="7" fill="#fe8019" opacity="0.4"/>
+    <circle cx="255" cy="95" r="9" fill="#83a598" opacity="0.3"/>
+    
+    <!-- Theme name -->
+    <text x="150" y="190" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#fabd2f">
+      Gruvbox Material
+    </text>
+  </g>
+  
+  <!-- Row 2 -->
+  <!-- Nord -->
+  <g transform="translate(100, 360)">
+    <rect width="300" height="200" rx="15" fill="#2e3440" filter="url(#cardShadow)"/>
+    <!-- Fake desktop -->
+    <rect x="10" y="10" width="280" height="160" rx="8" fill="#3b4252"/>
+    <!-- Waybar -->
+    <rect x="15" y="15" width="270" height="30" rx="4" fill="#434c5e"/>
+    <circle cx="30" cy="30" r="4" fill="#bf616a"/>
+    <circle cx="45" cy="30" r="4" fill="#a3be8c"/>
+    <circle cx="60" cy="30" r="4" fill="#ebcb8b"/>
+    <text x="150" y="33" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="#eceff4">Workspace 1</text>
+    <text x="270" y="33" font-family="Arial, sans-serif" font-size="8" text-anchor="end" fill="#eceff4">14:30</text>
+    
+    <!-- Windows -->
+    <rect x="20" y="55" width="120" height="80" rx="5" fill="#4c566a"/>
+    <rect x="25" y="60" width="110" height="20" rx="2" fill="#5e81ac"/>
+    <text x="80" y="73" font-family="Arial, sans-serif" font-size="8" text-anchor="middle" fill="#eceff4">Terminal</text>
+    
+    <rect x="160" y="55" width="120" height="80" rx="5" fill="#5e81ac"/>
+    <rect x="165" y="60" width="110" height="20" rx="2" fill="#81a1c1"/>
+    <text x="220" y="73" font-family="Arial, sans-serif" font-size="8" text-anchor="middle" fill="#eceff4">Browser</text>
+    
+    <!-- Wallpaper elements -->
+    <circle cx="55" cy="135" r="8" fill="#8fbcbb" opacity="0.4"/>
+    <circle cx="235" cy="105" r="11" fill="#88c0d0" opacity="0.3"/>
+    
+    <!-- Theme name -->
+    <text x="150" y="190" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#5e81ac">
+      Nord
+    </text>
+  </g>
+  
+  <!-- Dracula -->
+  <g transform="translate(450, 360)">
+    <rect width="300" height="200" rx="15" fill="#282a36" filter="url(#cardShadow)"/>
+    <!-- Fake desktop -->
+    <rect x="10" y="10" width="280" height="160" rx="8" fill="#21222c"/>
+    <!-- Waybar -->
+    <rect x="15" y="15" width="270" height="30" rx="4" fill="#44475a"/>
+    <circle cx="30" cy="30" r="4" fill="#ff5555"/>
+    <circle cx="45" cy="30" r="4" fill="#50fa7b"/>
+    <circle cx="60" cy="30" r="4" fill="#f1fa8c"/>
+    <text x="150" y="33" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="#f8f8f2">Workspace 1</text>
+    <text x="270" y="33" font-family="Arial, sans-serif" font-size="8" text-anchor="end" fill="#f8f8f2">14:30</text>
+    
+    <!-- Windows -->
+    <rect x="20" y="55" width="120" height="80" rx="5" fill="#6272a4"/>
+    <rect x="25" y="60" width="110" height="20" rx="2" fill="#bd93f9"/>
+    <text x="80" y="73" font-family="Arial, sans-serif" font-size="8" text-anchor="middle" fill="#f8f8f2">Terminal</text>
+    
+    <rect x="160" y="55" width="120" height="80" rx="5" fill="#bd93f9"/>
+    <rect x="165" y="60" width="110" height="20" rx="2" fill="#ff79c6"/>
+    <text x="220" y="73" font-family="Arial, sans-serif" font-size="8" text-anchor="middle" fill="#f8f8f2">Browser</text>
+    
+    <!-- Wallpaper elements -->
+    <circle cx="50" cy="140" r="7" fill="#ffb86c" opacity="0.4"/>
+    <circle cx="245" cy="100" r="10" fill="#8be9fd" opacity="0.3"/>
+    
+    <!-- Theme name -->
+    <text x="150" y="190" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#bd93f9">
+      Dracula
+    </text>
+  </g>
+  
+  <!-- One Dark -->
+  <g transform="translate(800, 360)">
+    <rect width="300" height="200" rx="15" fill="#282c34" filter="url(#cardShadow)"/>
+    <!-- Fake desktop -->
+    <rect x="10" y="10" width="280" height="160" rx="8" fill="#21252b"/>
+    <!-- Waybar -->
+    <rect x="15" y="15" width="270" height="30" rx="4" fill="#3e4451"/>
+    <circle cx="30" cy="30" r="4" fill="#e06c75"/>
+    <circle cx="45" cy="30" r="4" fill="#98c379"/>
+    <circle cx="60" cy="30" r="4" fill="#e5c07b"/>
+    <text x="150" y="33" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="#abb2bf">Workspace 1</text>
+    <text x="270" y="33" font-family="Arial, sans-serif" font-size="8" text-anchor="end" fill="#abb2bf">14:30</text>
+    
+    <!-- Windows -->
+    <rect x="20" y="55" width="120" height="80" rx="5" fill="#4b5263"/>
+    <rect x="25" y="60" width="110" height="20" rx="2" fill="#5c6370"/>
+    <text x="80" y="73" font-family="Arial, sans-serif" font-size="8" text-anchor="middle" fill="#abb2bf">Terminal</text>
+    
+    <rect x="160" y="55" width="120" height="80" rx="5" fill="#5c6370"/>
+    <rect x="165" y="60" width="110" height="20" rx="2" fill="#61afef"/>
+    <text x="220" y="73" font-family="Arial, sans-serif" font-size="8" text-anchor="middle" fill="#abb2bf">Browser</text>
+    
+    <!-- Wallpaper elements -->
+    <circle cx="60" cy="130" r="6" fill="#c678dd" opacity="0.4"/>
+    <circle cx="230" cy="110" r="9" fill="#56b6c2" opacity="0.3"/>
+    
+    <!-- Theme name -->
+    <text x="150" y="190" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#61afef">
+      One Dark Pro
+    </text>
+  </g>
+  
+  <!-- Row 3 - Additional themes -->
+  <!-- Solarized Dark -->
+  <g transform="translate(100, 600)">
+    <rect width="300" height="200" rx="15" fill="#002b36" filter="url(#cardShadow)"/>
+    <!-- Fake desktop -->
+    <rect x="10" y="10" width="280" height="160" rx="8" fill="#073642"/>
+    <!-- Waybar -->
+    <rect x="15" y="15" width="270" height="30" rx="4" fill="#586e75"/>
+    <circle cx="30" cy="30" r="4" fill="#dc322f"/>
+    <circle cx="45" cy="30" r="4" fill="#859900"/>
+    <circle cx="60" cy="30" r="4" fill="#b58900"/>
+    <text x="150" y="33" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="#839496">Workspace 1</text>
+    <text x="270" y="33" font-family="Arial, sans-serif" font-size="8" text-anchor="end" fill="#839496">14:30</text>
+    
+    <!-- Windows -->
+    <rect x="20" y="55" width="120" height="80" rx="5" fill="#657b83"/>
+    <rect x="25" y="60" width="110" height="20" rx="2" fill="#93a1a1"/>
+    <text x="80" y="73" font-family="Arial, sans-serif" font-size="8" text-anchor="middle" fill="#fdf6e3">Terminal</text>
+    
+    <rect x="160" y="55" width="120" height="80" rx="5" fill="#93a1a1"/>
+    <rect x="165" y="60" width="110" height="20" rx="2" fill="#268bd2"/>
+    <text x="220" y="73" font-family="Arial, sans-serif" font-size="8" text-anchor="middle" fill="#fdf6e3">Browser</text>
+    
+    <!-- Wallpaper elements -->
+    <circle cx="65" cy="145" r="7" fill="#2aa198" opacity="0.4"/>
+    <circle cx="225" cy="95" r="8" fill="#6c71c4" opacity="0.3"/>
+    
+    <!-- Theme name -->
+    <text x="150" y="190" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#268bd2">
+      Solarized Dark
+    </text>
+  </g>
+  
+  <!-- Monokai -->
+  <g transform="translate(450, 600)">
+    <rect width="300" height="200" rx="15" fill="#272822" filter="url(#cardShadow)"/>
+    <!-- Fake desktop -->
+    <rect x="10" y="10" width="280" height="160" rx="8" fill="#1e1f1c"/>
+    <!-- Waybar -->
+    <rect x="15" y="15" width="270" height="30" rx="4" fill="#49483e"/>
+    <circle cx="30" cy="30" r="4" fill="#f92672"/>
+    <circle cx="45" cy="30" r="4" fill="#a6e22e"/>
+    <circle cx="60" cy="30" r="4" fill="#f4bf75"/>
+    <text x="150" y="33" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="#f8f8f2">Workspace 1</text>
+    <text x="270" y="33" font-family="Arial, sans-serif" font-size="8" text-anchor="end" fill="#f8f8f2">14:30</text>
+    
+    <!-- Windows -->
+    <rect x="20" y="55" width="120" height="80" rx="5" fill="#75715e"/>
+    <rect x="25" y="60" width="110" height="20" rx="2" fill="#66d9ef"/>
+    <text x="80" y="73" font-family="Arial, sans-serif" font-size="8" text-anchor="middle" fill="#f8f8f2">Terminal</text>
+    
+    <rect x="160" y="55" width="120" height="80" rx="5" fill="#66d9ef"/>
+    <rect x="165" y="60" width="110" height="20" rx="2" fill="#ae81ff"/>
+    <text x="220" y="73" font-family="Arial, sans-serif" font-size="8" text-anchor="middle" fill="#f8f8f2">Browser</text>
+    
+    <!-- Wallpaper elements -->
+    <circle cx="40" cy="135" r="8" fill="#fd971f" opacity="0.4"/>
+    <circle cx="260" cy="105" r="6" fill="#a6e22e" opacity="0.3"/>
+    
+    <!-- Theme name -->
+    <text x="150" y="190" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#a6e22e">
+      Monokai Pro
+    </text>
+  </g>
+  
+  <!-- Custom Theme Placeholder -->
+  <g transform="translate(800, 600)">
+    <rect width="300" height="200" rx="15" fill="#1a1a1a" stroke="#4facfe" stroke-width="3" stroke-dasharray="10,5" filter="url(#cardShadow)"/>
+    <text x="150" y="80" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" fill="#4facfe">
+      + Create Your Own
+    </text>
+    <text x="150" y="110" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#a8b3cf">
+      Upload custom themes
+    </text>
+    <text x="150" y="130" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#a8b3cf">
+      Share with community
+    </text>
+    
+    <!-- Upload icon -->
+    <g transform="translate(130, 140)">
+      <rect width="40" height="30" rx="5" fill="none" stroke="#4facfe" stroke-width="2"/>
+      <path d="M15 15 L20 10 L25 15" fill="none" stroke="#4facfe" stroke-width="2"/>
+      <line x1="20" y1="10" x2="20" y2="25" stroke="#4facfe" stroke-width="2"/>
+    </g>
+    
+    <!-- Theme name -->
+    <text x="150" y="190" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#4facfe">
+      Your Theme Here
+    </text>
+  </g>
+  
+  <!-- Gallery Footer -->
+  <g transform="translate(0, 820)">
+    <rect width="1400" height="80" fill="#0f0f23" opacity="0.8"/>
+    <text x="700" y="30" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#ffffff">
+      🌟 Browse all themes in the Community Platform
+    </text>
+    <text x="700" y="50" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#a8b3cf">
+      ./launch_web.sh → localhost:5000 | Rate, download, and discover new themes
+    </text>
+    <text x="700" y="65" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="#6c7d8a">
+      💡 All themes are fully tested and optimized for HyprSupreme-Builder
+    </text>
+  </g>
+</svg>
+
