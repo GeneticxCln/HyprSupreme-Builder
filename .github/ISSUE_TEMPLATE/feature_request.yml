@@ -1,0 +1,120 @@
+name: ✨ Feature Request
+description: Suggest a new feature or enhancement
+title: "[FEATURE] "
+labels: ["enhancement", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # ✨ Feature Request
+        
+        We're always looking to improve HyprSupreme-Builder! Your ideas help make it better for everyone.
+        
+        ---
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: ✅ Pre-Check
+      description: Please confirm you've completed these steps
+      options:
+        - label: I have searched existing issues to ensure this isn't a duplicate
+          required: true
+        - label: I have checked the documentation to see if this feature already exists
+          required: true
+        - label: This feature would benefit the broader community
+          required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 🤔 Problem/Need
+      description: What problem does this feature solve? What need does it address?
+      placeholder: "I'm always frustrated when..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: 💡 Proposed Solution
+      description: Describe the solution you'd like to see implemented
+      placeholder: "I would like to see..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 🔄 Alternatives Considered
+      description: Have you considered any alternative solutions or features?
+      placeholder: "I've also considered..."
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 📊 Priority Level
+      description: How important is this feature to you?
+      options:
+        - "🔥 Critical - Blocking my workflow"
+        - "📈 High - Would significantly improve my experience"
+        - "📊 Medium - Nice to have"
+        - "🎁 Low - Small quality of life improvement"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: 🏷️ Feature Category
+      description: What category does this feature belong to?
+      options:
+        - "🚀 Installation & Setup"
+        - "🎨 Theming & Customization"
+        - "🌐 Community Platform"
+        - "🎮 Keybindings & Controls"
+        - "🔧 Developer Tools"
+        - "📱 GUI Application"
+        - "💻 CLI Tools"
+        - "🐳 Docker & Containers"
+        - "🤖 AI & Automation"
+        - "📊 Performance & Monitoring"
+        - "📚 Documentation"
+        - "🔄 Other"
+    validations:
+      required: true
+
+  - type: textarea
+    id: implementation
+    attributes:
+      label: 🛠️ Implementation Ideas
+      description: Do you have any ideas about how this could be implemented?
+      placeholder: "This could be implemented by..."
+
+  - type: textarea
+    id: mockup
+    attributes:
+      label: 🎨 Mockups/Examples
+      description: If applicable, add mockups, sketches, or examples from other tools
+      placeholder: "You can paste images or describe the interface..."
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: 🤝 Contribution
+      description: Would you be interested in contributing to this feature?
+      options:
+        - label: "I would be willing to implement this feature myself"
+        - label: "I could help with testing this feature"
+        - label: "I could help with documentation for this feature"
+        - label: "I could provide design/UX input for this feature"
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 📝 Additional Context
+      description: Add any other context, screenshots, or information about the feature request
+      placeholder: "Any additional information that might be helpful..."
+

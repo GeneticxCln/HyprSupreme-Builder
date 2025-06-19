@@ -1,0 +1,51 @@
+<svg width="600" height="400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="step-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="bg-light" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f8fafc;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e2e8f0;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="600" height="400" fill="#ffffff" />
+  
+  <!-- Title -->
+  <text x="300" y="30" font-family="Arial, sans-serif" font-size="24" font-weight="bold" text-anchor="middle" fill="#1e293b">
+    🚀 Quick Installation
+  </text>
+  
+  <!-- Step 1 -->
+  <rect x="50" y="70" width="500" height="60" rx="10" fill="url(#bg-light)" stroke="#e2e8f0" stroke-width="2"/>
+  <circle cx="80" cy="100" r="15" fill="url(#step-gradient)" />
+  <text x="80" y="105" font-family="Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#ffffff">1</text>
+  <text x="110" y="90" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#1e293b">Clone Repository</text>
+  <text x="110" y="110" font-family="Arial, sans-serif" font-size="11" fill="#64748b">git clone https://github.com/GeneticxCln/HyprSupreme-Builder.git</text>
+  
+  <!-- Step 2 -->
+  <rect x="50" y="150" width="500" height="60" rx="10" fill="url(#bg-light)" stroke="#e2e8f0" stroke-width="2"/>
+  <circle cx="80" cy="180" r="15" fill="url(#step-gradient)" />
+  <text x="80" y="185" font-family="Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#ffffff">2</text>
+  <text x="110" y="170" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#1e293b">Navigate to Directory</text>
+  <text x="110" y="190" font-family="Arial, sans-serif" font-size="11" fill="#64748b">cd HyprSupreme-Builder</text>
+  
+  <!-- Step 3 -->
+  <rect x="50" y="230" width="500" height="60" rx="10" fill="url(#bg-light)" stroke="#e2e8f0" stroke-width="2"/>
+  <circle cx="80" cy="260" r="15" fill="url(#step-gradient)" />
+  <text x="80" y="265" font-family="Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#ffffff">3</text>
+  <text x="110" y="250" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#1e293b">Run Installation</text>
+  <text x="110" y="270" font-family="Arial, sans-serif" font-size="11" fill="#64748b">chmod +x install.sh && ./install.sh</text>
+  
+  <!-- Features box -->
+  <rect x="50" y="320" width="500" height="50" rx="10" fill="url(#step-gradient)" />
+  <text x="300" y="340" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#ffffff">
+    ✨ Features: AI Updates • GPU Optimization • Community Platform • Smart Backups
+  </text>
+  <text x="300" y="355" font-family="Arial, sans-serif" font-size="11" text-anchor="middle" fill="rgba(255,255,255,0.8)">
+    🏆 Production Ready • 🔧 Unattended Mode • 🌐 Web Interface • 🐳 Docker Support
+  </text>
+</svg>
+

@@ -1,25 +1,103 @@
+<div align="center">
+
+![HyprSupreme-Builder Banner](.github/assets/banner.svg)
+
 # ⭐ HyprSupreme-Builder
 
-The ultimate Hyprland configuration suite with advanced community features, automated setup, and professional theming capabilities.
+**The Ultimate Hyprland Configuration Suite**
 
-![HyprSupreme-Builder](https://img.shields.io/badge/HyprSupreme-Builder-blue?style=for-the-badge)
-![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
-![Version](https://img.shields.io/badge/Version-2.1.0-purple?style=for-the-badge)
-![Release](https://img.shields.io/github/v/release/GeneticxCln/HyprSupreme-Builder?style=for-the-badge&label=⭐%20LATEST%20RELEASE)
+*AI-Powered • Community-Driven • Production-Ready • Enterprise-Grade*
 
-## 🎉 **LATEST RELEASE v2.1.0 - NOW AVAILABLE!** ⭐
+---
 
-✨ **[Download v2.1.0](https://github.com/GeneticxCln/HyprSupreme-Builder/releases/tag/v2.1.0)** - Our biggest release yet!
+![Version](https://img.shields.io/badge/Version-2.1.0-blueviolet?style=for-the-badge&logo=semanticrelease)
+![Release](https://img.shields.io/github/v/release/GeneticxCln/HyprSupreme-Builder?style=for-the-badge&label=⭐%20LATEST&logo=github&color=success)
+![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge&logo=opensourceinitiative)
+![Stars](https://img.shields.io/github/stars/GeneticxCln/HyprSupreme-Builder?style=for-the-badge&logo=github&color=yellow)
+![Forks](https://img.shields.io/github/forks/GeneticxCln/HyprSupreme-Builder?style=for-the-badge&logo=github&color=blue)
+![Issues](https://img.shields.io/github/issues/GeneticxCln/HyprSupreme-Builder?style=for-the-badge&logo=github)
+![Downloads](https://img.shields.io/github/downloads/GeneticxCln/HyprSupreme-Builder/total?style=for-the-badge&logo=github&color=brightgreen)
 
-### 🚀 **New in v2.1.0:**
-- 🤖 **AI Update Manager** - Intelligent system management
-- 🔧 **Enhanced Installation** - Unattended mode & better conflict resolution
-- ⚡ **GPU Optimization** - Advanced driver detection & hardware-specific optimizations
-- 💾 **Smart Backups** - Point-in-time recovery & automated cleanup
-- 🌐 **Community Platform** - Web interface & collaborative development
-- 🖥️ **Warp Terminal** - Full AI terminal integration
-- 🐳 **Docker Support** - Containerized deployment
-- 🧪 **Testing Framework** - Comprehensive automated testing
+![Language](https://img.shields.io/badge/Shell-89.2%25-4EAA25?style=flat-square&logo=gnubash)
+![Language](https://img.shields.io/badge/Python-8.4%25-3776AB?style=flat-square&logo=python)
+![Language](https://img.shields.io/badge/JavaScript-2.4%25-F7DF1E?style=flat-square&logo=javascript)
+
+---
+
+## 🎉 **LATEST RELEASE v2.1.0 - NOW AVAILABLE!** 
+
+### ✨ **[🚀 Download v2.1.0](https://github.com/GeneticxCln/HyprSupreme-Builder/releases/tag/v2.1.0)** - *Our biggest release yet!*
+
+</div>
+
+---
+
+## 🌟 **What's New in v2.1.0**
+
+<div align="center">
+
+![Features Showcase](.github/assets/features.svg)
+
+</div>
+
+<table>
+<tr>
+<td width="50%">
+
+### 🤖 **AI Update Manager**
+- Intelligent system update management
+- Automated dependency resolution
+- Smart conflict detection & resolution
+- Predictive maintenance scheduling
+
+### ⚡ **GPU Optimization**
+- Advanced driver detection
+- Hardware-specific optimizations
+- Performance monitoring
+- GPU-specific presets
+
+### 🌐 **Community Platform**
+- Web-based configuration interface
+- Theme sharing & discovery
+- Community collaboration tools
+- Remote system management
+
+### 💾 **Smart Backup System**
+- Point-in-time recovery
+- Incremental backups
+- Automated cleanup
+- Configuration validation
+
+</td>
+<td width="50%">
+
+### 🔧 **Enhanced Installation**
+- Unattended installation mode
+- Better conflict resolution
+- Cross-distribution support
+- Dependency management
+
+### 🖥️ **Warp Terminal Integration**
+- Full AI terminal support
+- Smart terminal detection
+- Custom theme integration
+- Performance profiles
+
+### 🐳 **Docker Support**
+- Containerized deployment
+- Development environments
+- Multi-service configuration
+- Isolated testing
+
+### 🧪 **Testing Framework**
+- Comprehensive test suite
+- Performance benchmarking
+- Configuration validation
+- Error recovery testing
+
+</td>
+</tr>
+</table>
 
 ## ✨ Features
 
@@ -56,18 +134,47 @@ The ultimate Hyprland configuration suite with advanced community features, auto
 
 ## 🚀 Quick Start
 
-### 📦 **Automatic Installation**
+<div align="center">
+
+![Installation Guide](.github/assets/installation.svg)
+
+</div>
+
+### 📦 **One-Command Installation**
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/HyprSupreme-Builder.git
+# 🚀 Quick Install (Recommended)
+curl -fsSL https://raw.githubusercontent.com/GeneticxCln/HyprSupreme-Builder/main/install.sh | bash
+```
+
+### 🔧 **Manual Installation**
+```bash
+# 📥 Clone the repository
+git clone https://github.com/GeneticxCln/HyprSupreme-Builder.git
 cd HyprSupreme-Builder
 
-# Run the installer
+# 🚀 Run the installer
 chmod +x install.sh
 ./install.sh
 
-# Launch the application
+# 🎯 Launch the application
 ./hyprsupreme
+```
+
+### 🤖 **Unattended Installation**
+```bash
+# 🔄 Automated install with preset
+./install.sh --unattended --preset gaming
+./install.sh --unattended --preset work
+./install.sh --unattended --preset minimal
+```
+
+### 🐳 **Docker Installation**
+```bash
+# 📦 Run with Docker
+docker-compose up -d
+
+# 🌐 Access web interface
+open http://localhost:5000
 ```
 
 ### 🌐 **Community Platform**
