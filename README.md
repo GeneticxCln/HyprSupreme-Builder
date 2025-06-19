@@ -1,10 +1,25 @@
-# 🌟 HyprSupreme-Builder
+# ⭐ HyprSupreme-Builder
 
 The ultimate Hyprland configuration suite with advanced community features, automated setup, and professional theming capabilities.
 
 ![HyprSupreme-Builder](https://img.shields.io/badge/HyprSupreme-Builder-blue?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 ![Version](https://img.shields.io/badge/Version-2.1.0-purple?style=for-the-badge)
+![Release](https://img.shields.io/github/v/release/GeneticxCln/HyprSupreme-Builder?style=for-the-badge&label=⭐%20LATEST%20RELEASE)
+
+## 🎉 **LATEST RELEASE v2.1.0 - NOW AVAILABLE!** ⭐
+
+✨ **[Download v2.1.0](https://github.com/GeneticxCln/HyprSupreme-Builder/releases/tag/v2.1.0)** - Our biggest release yet!
+
+### 🚀 **New in v2.1.0:**
+- 🤖 **AI Update Manager** - Intelligent system management
+- 🔧 **Enhanced Installation** - Unattended mode & better conflict resolution
+- ⚡ **GPU Optimization** - Advanced driver detection & hardware-specific optimizations
+- 💾 **Smart Backups** - Point-in-time recovery & automated cleanup
+- 🌐 **Community Platform** - Web interface & collaborative development
+- 🖥️ **Warp Terminal** - Full AI terminal integration
+- 🐳 **Docker Support** - Containerized deployment
+- 🧪 **Testing Framework** - Comprehensive automated testing
 
 ## ✨ Features
 
