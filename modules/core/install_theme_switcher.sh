@@ -454,7 +454,7 @@ create_theme_from_pywal() {
     local colors=($(cat "$colors_file"))
     
     # Create theme file
-    cat > "$theme_file" << EOF
+    cat > "$theme_file" << 'THEME_EOF'
 # Generated theme from wallpaper: $wallpaper_name
 
 \$background = 0x${colors[0]#?}
@@ -482,7 +482,7 @@ general {
 decoration {
     col.shadow = rgba(\$background, 0.5)
 }
-EOF
+THEME_EOF
     
     # Apply the generated theme
     "$HOME/.config/hypr/scripts/theme-switcher.sh" apply "$theme_name"
@@ -537,14 +537,14 @@ toggle_auto_theme() {
 
 enable_auto_theme() {
     # Create auto theme config
-    cat > "$AUTO_THEME_CONFIG" << EOF
+    cat > "\$AUTO_THEME_CONFIG" << AUTOEOF
 # Auto Theme Configuration
 ENABLED=true
 LIGHT_THEME=catppuccin-latte
 DARK_THEME=catppuccin-mocha
 LIGHT_START=06:00
 DARK_START=18:00
-EOF
+AUTOEOF
     
     # Start auto theme service
     start_auto_theme_service

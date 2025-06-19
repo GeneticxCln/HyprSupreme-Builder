@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=HyprSupreme Driver Manager
+Comment=Manage hardware drivers automatically
+Exec=/home/alex/HyprSupreme-Builder/gui/driver_manager_gui.sh
+Icon=preferences-system-hardware
+Type=Application
+Categories=System;Settings;Hardware;
+Terminal=false
+StartupNotify=true
+Keywords=drivers;hardware;gpu;nvidia;amd;intel;audio;network;bluetooth;camera;
+

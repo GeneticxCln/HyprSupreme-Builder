@@ -28,7 +28,7 @@ class TestMainInstaller:
     
     def test_preset_validation(self, sample_config):
         """Test preset validation logic."""
-        valid_presets = ["JaKooLit", "prasanthrangan", "SolDoesTech", "custom"]
+        valid_presets = ["jakoolit", "ml4w", "hyde", "end4", "prasanta", "custom"]
         
         # Test valid preset
         assert sample_config["preset"] in valid_presets

@@ -39,15 +39,15 @@ install_packages() {
     local packages=("$@")
     
     for pkg in "${packages[@]}"; do
-        if ! pacman -Qi "$pkg" &> /dev/null; then
+        if ! pacman -Qi "$pkg" &>/dev/null; then
             log_info "Installing $pkg..."
             
             # Try official repos first
-            if sudo pacman -S --noconfirm "$pkg" &> /dev/null; then
+            if sudo pacman -S --noconfirm "$pkg" &>/dev/null; then
                 log_success "Installed $pkg from official repos"
             # Try AUR if not in official repos
             elif [[ -n "$AUR_HELPER" ]]; then
-                if $AUR_HELPER -S --noconfirm "$pkg" &> /dev/null; then
+                if $AUR_HELPER -S --noconfirm "$pkg" &>/dev/null; then
                     log_success "Installed $pkg from AUR"
                 else
                     log_error "Failed to install $pkg"
@@ -150,7 +150,7 @@ enable_service() {
 
 # Check if command exists
 command_exists() {
-    command -v "$1" &> /dev/null
+    command -v "$1" &>/dev/null
 }
 
 # Get GPU info

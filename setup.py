@@ -104,15 +104,8 @@ setup(
             "safety>=2.0.0",
         ]
     },
-    entry_points={
-        "console_scripts": [
-            "hyprsupreme=hyprsupreme:main",
-            "hyprsupreme-community=tools.hyprsupreme_community:main",
-            "hyprsupreme-migrate=tools.hyprsupreme_migrate:main",
-            "hyprsupreme-cloud=tools.hyprsupreme_cloud:main",
-            "hyprsupreme-gui=gui.hyprsupreme_gui:main",
-        ],
-    },
+    # Note: Entry points removed due to hyphen-named files
+    # Use direct script execution instead
     scripts=[
         "install.sh",
         "hyprsupreme",

@@ -1,0 +1,147 @@
+#!/bin/bash
+
+# HyprSupreme Driver Manager - CLI Wrapper
+# Quick access to driver management tools
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DRIVER_MANAGER="$SCRIPT_DIR/modules/core/driver_manager.sh"
+DRIVER_GUI="$SCRIPT_DIR/gui/driver_manager_gui.sh"
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+MAGENTA='\033[0;35m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
+
+# Print banner
+print_banner() {
+    echo -e "${MAGENTA}"
+    echo "╔═══════════════════════════════════════════════════════════════╗"
+    echo "║                                                               ║"
+    echo "║               🔧 HyprSupreme Driver Manager 🔧               ║"
+    echo "║                                                               ║"
+    echo "║          Automatic Hardware Detection & Drivers              ║"
+    echo "║                                                               ║"
+    echo "╚═══════════════════════════════════════════════════════════════╝"
+    echo -e "${NC}"
+}
+
+# Show help
+show_help() {
+    print_banner
+    echo -e "${CYAN}Usage:${NC} $0 [COMMAND] [OPTIONS]"
+    echo ""
+    echo -e "${YELLOW}Commands:${NC}"
+    echo "  gui                    - Launch graphical interface"
+    echo "  install               - Install all drivers automatically"
+    echo "  install-gaming        - Install drivers with gaming support"
+    echo "  install-gpu           - Install GPU drivers only"
+    echo "  install-audio         - Install audio drivers only"
+    echo "  install-network       - Install network drivers only"
+    echo "  status               - Check current driver status"
+    echo "  report               - Generate detailed driver report"
+    echo "  backup               - Backup current driver configuration"
+    echo "  uninstall-nvidia     - Remove NVIDIA drivers"
+    echo "  help                 - Show this help message"
+    echo ""
+    echo -e "${YELLOW}Examples:${NC}"
+    echo "  $0 gui               # Launch GUI"
+    echo "  $0 status            # Check driver status"
+    echo "  $0 install           # Install all drivers"
+    echo "  $0 install-gaming    # Install with gaming optimization"
+    echo ""
+    echo -e "${BLUE}For more information, visit:${NC}"
+    echo "  https://github.com/GeneticxCln/HyprSupreme-Builder"
+}
+
+# Quick status check
+quick_status() {
+    echo -e "${CYAN}🔍 Quick Hardware Status:${NC}"
+    echo ""
+    
+    # GPU Check
+    if lsmod | grep -q nvidia; then
+        echo -e "GPU: ${GREEN}✓ NVIDIA driver loaded${NC}"
+    elif lsmod | grep -q amdgpu; then
+        echo -e "GPU: ${GREEN}✓ AMD driver loaded${NC}"
+    elif lsmod | grep -q i915; then
+        echo -e "GPU: ${GREEN}✓ Intel driver loaded${NC}"
+    else
+        echo -e "GPU: ${YELLOW}⚠ No GPU driver detected${NC}"
+    fi
+    
+    # Audio Check
+    if systemctl --user is-active --quiet pipewire; then
+        echo -e "Audio: ${GREEN}✓ PipeWire active${NC}"
+    elif systemctl --user is-active --quiet pulseaudio; then
+        echo -e "Audio: ${GREEN}✓ PulseAudio active${NC}"
+    else
+        echo -e "Audio: ${YELLOW}⚠ No audio system detected${NC}"
+    fi
+    
+    # Network Check
+    if systemctl is-active --quiet NetworkManager; then
+        echo -e "Network: ${GREEN}✓ NetworkManager active${NC}"
+    else
+        echo -e "Network: ${YELLOW}⚠ NetworkManager not active${NC}"
+    fi
+    
+    # Bluetooth Check
+    if systemctl is-active --quiet bluetooth; then
+        echo -e "Bluetooth: ${GREEN}✓ Service active${NC}"
+    else
+        echo -e "Bluetooth: ${YELLOW}⚠ Service not active${NC}"
+    fi
+    
+    # Camera Check
+    if v4l2-ctl --list-devices &>/dev/null; then
+        echo -e "Camera: ${GREEN}✓ Devices detected${NC}"
+    else
+        echo -e "Camera: ${YELLOW}⚠ No devices detected${NC}"
+    fi
+    
+    echo ""
+    echo -e "${BLUE}Run '$0 status' for detailed information${NC}"
+}
+
+# Main function
+main() {
+    case "${1:-help}" in
+        "gui")
+            if [ -x "$DRIVER_GUI" ]; then
+                exec "$DRIVER_GUI"
+            else
+                echo -e "${RED}Error: GUI not found or not executable${NC}"
+                exit 1
+            fi
+            ;;
+        "quick"|"q")
+            quick_status
+            ;;
+        "install"|"install-gaming"|"install-gpu"|"install-audio"|"install-network"|"status"|"report"|"backup"|"uninstall-nvidia")
+            if [ -x "$DRIVER_MANAGER" ]; then
+                exec "$DRIVER_MANAGER" "$@"
+            else
+                echo -e "${RED}Error: Driver manager not found or not executable${NC}"
+                exit 1
+            fi
+            ;;
+        "help"|"-h"|"--help"|*)
+            show_help
+            ;;
+    esac
+}
+
+# Check if driver manager exists
+if [ ! -f "$DRIVER_MANAGER" ]; then
+    echo -e "${RED}Error: Driver manager not found at $DRIVER_MANAGER${NC}"
+    echo "Please run this script from the HyprSupreme-Builder directory"
+    exit 1
+fi
+
+# Run main function
+main "$@"
+

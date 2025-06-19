@@ -34,7 +34,7 @@ def mock_home_dir(temp_dir):
 def sample_config():
     """Sample configuration for tests."""
     return {
-        "preset": "JaKooLit",
+        "preset": "jakoolit",
         "components": {
             "hyprland": True,
             "waybar": True,
