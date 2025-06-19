@@ -83,7 +83,7 @@ jobs:
         echo "Security scan completed. Check artifacts for detailed reports."
 
     - name: Upload security reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: security-reports
