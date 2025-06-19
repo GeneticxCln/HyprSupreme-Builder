@@ -8,11 +8,11 @@ configs=(
 )
 
 # Components to install
-components=(
-    "hyprland"
-    "waybar"
-    "rofi"
-    "kitty"
+components:
+  - hyprland
+  - waybar
+  - rofi
+  - warp
     "themes"
     "fonts"
     "scripts"

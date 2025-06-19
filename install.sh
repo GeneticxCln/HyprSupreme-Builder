@@ -170,7 +170,8 @@ select_components() {
         "hyprland" "Hyprland Window Manager" "ON"
         "waybar" "Status Bar" "ON"
         "rofi" "Application Launcher" "ON"
-        "kitty" "Terminal Emulator" "ON"
+        "warp" "Warp Terminal (Modern AI Terminal)" "ON"
+        "kitty" "Kitty Terminal (Fallback)" "OFF"
         "ags" "Aylur's GTK Shell (Widgets)" "OFF"
         "sddm" "Display Manager" "OFF"
         "themes" "GTK & Icon Themes" "ON"
@@ -252,27 +253,27 @@ load_preset() {
     case "$preset" in
         "showcase")
             SELECTED_CONFIGS='"jakoolit" "hyde" "end4" "prasanta"'
-            SELECTED_COMPONENTS='"hyprland" "waybar" "rofi" "kitty" "ags" "sddm" "themes" "fonts" "wallpapers" "scripts"'
+            SELECTED_COMPONENTS='"hyprland" "waybar" "rofi" "warp" "ags" "sddm" "themes" "fonts" "wallpapers" "scripts"'
             SELECTED_FEATURES='"animations" "blur" "shadows" "rounded" "transparency" "workspace_swipe" "auto_theme"'
             ;;
         "gaming")
             SELECTED_CONFIGS='"jakoolit" "ml4w"'
-            SELECTED_COMPONENTS='"hyprland" "waybar" "rofi" "kitty" "themes" "fonts" "scripts"'
+            SELECTED_COMPONENTS='"hyprland" "waybar" "rofi" "warp" "themes" "fonts" "scripts"'
             SELECTED_FEATURES='"performance" "workspace_swipe"'
             ;;
         "work")
             SELECTED_CONFIGS='"ml4w" "jakoolit"'
-            SELECTED_COMPONENTS='"hyprland" "waybar" "rofi" "kitty" "themes" "fonts" "scripts"'
+            SELECTED_COMPONENTS='"hyprland" "waybar" "rofi" "warp" "themes" "fonts" "scripts"'
             SELECTED_FEATURES='"rounded" "transparency" "workspace_swipe" "performance"'
             ;;
         "minimal")
             SELECTED_CONFIGS='"jakoolit"'
-            SELECTED_COMPONENTS='"hyprland" "waybar" "rofi" "kitty" "fonts"'
+            SELECTED_COMPONENTS='"hyprland" "waybar" "rofi" "warp" "fonts"'
             SELECTED_FEATURES='"performance"'
             ;;
         "hybrid")
             SELECTED_CONFIGS='"jakoolit" "ml4w" "hyde"'
-            SELECTED_COMPONENTS='"hyprland" "waybar" "rofi" "kitty" "ags" "themes" "fonts" "wallpapers" "scripts"'
+            SELECTED_COMPONENTS='"hyprland" "waybar" "rofi" "warp" "ags" "themes" "fonts" "wallpapers" "scripts"'
             SELECTED_FEATURES='"animations" "blur" "rounded" "transparency" "workspace_swipe"'
             ;;
     esac
@@ -341,6 +342,9 @@ install_components() {
                 ;;
             "rofi")
                 ./modules/core/install_rofi.sh
+                ;;
+            "warp")
+                ./modules/core/install_warp.sh
                 ;;
             "kitty")
                 ./modules/core/install_kitty.sh

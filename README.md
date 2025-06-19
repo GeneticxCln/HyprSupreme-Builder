@@ -166,7 +166,7 @@ HyprSupreme-Builder/
 ### 📦 **Dependencies**
 - Python 3.8+
 - Hyprland 0.35+
-- Waybar, Rofi, Kitty
+- Waybar, Rofi, Warp Terminal
 - Git, Curl, Wget
 
 ## 🤝 **Contributing**
