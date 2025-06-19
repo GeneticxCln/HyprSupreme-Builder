@@ -5,12 +5,39 @@
 # Exit on any error, undefined variable, or pipe failure
 set -euo pipefail
 
-# Cleanup function for script failure
+# Initialize Enhanced Error Handling System
+SCRIPT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ -f "$SCRIPT_ROOT/modules/common/enhanced_error_system.sh" ]]; then
+    echo "🔧 Loading enhanced error handling system..."
+    source "$SCRIPT_ROOT/modules/common/enhanced_error_system.sh"
+    
+    # Configure enhanced error handling for main installation
+    configure_enhanced_error_system \
+        --enable-monitoring \
+        --enable-prediction \
+        --enable-self-healing \
+        --enable-analytics \
+        --enable-recovery \
+        --interactive-recovery \
+        --monitoring-interval 25
+        
+    # Initialize the enhanced error system
+    init_enhanced_error_system "$SCRIPT_ROOT/logs" "hyprsupreme-main"
+    
+    echo "✅ Enhanced error handling system activated!"
+    ENHANCED_ERROR_ACTIVE=true
+else
+    echo "⚠️  Enhanced error handling system not found - using basic error handling"
+    echo "📝 For best experience, ensure all modules are properly installed"
+    ENHANCED_ERROR_ACTIVE=false
+fi
+
+# Enhanced cleanup function
 cleanup() {
     local exit_code=$?
     if [[ $exit_code -ne 0 ]]; then
-        echo "${ERROR} Script failed with exit code $exit_code" | tee -a "$LOG" 2>/dev/null || true
-        echo "${ERROR} Check the log file for details: $LOG" | tee -a "$LOG" 2>/dev/null || true
+        echo "${ERROR} Script failed with exit code $exit_code" | tee -a "${LOG:-/tmp/hyprsupreme-install.log}" 2>/dev/null || true
+        echo "${ERROR} Check the log file for details: ${LOG:-/tmp/hyprsupreme-install.log}" | tee -a "${LOG:-/tmp/hyprsupreme-install.log}" 2>/dev/null || true
         
         # Kill sudo keeper if running
         if [[ -n "${SUDO_KEEPER_PID:-}" ]]; then
@@ -24,7 +51,12 @@ cleanup() {
         
         # Restore interrupted backups if they exist
         if [[ -n "${CURRENT_BACKUP_DIR:-}" && -d "$CURRENT_BACKUP_DIR" ]]; then
-            echo "${INFO} Backup available at: $CURRENT_BACKUP_DIR" | tee -a "$LOG" 2>/dev/null || true
+            echo "${INFO} Backup available at: $CURRENT_BACKUP_DIR" | tee -a "${LOG:-/tmp/hyprsupreme-install.log}" 2>/dev/null || true
+        fi
+        
+        # Generate enhanced error report if system is active
+        if [[ "${ENHANCED_ERROR_ACTIVE:-false}" == true ]] && declare -f cleanup_enhanced_error_system &>/dev/null; then
+            cleanup_enhanced_error_system
         fi
     fi
 }
@@ -243,16 +275,28 @@ check_system_dependencies() {
                     ;;
                 *)
                     if confirm_package_installation "$dep"; then
+                        # Use enhanced error handling for package installation if available
+                        local install_cmd
                         if [[ "$UNATTENDED" == "true" ]]; then
-                            if ! sudo pacman -S --noconfirm "$dep" 2>/dev/null; then
-                                echo "${ERROR} Failed to install $dep" | tee -a "$LOG"
-                                exit 1
+                            install_cmd=(sudo pacman -S --noconfirm "$dep")
+                        else
+                            install_cmd=(sudo pacman -S "$dep")
+                        fi
+                        
+                        local install_success=false
+                        if [[ "${ENHANCED_ERROR_ACTIVE:-false}" == true ]] && declare -f execute_with_enhanced_error_handling &>/dev/null; then
+                            if execute_with_enhanced_error_handling "${install_cmd[@]}"; then
+                                install_success=true
                             fi
                         else
-                            if ! sudo pacman -S "$dep" 2>/dev/null; then
-                                echo "${ERROR} Failed to install $dep" | tee -a "$LOG"
-                                exit 1
+                            if "${install_cmd[@]}" 2>/dev/null; then
+                                install_success=true
                             fi
+                        fi
+                        
+                        if [[ "$install_success" != true ]]; then
+                            echo "${ERROR} Failed to install $dep" | tee -a "$LOG"
+                            exit 1
                         fi
                     else
                         echo "${ERROR} Installation of critical dependency $dep was cancelled" | tee -a "$LOG"

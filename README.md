@@ -152,6 +152,9 @@
 ```bash
 # 🚀 Quick Install (Recommended)
 curl -fsSL https://raw.githubusercontent.com/GeneticxCln/HyprSupreme-Builder/main/install.sh | bash
+
+# 🆕 Enhanced Installation (New!)
+./install_enhanced.sh --preset gaming --theme catppuccin
 ```
 
 ### 🔧 **Manual Installation**
@@ -218,6 +221,7 @@ open http://localhost:5000
 ## 📚 Documentation
 
 ### 📖 **Comprehensive Guides**
+- **[📋 Installation Guide](INSTALLATION_GUIDE.md)** - Complete setup instructions with prerequisites 🆕
 - **[Keybindings Reference](KEYBINDINGS_REFERENCE.md)** - Complete keyboard shortcuts guide
 - **[Community Commands](COMMUNITY_COMMANDS.md)** - CLI and web interface usage
 - **[Resolution Functions](RESOLUTION_FUNCTIONS.md)** - Multi-monitor setup guide
