@@ -2,7 +2,7 @@
 # HyprSupreme-Builder Main Launcher
 # Central command for accessing all HyprSupreme tools
 
-VERSION="2.0.0"
+VERSION="2.1.0"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Colors
@@ -66,6 +66,13 @@ show_help() {
     echo "  gpu [command]             Advanced GPU switching and optimization"
     echo "  presets [command]         GPU presets for specific workflows"
     echo "  scheduler [command]       Intelligent automatic GPU scheduling"
+    echo
+    echo "VISUAL EFFECTS:"
+    echo "  blur [preset]             Manage blur effects"
+    echo "  transparency [preset]     Manage transparency"
+    echo "  shadows [preset]          Manage window shadows"
+    echo "  colors [action]           Color scheme management"
+    echo "  visual [preset]           Apply combined visual presets"
     echo
     echo "APPLICATION MANAGEMENT:"
     echo "  flatpak [command]         Manage Flatpak applications"
@@ -315,6 +322,26 @@ main() {
                 echo "  flatpak - Manage Flatpak applications"
                 echo "Usage: hyprsupreme apps flatpak [command]"
             fi
+            ;;
+        "blur")
+            echo "${INFO} Managing blur effects..."
+            exec "${SCRIPT_DIR}/modules/visual-effects/visual_effects_manager.sh" blur "$@"
+            ;;
+        "transparency")
+            echo "${INFO} Managing transparency..."
+            exec "${SCRIPT_DIR}/modules/visual-effects/visual_effects_manager.sh" transparency "$@"
+            ;;
+        "shadows")
+            echo "${INFO} Managing shadows..."
+            exec "${SCRIPT_DIR}/modules/visual-effects/visual_effects_manager.sh" shadows "$@"
+            ;;
+        "colors")
+            echo "${INFO} Managing colors..."
+            exec "${SCRIPT_DIR}/modules/visual-effects/visual_effects_manager.sh" color "$@"
+            ;;
+        "visual")
+            echo "${INFO} Applying visual preset..."
+            exec "${SCRIPT_DIR}/modules/visual-effects/visual_effects_manager.sh" preset "$@"
             ;;
         "update")
             echo "${INFO} Updating HyprSupreme..."

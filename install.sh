@@ -51,7 +51,7 @@ SKY_BLUE="$(tput setaf 6)"
 RESET="$(tput sgr0)"
 
 # Script version
-VERSION="1.0.0"
+VERSION="2.1.0"
 PROJECT_NAME="HyprSupreme-Builder"
 
 # Create logs directory
@@ -407,9 +407,18 @@ select_components() {
         "hyprland" "Hyprland Window Manager" "ON"
         "waybar" "Status Bar" "ON"
         "rofi" "Application Launcher" "ON"
-        "kitty" "Terminal Emulator" "ON"
+        "warp" "Warp Terminal (Modern AI Terminal)" "ON"
+        "kitty" "Kitty Terminal (Fallback)" "OFF"
         "ags" "Aylur's GTK Shell (Widgets)" "OFF"
         "sddm" "Display Manager" "OFF"
+        "system-utils" "System Utilities (File/Package/Volume Mgr)" "ON"
+        "notifications" "Notification System (Mako/Dunst)" "ON"
+        "audio" "Audio System (PipeWire/Controls)" "ON"
+        "bluetooth" "Bluetooth System & Controls" "ON"
+        "network" "Network & WiFi Management" "ON"
+        "power" "Power Management & Battery" "ON"
+        "theme-switcher" "Theme Switcher & Manager" "ON"
+        "workspace-time" "Workspace & Time Management" "ON"
         "themes" "GTK & Icon Themes" "ON"
         "fonts" "Font Collection" "ON"
         "wallpapers" "Wallpaper Collection" "ON"
@@ -613,27 +622,27 @@ load_preset() {
     case "$preset" in
         "showcase")
             SELECTED_CONFIGS='"jakoolit" "hyde" "end4" "prasanta"'
-            SELECTED_COMPONENTS='"hyprland" "waybar" "rofi" "kitty" "ags" "sddm" "themes" "fonts" "wallpapers" "scripts"'
+            SELECTED_COMPONENTS='"hyprland" "waybar" "rofi" "warp" "ags" "sddm" "themes" "fonts" "wallpapers" "scripts"'
             SELECTED_FEATURES='"animations" "blur" "shadows" "rounded" "transparency" "workspace_swipe" "auto_theme"'
             ;;
         "gaming")
             SELECTED_CONFIGS='"jakoolit" "ml4w"'
-            SELECTED_COMPONENTS='"hyprland" "waybar" "rofi" "kitty" "themes" "fonts" "scripts"'
+            SELECTED_COMPONENTS='"hyprland" "waybar" "rofi" "warp" "themes" "fonts" "scripts"'
             SELECTED_FEATURES='"performance" "workspace_swipe"'
             ;;
         "work")
             SELECTED_CONFIGS='"ml4w" "jakoolit"'
-            SELECTED_COMPONENTS='"hyprland" "waybar" "rofi" "kitty" "themes" "fonts" "scripts"'
+            SELECTED_COMPONENTS='"hyprland" "waybar" "rofi" "warp" "themes" "fonts" "scripts"'
             SELECTED_FEATURES='"rounded" "transparency" "workspace_swipe" "performance"'
             ;;
         "minimal")
             SELECTED_CONFIGS='"jakoolit"'
-            SELECTED_COMPONENTS='"hyprland" "waybar" "rofi" "kitty" "fonts"'
+            SELECTED_COMPONENTS='"hyprland" "waybar" "rofi" "warp" "fonts"'
             SELECTED_FEATURES='"performance"'
             ;;
         "hybrid")
             SELECTED_CONFIGS='"jakoolit" "ml4w" "hyde"'
-            SELECTED_COMPONENTS='"hyprland" "waybar" "rofi" "kitty" "ags" "themes" "fonts" "wallpapers" "scripts"'
+            SELECTED_COMPONENTS='"hyprland" "waybar" "rofi" "warp" "ags" "themes" "fonts" "wallpapers" "scripts"'
             SELECTED_FEATURES='"animations" "blur" "rounded" "transparency" "workspace_swipe"'
             ;;
     esac
@@ -721,6 +730,9 @@ install_components() {
             "rofi")
                 ./modules/core/install_rofi.sh
                 ;;
+            "warp")
+                ./modules/core/install_warp.sh
+                ;;
             "kitty")
                 ./modules/core/install_kitty.sh
                 ;;
@@ -729,6 +741,30 @@ install_components() {
                 ;;
             "sddm")
                 ./modules/core/install_sddm.sh
+                ;;
+            "system-utils")
+                ./modules/core/install_system_utils.sh
+                ;;
+            "notifications")
+                ./modules/core/install_notifications.sh
+                ;;
+            "audio")
+                ./modules/core/install_audio.sh
+                ;;
+            "bluetooth")
+                ./modules/core/install_bluetooth.sh
+                ;;
+            "network")
+                ./modules/core/install_network.sh
+                ;;
+            "power")
+                ./modules/core/install_power.sh
+                ;;
+            "theme-switcher")
+                ./modules/core/install_theme_switcher.sh
+                ;;
+            "workspace-time")
+                ./modules/core/install_workspace_time.sh
                 ;;
             "themes")
                 ./modules/themes/install_themes.sh

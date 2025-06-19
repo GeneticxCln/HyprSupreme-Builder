@@ -4,7 +4,7 @@ The ultimate Hyprland configuration suite with advanced community features, auto
 
 ![HyprSupreme-Builder](https://img.shields.io/badge/HyprSupreme-Builder-blue?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
-![Version](https://img.shields.io/badge/Version-2.0.0-purple?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-2.1.0-purple?style=for-the-badge)
 
 ## ✨ Features
 
@@ -166,7 +166,7 @@ HyprSupreme-Builder/
 ### 📦 **Dependencies**
 - Python 3.8+
 - Hyprland 0.35+
-- Waybar, Rofi, Kitty
+- Waybar, Rofi, Warp Terminal
 - Git, Curl, Wget
 
 ## 🤝 **Contributing**

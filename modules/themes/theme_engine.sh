@@ -632,7 +632,6 @@ esac
 EOF
     
     chmod +x "$script_file"
-}
 
 # Auto theme switching based on time/wallpaper
 setup_auto_theming() {
