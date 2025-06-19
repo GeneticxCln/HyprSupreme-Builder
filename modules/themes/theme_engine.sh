@@ -632,6 +632,7 @@ esac
 EOF
     
     chmod +x "$script_file"
+}
 
 # Auto theme switching based on time/wallpaper
 setup_auto_theming() {
@@ -710,8 +711,6 @@ EOF
     systemctl --user start hyprsupreme-auto-theme.timer
     
     log_success "Auto theming configured"
-}
-
 }
 
 # Run if called directly
