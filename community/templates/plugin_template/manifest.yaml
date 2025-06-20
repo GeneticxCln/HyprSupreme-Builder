@@ -1,0 +1,81 @@
+# HyprSupreme Plugin Manifest Template
+# Replace the values with your plugin information
+
+# Basic plugin information
+name: "plugin-name"                 # Required: Unique identifier for your plugin (use kebab-case)
+display_name: "Plugin Name"         # Required: User-friendly name for your plugin
+version: "1.0.0"                    # Required: Plugin version using semantic versioning
+author: "Your Name"                 # Required: Plugin author name
+description: "A useful plugin"      # Required: Short description of your plugin
+homepage: ""                        # Optional: Plugin homepage or repository URL
+license: "MIT"                      # Optional: Plugin license
+
+# Dependencies
+dependencies:
+  hyprsupreme: ">=2.0.0"            # Minimum required HyprSupreme version
+  # Add any other dependencies your plugin requires
+  # example-dependency: ">=1.0.0"
+
+# Plugin hooks
+# Hooks are scripts that run at specific events
+hooks:
+  - name: "startup"                 # Hook that runs when Hyprland starts
+    script: "scripts/startup.sh"
+    description: "Initializes the plugin"
+    
+  - name: "shutdown"                # Hook that runs when Hyprland exits
+    script: "scripts/shutdown.sh"
+    description: "Cleans up plugin resources"
+    
+  # Add any other hooks your plugin uses
+  # - name: "workspace-change"
+  #   script: "scripts/workspace_changed.sh"
+  #   description: "Runs when workspace changes"
+
+# Plugin commands
+# Commands that can be executed by the user
+commands:
+  - name: "example-command"         # Command name (use kebab-case)
+    script: "scripts/example.sh"    # Script to execute
+    description: "An example command"
+    usage: "hyprsupreme plugin example-command [args]"
+    
+  - name: "toggle-feature"          # Another example command
+    script: "scripts/toggle.sh"
+    description: "Toggles a feature on/off"
+    usage: "hyprsupreme plugin toggle-feature [on|off]"
+    
+  # Add any other commands your plugin provides
+
+# Configuration
+config:
+  # Default configuration for your plugin
+  enabled: true
+  
+  # Plugin-specific settings
+  settings:
+    refresh_rate: 60
+    notify: true
+    
+  # Hyprland integration
+  hyprland:
+    keybinds:
+      - "bind = SUPER, P, exec, hyprsupreme plugin example-command"
+    exec:
+      - "exec-once = hyprsupreme plugin startup"
+
+# Plugin capabilities and features
+capabilities:
+  - "configuration"  # Plugin provides configuration options
+  - "theming"        # Plugin supports theming
+  - "keybinds"       # Plugin adds keybindings
+  - "notifications"  # Plugin can send notifications
+  # Add any other capabilities
+
+# Installation requirements
+requires:
+  commands:
+    - "bash"         # Required commands
+    - "jq"
+  packages:
+    - "optional-dependency"  # Optional packages that enhance functionality

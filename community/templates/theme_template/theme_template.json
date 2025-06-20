@@ -1,0 +1,71 @@
+{
+  "name": "your-theme-name",
+  "version": "1.0.0",
+  "author": "Your Name",
+  "description": "A beautiful theme",
+  "homepage": "",
+  "license": "MIT",
+  
+  "colors": {
+    "background": "#1a1b26",
+    "foreground": "#c0caf5",
+    "accent": "#7aa2f7",
+    "accent2": "#bb9af7",
+    "surface": "#24283b",
+    "border": "#444b6a",
+    "error": "#f7768e",
+    "success": "#9ece6a",
+    "warning": "#e0af68",
+    "inactive": "#565f89",
+    
+    "term_black": "#32344a",
+    "term_red": "#f7768e",
+    "term_green": "#9ece6a",
+    "term_yellow": "#e0af68",
+    "term_blue": "#7aa2f7",
+    "term_magenta": "#bb9af7",
+    "term_cyan": "#7dcfff",
+    "term_white": "#a9b1d6",
+    "term_bright_black": "#444b6a",
+    "term_bright_red": "#ff7a93",
+    "term_bright_green": "#b9f27c",
+    "term_bright_yellow": "#ff9e64",
+    "term_bright_blue": "#7da6ff",
+    "term_bright_magenta": "#bb9af7",
+    "term_bright_cyan": "#7dcfff",
+    "term_bright_white": "#c0caf5"
+  },
+  
+  "variables": {
+    "font": "JetBrains Mono Nerd Font",
+    "font_size": "10",
+    "font_size_mono": "10",
+    "icon_theme": "Papirus-Dark",
+    "cursor_theme": "Bibata-Modern-Ice",
+    "wallpaper": "themes/default.jpg",
+    "border_size": "2",
+    "border_radius": "8",
+    "gaps_in": "5",
+    "gaps_out": "10",
+    "shadow_size": "3",
+    "shadow_opacity": "0.5",
+    "blur_size": "8",
+    "blur_passes": "2",
+    "transparency": "0.9"
+  },
+  
+  "hyprland": {
+    "animations": true,
+    "blur": true,
+    "shadows": true,
+    "transparency": true
+  },
+  
+  "advanced": {
+    "plugin_compatibility": ["auto-theme", "dynamic-wallpaper"],
+    "wallpaper_style": "center",
+    "color_scheme": "dark",
+    "animation_style": "smooth",
+    "extension_support": true
+  }
+}
