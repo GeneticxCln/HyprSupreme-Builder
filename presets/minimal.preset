@@ -1,0 +1,58 @@
+# HyprSupreme-Builder Preset: Minimal
+# Lightweight configuration with minimal resource usage
+
+# Configuration sources to include
+configs=(
+    "jakoolit"
+)
+
+# Components to install
+components:
+  - hyprland
+  - waybar-minimal
+  - rofi
+    "themes"
+    "fonts"
+    "scripts"
+)
+
+# Features to enable
+features=(
+    "performance"
+)
+
+# Specific settings for minimal setup
+animation_style="disabled"
+blur_strength="disabled"
+shadow_size="none"
+corner_radius="0"
+transparency_level="1.0"
+
+# Performance optimizations
+disable_effects="true"
+minimal_ui="true"
+low_power_mode="true"
+startup_apps="minimal"
+
+# Memory and CPU optimizations
+swap_aggressive="false"
+use_hyprlang="true"
+disable_overlay_scrollbar="true"
+disable_animations="true"
+
+# Minimal workspace setup
+workspace_1="Main"
+workspace_2="Alt"
+workspace_3="Media"
+workspace_4="System"
+
+# Theme preferences for minimal setup
+default_theme="dracula-minimal"  # Dark theme with minimal styling
+auto_wallpaper="false"           # Static wallpaper for minimal resource usage
+wallpaper_effects="false"
+use_static_color="true"
+
+# Resource optimization
+fps_limit="60"
+optimization_level="maximum"
+memory_limit="low"
