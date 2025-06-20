@@ -2,27 +2,162 @@
 # HyprSupreme-Builder - System Utilities Installation Module
 # File Manager, Package Manager GUI, Volume Control Tools
 
-source "$(dirname "$0")/../common/functions.sh"
+# Set strict error handling
+set -o errexit  # Exit on error
+set -o pipefail # Exit if any command in a pipe fails
+set -o nounset  # Exit on undefined variables
+
+# Define error codes
+readonly E_SUCCESS=0
+readonly E_GENERAL=1
+readonly E_PERMISSION=2
+readonly E_DEPENDENCY=3
+readonly E_SERVICE=4
+readonly E_DIRECTORY=5
+readonly E_CONFIG=6
+readonly E_UTILITIES=7  # System utilities specific errors
+
+# Path to the script
+readonly SCRIPT_PATH="$(readlink -f "$0")"
+readonly SCRIPT_DIR="$(dirname "$SCRIPT_PATH")"
+readonly CONFIG_DIR="$HOME/.config"
+readonly BACKUP_DIR="$HOME/.config/system-utils-backup-$(date +%Y%m%d-%H%M%S)"
+
+# Source common functions
+if [[ ! -f "${SCRIPT_DIR}/../common/functions.sh" ]]; then
+    echo "ERROR: Required file not found: ${SCRIPT_DIR}/../common/functions.sh"
+    exit $E_DEPENDENCY
+fi
+
+source "${SCRIPT_DIR}/../common/functions.sh"
+
+# Error handling function
+handle_error() {
+    local exit_code=$1
+    local error_message="${2:-Unknown error}"
+    local error_source="${3:-$SCRIPT_PATH}"
+    
+    log_error "Error in $error_source: $error_message (code: $exit_code)"
+    
+    # Clean up any temporary resources if needed
+    
+    # Return the exit code
+    return $exit_code
+}
+
+# System utilities specific error handler
+handle_utilities_error() {
+    local error_type="$1"
+    local error_message="$2"
+    
+    case "$error_type" in
+        "file_manager")
+            log_error "File manager error: $error_message"
+            return $E_UTILITIES
+            ;;
+        "package_manager")
+            log_error "Package manager error: $error_message"
+            return $E_UTILITIES
+            ;;
+        "volume_control")
+            log_error "Volume control error: $error_message"
+            return $E_UTILITIES
+            ;;
+        "monitoring")
+            log_error "System monitoring error: $error_message"
+            return $E_UTILITIES
+            ;;
+        *)
+            log_error "Unknown system utilities error: $error_message"
+            return $E_GENERAL
+            ;;
+    esac
+}
+
+# Trap errors
+trap 'handle_error $? "Script interrupted" "$BASH_SOURCE:$LINENO"' ERR
+trap 'log_warn "Script received SIGINT - operation canceled"; exit $E_GENERAL' INT
+trap 'log_warn "Script received SIGTERM - operation canceled"; exit $E_GENERAL' TERM
+
+# Backup existing configuration
+backup_config() {
+    local configs_to_backup=(
+        "$HOME/.config/mimeapps.list"
+        "$HOME/.config/Thunar"
+        "$HOME/.config/pcmanfm"
+        "$HOME/.config/nautilus"
+        "$HOME/.local/share/applications"
+    )
+    
+    log_info "Backing up system utilities configuration..."
+    
+    # Create backup directory
+    if ! mkdir -p "$BACKUP_DIR" 2>/dev/null; then
+        log_error "Failed to create backup directory: $BACKUP_DIR"
+        return $E_DIRECTORY
+    fi
+    
+    # Backup each configuration if it exists
+    for config in "${configs_to_backup[@]}"; do
+        if [[ -e "$config" ]]; then
+            local backup_path="$BACKUP_DIR/$(basename "$config")"
+            if ! cp -r "$config" "$backup_path" 2>/dev/null; then
+                log_warn "Failed to backup: $config"
+            else
+                log_info "Backed up: $config"
+            fi
+        fi
+    done
+    
+    log_success "Configuration backup completed to $BACKUP_DIR"
+    return $E_SUCCESS
+}
 
 install_system_utilities() {
     log_info "Installing system utilities (file manager, package manager, volume control)..."
     
-    # File Manager options
-    install_file_managers
+    # Check if running as root
+    if [[ $EUID -eq 0 ]]; then
+        log_error "This script should not be run as root"
+        return $E_PERMISSION
+    fi
     
-    # Package Manager GUIs
-    install_package_managers
+    # Check for essential dependencies
+    if ! command -v pacman &> /dev/null; then
+        log_error "Package manager not found (pacman is required)"
+        return $E_DEPENDENCY
+    fi
     
-    # Volume Control tools
-    install_volume_control
+    # Backup existing configuration
+    backup_config
     
-    # System monitoring tools
-    install_monitoring_tools
+    # Install components with error handling
+    if ! install_file_managers; then
+        handle_utilities_error "file_manager" "Failed to install file managers"
+        return $E_UTILITIES
+    fi
     
-    # Configure default applications
-    configure_system_defaults
+    if ! install_package_managers; then
+        log_warn "Failed to install some package managers, continuing..."
+    fi
+    
+    if ! install_volume_control; then
+        handle_utilities_error "volume_control" "Failed to install volume control"
+        return $E_UTILITIES
+    fi
+    
+    if ! install_monitoring_tools; then
+        log_warn "Failed to install some monitoring tools, continuing..."
+    fi
+    
+    # Configure system defaults
+    if ! configure_system_defaults; then
+        handle_utilities_error "config" "Failed to configure system defaults"
+        return $E_CONFIG
+    fi
     
     log_success "System utilities installation completed"
+    return $E_SUCCESS
 }
 
 install_file_managers() {
@@ -43,22 +178,41 @@ install_file_managers() {
         "nemo"                     # Cinnamon file manager
     )
     
-    # Install primary file manager (Thunar)
-    install_packages "${file_managers[@]}"
+    # Install primary file manager (Thunar) with error handling
+    if ! install_packages "${file_managers[@]}"; then
+        log_error "Failed to install primary file manager"
+        return $E_DEPENDENCY
+    fi
     
-    # Ask user for additional file managers
-    if whiptail --yesno "Install additional file managers (Nautilus, PCManFM, Nemo)?" 10 60; then
-        install_packages "${optional_managers[@]}"
-        log_info "Additional file managers installed"
+    # Verify installation
+    if ! command -v thunar &> /dev/null; then
+        log_error "Thunar installation failed: thunar command not found"
+        return $E_DEPENDENCY
+    fi
+    
+    # Ask user for additional file managers if whiptail is available
+    if command -v whiptail &> /dev/null; then
+        if whiptail --yesno "Install additional file managers (Nautilus, PCManFM, Nemo)?" 10 60; then
+            if ! install_packages "${optional_managers[@]}"; then
+                log_warn "Failed to install some additional file managers"
+                # Continue anyway as these are optional
+            else
+                log_info "Additional file managers installed"
+            fi
+        fi
+    else
+        log_info "Whiptail not available, skipping additional file managers"
     fi
     
     log_success "File managers installed"
+    return $E_SUCCESS
 }
 
 install_package_managers() {
     log_info "Installing GUI package managers..."
     
     local package_managers=()
+    local install_success=false
     
     # Check distribution and install appropriate GUI package managers
     if command -v pacman &> /dev/null; then
@@ -68,45 +222,82 @@ install_package_managers() {
             "octopi"             # Alternative GUI package manager
         )
         
-        # Check if pamac is available
-        if yay -Ss pamac-gtk &> /dev/null || paru -Ss pamac-gtk &> /dev/null; then
-            package_managers+=("pamac-gtk")
+        # Verify AUR helper is available
+        local aur_helper=""
+        if command -v yay &> /dev/null; then
+            aur_helper="yay"
+        elif command -v paru &> /dev/null; then
+            aur_helper="paru"
         fi
         
-        # Octopi is usually available
-        package_managers+=("octopi")
-        
-        # Ask user which package managers to install
-        local selection=$(whiptail --title "Package Manager Selection" \
-            --checklist "Choose GUI package managers to install:" \
-            15 80 10 \
-            "pamac" "Pamac - Modern GUI for pacman/AUR" ON \
-            "octopi" "Octopi - Qt-based package manager" ON \
-            "bauh" "Bauh - Universal package manager" OFF \
-            3>&1 1>&2 2>&3)
-        
-        if [[ $selection == *"pamac"* ]]; then
-            if command -v yay &> /dev/null; then
-                yay -S --noconfirm pamac-gtk || log_warn "Failed to install pamac-gtk"
-            elif command -v paru &> /dev/null; then
-                paru -S --noconfirm pamac-gtk || log_warn "Failed to install pamac-gtk"
+        # Check if whiptail is available for user selection
+        if command -v whiptail &> /dev/null; then
+            # Ask user which package managers to install
+            local selection=$(whiptail --title "Package Manager Selection" \
+                --checklist "Choose GUI package managers to install:" \
+                15 80 10 \
+                "pamac" "Pamac - Modern GUI for pacman/AUR" ON \
+                "octopi" "Octopi - Qt-based package manager" ON \
+                "bauh" "Bauh - Universal package manager" OFF \
+                3>&1 1>&2 2>&3) || selection=""
+            
+            if [[ $selection == *"pamac"* ]]; then
+                if [[ -n "$aur_helper" ]]; then
+                    log_info "Installing pamac-gtk using $aur_helper..."
+                    if "$aur_helper" -S --noconfirm pamac-gtk; then
+                        log_success "Installed pamac-gtk"
+                        install_success=true
+                    else
+                        log_warn "Failed to install pamac-gtk"
+                    fi
+                else
+                    log_warn "Cannot install pamac-gtk: No AUR helper found"
+                fi
+            fi
+            
+            if [[ $selection == *"octopi"* ]]; then
+                if install_packages "octopi"; then
+                    log_success "Installed octopi"
+                    install_success=true
+                else
+                    log_warn "Failed to install octopi"
+                fi
+            fi
+            
+            if [[ $selection == *"bauh"* ]]; then
+                if [[ -n "$aur_helper" ]]; then
+                    log_info "Installing bauh using $aur_helper..."
+                    if "$aur_helper" -S --noconfirm bauh; then
+                        log_success "Installed bauh"
+                        install_success=true
+                    else
+                        log_warn "Failed to install bauh"
+                    fi
+                else
+                    log_warn "Cannot install bauh: No AUR helper found"
+                fi
+            fi
+        else
+            # No whiptail - default to installing octopi
+            log_info "Whiptail not available, installing octopi by default"
+            if install_packages "octopi"; then
+                log_success "Installed octopi"
+                install_success=true
+            else
+                log_warn "Failed to install octopi"
             fi
         fi
-        
-        if [[ $selection == *"octopi"* ]]; then
-            install_packages "octopi"
-        fi
-        
-        if [[ $selection == *"bauh"* ]]; then
-            if command -v yay &> /dev/null; then
-                yay -S --noconfirm bauh || log_warn "Failed to install bauh"
-            elif command -v paru &> /dev/null; then
-                paru -S --noconfirm bauh || log_warn "Failed to install bauh"
-            fi
-        fi
+    else
+        log_warn "Not running on an Arch-based system, skipping package manager installation"
     fi
     
-    log_success "GUI package managers installed"
+    if $install_success; then
+        log_success "GUI package managers installed"
+        return $E_SUCCESS
+    else
+        log_warn "No GUI package managers were successfully installed"
+        return $E_UTILITIES
+    fi
 }
 
 install_volume_control() {
@@ -126,16 +317,34 @@ install_volume_control() {
         "qpwgraph"                # PipeWire graph manager
     )
     
-    # Install primary tools
-    install_packages "${volume_tools[@]}"
+    # Install primary tools with error handling
+    if ! install_packages "${volume_tools[@]}"; then
+        log_error "Failed to install primary volume control tools"
+        return $E_DEPENDENCY
+    fi
     
-    # Ask for advanced tools
-    if whiptail --yesno "Install advanced audio tools (PulseMixer, EasyEffects, qpwgraph)?" 10 70; then
-        install_packages "${advanced_tools[@]}"
-        log_info "Advanced audio tools installed"
+    # Verify installation
+    if ! command -v pavucontrol &> /dev/null || ! command -v alsamixer &> /dev/null; then
+        log_error "Volume control tools installation failed: critical commands not found"
+        return $E_DEPENDENCY
+    fi
+    
+    # Ask for advanced tools if whiptail is available
+    if command -v whiptail &> /dev/null; then
+        if whiptail --yesno "Install advanced audio tools (PulseMixer, EasyEffects, qpwgraph)?" 10 70; then
+            if ! install_packages "${advanced_tools[@]}"; then
+                log_warn "Failed to install some advanced audio tools"
+                # Continue anyway as these are optional
+            else
+                log_info "Advanced audio tools installed"
+            fi
+        fi
+    else
+        log_info "Whiptail not available, skipping advanced audio tools"
     fi
     
     log_success "Volume control applications installed"
+    return $E_SUCCESS
 }
 
 install_monitoring_tools() {
@@ -157,62 +366,135 @@ install_monitoring_tools() {
         "xfce4-taskmanager"      # XFCE task manager
     )
     
-    # Install primary monitoring tools
-    install_packages "${monitoring_tools[@]}"
+    # Install primary monitoring tools with error handling
+    if ! install_packages "${monitoring_tools[@]}"; then
+        log_warn "Failed to install some monitoring tools"
+        # Try to install critical ones individually
+        local critical_tools=("htop" "neofetch" "inxi")
+        for tool in "${critical_tools[@]}"; do
+            if ! install_packages "$tool"; then
+                log_warn "Failed to install $tool"
+            fi
+        done
+    fi
     
-    # Ask for GUI monitoring tools
-    if whiptail --yesno "Install GUI system monitoring tools?" 10 50; then
-        local selection=$(whiptail --title "System Monitor Selection" \
-            --checklist "Choose GUI monitoring tools:" \
-            15 80 10 \
-            "gnome" "GNOME System Monitor" ON \
-            "xfce" "XFCE Task Manager (lightweight)" ON \
-            "kde" "KDE System Guard" OFF \
-            3>&1 1>&2 2>&3)
-        
-        if [[ $selection == *"gnome"* ]]; then
-            install_packages "gnome-system-monitor"
+    # Verify at least one monitoring tool is installed
+    local tool_found=false
+    for tool in "htop" "btop" "neofetch"; do
+        if command -v "$tool" &> /dev/null; then
+            tool_found=true
+            break
         fi
-        
-        if [[ $selection == *"xfce"* ]]; then
-            install_packages "xfce4-taskmanager"
+    done
+    
+    if ! $tool_found; then
+        log_error "Failed to install any monitoring tools"
+        return $E_DEPENDENCY
+    fi
+    
+    # Ask for GUI monitoring tools if whiptail is available
+    if command -v whiptail &> /dev/null; then
+        if whiptail --yesno "Install GUI system monitoring tools?" 10 50; then
+            local selection=$(whiptail --title "System Monitor Selection" \
+                --checklist "Choose GUI monitoring tools:" \
+                15 80 10 \
+                "gnome" "GNOME System Monitor" ON \
+                "xfce" "XFCE Task Manager (lightweight)" ON \
+                "kde" "KDE System Guard" OFF \
+                3>&1 1>&2 2>&3) || selection=""
+            
+            if [[ $selection == *"gnome"* ]]; then
+                if ! install_packages "gnome-system-monitor"; then
+                    log_warn "Failed to install GNOME System Monitor"
+                fi
+            fi
+            
+            if [[ $selection == *"xfce"* ]]; then
+                if ! install_packages "xfce4-taskmanager"; then
+                    log_warn "Failed to install XFCE Task Manager"
+                fi
+            fi
+            
+            if [[ $selection == *"kde"* ]]; then
+                if ! install_packages "ksysguard"; then
+                    log_warn "Failed to install KDE System Guard"
+                fi
+            fi
         fi
-        
-        if [[ $selection == *"kde"* ]]; then
-            install_packages "ksysguard"
-        fi
+    else
+        log_info "Whiptail not available, skipping GUI monitoring tools"
     fi
     
     log_success "System monitoring tools installed"
+    return $E_SUCCESS
 }
 
 configure_system_defaults() {
     log_info "Configuring system defaults..."
     
-    # Update MIME types for file manager
-    if command -v thunar &> /dev/null; then
+    # Update MIME types for file manager if xdg-mime is available
+    if command -v thunar &> /dev/null && command -v xdg-mime &> /dev/null; then
+        log_info "Setting Thunar as default file manager..."
         # Set Thunar as default file manager
-        xdg-mime default thunar.desktop inode/directory
-        xdg-mime default thunar.desktop application/x-gnome-saved-search
+        if ! xdg-mime default thunar.desktop inode/directory 2>/dev/null; then
+            log_warn "Failed to set Thunar as default file manager for directories"
+        fi
+        
+        if ! xdg-mime default thunar.desktop application/x-gnome-saved-search 2>/dev/null; then
+            log_warn "Failed to set Thunar as default search handler"
+        fi
         
         # Create desktop entry for file manager shortcut
-        create_file_manager_shortcuts
+        if ! create_file_manager_shortcuts; then
+            log_warn "Failed to create file manager shortcuts"
+        fi
+    else
+        log_warn "Thunar or xdg-mime not found, skipping default file manager configuration"
     fi
     
     # Create quick access scripts
-    create_system_scripts
+    if ! create_system_scripts; then
+        log_error "Failed to create system scripts"
+        return $E_CONFIG
+    fi
     
     log_success "System defaults configured"
+    return $E_SUCCESS
 }
 
 create_file_manager_shortcuts() {
     log_info "Creating file manager shortcuts..."
     
+    # Create scripts directory with error handling
     local scripts_dir="$HOME/.config/hypr/scripts"
-    mkdir -p "$scripts_dir"
+    if [[ ! -d "$scripts_dir" ]]; then
+        log_info "Creating scripts directory: $scripts_dir"
+        if ! mkdir -p "$scripts_dir" 2>/dev/null; then
+            log_error "Failed to create scripts directory: $scripts_dir"
+            return $E_DIRECTORY
+        fi
+    else
+        log_info "Scripts directory already exists: $scripts_dir"
+    fi
+    
+    # Check write permissions
+    if [[ ! -w "$scripts_dir" ]]; then
+        log_error "No write permission for scripts directory: $scripts_dir"
+        return $E_PERMISSION
+    fi
     
     # File manager launcher script
-    cat > "$scripts_dir/file-manager.sh" << 'EOF'
+    local launcher_script="$scripts_dir/file-manager.sh"
+    log_info "Creating file manager launcher script..."
+    
+    # Check if file exists and is writable
+    if [[ -f "$launcher_script" && ! -w "$launcher_script" ]]; then
+        log_error "Cannot write to existing file: $launcher_script"
+        return $E_PERMISSION
+    fi
+    
+    # Create the script with error handling
+    if ! cat > "$launcher_script" << 'EOF'
 #!/bin/bash
 # File Manager Launcher for HyprSupreme
 
@@ -229,11 +511,29 @@ else
     notify-send "File Manager" "No file manager found"
 fi
 EOF
+    then
+        log_error "Failed to write file manager launcher script"
+        return $E_CONFIG
+    fi
     
-    chmod +x "$scripts_dir/file-manager.sh"
+    # Make script executable
+    if ! chmod +x "$launcher_script" 2>/dev/null; then
+        log_error "Failed to make file manager launcher script executable"
+        return $E_PERMISSION
+    fi
     
     # Quick access script for common locations
-    cat > "$scripts_dir/quick-access.sh" << 'EOF'
+    local quick_access_script="$scripts_dir/quick-access.sh"
+    log_info "Creating quick access script..."
+    
+    # Check if file exists and is writable
+    if [[ -f "$quick_access_script" && ! -w "$quick_access_script" ]]; then
+        log_error "Cannot write to existing file: $quick_access_script"
+        return $E_PERMISSION
+    fi
+    
+    # Create the script with error handling
+    if ! cat > "$quick_access_script" << 'EOF'
 #!/bin/bash
 # Quick Access Menu for File Manager
 
@@ -283,17 +583,54 @@ case "$selected" in
         ;;
 esac
 EOF
+    then
+        log_error "Failed to write quick access script"
+        return $E_CONFIG
+    fi
     
-    chmod +x "$scripts_dir/quick-access.sh"
+    # Make script executable
+    if ! chmod +x "$quick_access_script" 2>/dev/null; then
+        log_error "Failed to make quick access script executable"
+        return $E_PERMISSION
+    fi
+    
+    log_success "File manager shortcuts created"
+    return $E_SUCCESS
 }
 
 create_system_scripts() {
     log_info "Creating system utility scripts..."
     
+    # Create scripts directory with error handling
     local scripts_dir="$HOME/.config/hypr/scripts"
+    if [[ ! -d "$scripts_dir" ]]; then
+        log_info "Creating scripts directory: $scripts_dir"
+        if ! mkdir -p "$scripts_dir" 2>/dev/null; then
+            log_error "Failed to create scripts directory: $scripts_dir"
+            return $E_DIRECTORY
+        fi
+    else
+        log_info "Scripts directory already exists: $scripts_dir"
+    fi
+    
+    # Check write permissions
+    if [[ ! -w "$scripts_dir" ]]; then
+        log_error "No write permission for scripts directory: $scripts_dir"
+        return $E_PERMISSION
+    fi
     
     # Package manager launcher
-    cat > "$scripts_dir/package-manager.sh" << 'EOF'
+    local package_script="$scripts_dir/package-manager.sh"
+    log_info "Creating package manager launcher script..."
+    
+    # Check if file exists and is writable
+    if [[ -f "$package_script" && ! -w "$package_script" ]]; then
+        log_error "Cannot write to existing file: $package_script"
+        return $E_PERMISSION
+    fi
+    
+    # Create the script with error handling
+    if ! cat > "$package_script" << 'EOF'
 #!/bin/bash
 # Package Manager Launcher for HyprSupreme
 
@@ -340,11 +677,29 @@ case "$selected" in
         ;;
 esac
 EOF
+    then
+        log_error "Failed to write package manager launcher script"
+        return $E_CONFIG
+    fi
     
-    chmod +x "$scripts_dir/package-manager.sh"
+    # Make script executable
+    if ! chmod +x "$package_script" 2>/dev/null; then
+        log_error "Failed to make package manager launcher script executable"
+        return $E_PERMISSION
+    fi
     
     # Volume control launcher
-    cat > "$scripts_dir/volume-control.sh" << 'EOF'
+    local volume_script="$scripts_dir/volume-control.sh"
+    log_info "Creating volume control launcher script..."
+    
+    # Check if file exists and is writable
+    if [[ -f "$volume_script" && ! -w "$volume_script" ]]; then
+        log_error "Cannot write to existing file: $volume_script"
+        return $E_PERMISSION
+    fi
+    
+    # Create the script with error handling
+    if ! cat > "$volume_script" << 'EOF'
 #!/bin/bash
 # Volume Control Launcher for HyprSupreme
 
@@ -378,11 +733,29 @@ case "$selected" in
         ;;
 esac
 EOF
+    then
+        log_error "Failed to write volume control launcher script"
+        return $E_CONFIG
+    fi
     
-    chmod +x "$scripts_dir/volume-control.sh"
+    # Make script executable
+    if ! chmod +x "$volume_script" 2>/dev/null; then
+        log_error "Failed to make volume control launcher script executable"
+        return $E_PERMISSION
+    fi
     
     # System monitor launcher
-    cat > "$scripts_dir/system-monitor.sh" << 'EOF'
+    local monitor_script="$scripts_dir/system-monitor.sh"
+    log_info "Creating system monitor launcher script..."
+    
+    # Check if file exists and is writable
+    if [[ -f "$monitor_script" && ! -w "$monitor_script" ]]; then
+        log_error "Cannot write to existing file: $monitor_script"
+        return $E_PERMISSION
+    fi
+    
+    # Create the script with error handling
+    if ! cat > "$monitor_script" << 'EOF'
 #!/bin/bash
 # System Monitor Launcher for HyprSupreme
 
@@ -430,20 +803,41 @@ case "$selected" in
         ;;
 esac
 EOF
+    then
+        log_error "Failed to write system monitor launcher script"
+        return $E_CONFIG
+    fi
     
-    chmod +x "$scripts_dir/system-monitor.sh"
+    # Make script executable
+    if ! chmod +x "$monitor_script" 2>/dev/null; then
+        log_error "Failed to make system monitor launcher script executable"
+        return $E_PERMISSION
+    fi
+    
+    log_success "System utility scripts created"
+    return $E_SUCCESS
 }
 
-# Test system utilities installation
+# Test system utilities installation with enhanced error reporting
 test_system_utilities() {
     log_info "Testing system utilities installation..."
+    local errors=0
+    local warnings=0
     
     # Test file manager
     if command -v thunar &> /dev/null; then
         log_success "✅ File manager (Thunar) is available"
+        
+        # Check Thunar configuration
+        if [[ -d "$HOME/.config/Thunar" ]]; then
+            log_success "✅ Thunar configuration exists"
+        else
+            log_warn "⚠️  Thunar configuration is missing"
+            ((warnings++))
+        fi
     else
-        log_error "❌ File manager not found"
-        return 1
+        log_error "❌ Primary file manager not found"
+        ((errors++))
     fi
     
     # Test volume control
@@ -451,6 +845,7 @@ test_system_utilities() {
         log_success "✅ Volume control (PulseAudio) is available"
     else
         log_warn "⚠️  GUI volume control not found"
+        ((warnings++))
     fi
     
     # Test package managers
@@ -467,37 +862,151 @@ test_system_utilities() {
     
     if ! $pkg_mgr_found; then
         log_warn "⚠️  No GUI package manager found"
+        ((warnings++))
     fi
     
-    return 0
+    # Test monitoring tools
+    local monitoring_tools=("htop" "btop" "neofetch" "inxi")
+    local monitoring_found=false
+    
+    for tool in "${monitoring_tools[@]}"; do
+        if command -v "$tool" &> /dev/null; then
+            log_success "✅ Monitoring tool $tool is available"
+            monitoring_found=true
+        fi
+    done
+    
+    if ! $monitoring_found; then
+        log_warn "⚠️  No system monitoring tools found"
+        ((warnings++))
+    fi
+    
+    # Check scripts
+    local scripts_dir="$HOME/.config/hypr/scripts"
+    local required_scripts=(
+        "file-manager.sh"
+        "quick-access.sh"
+        "package-manager.sh"
+        "volume-control.sh"
+        "system-monitor.sh"
+    )
+    
+    for script in "${required_scripts[@]}"; do
+        if [[ -x "$scripts_dir/$script" ]]; then
+            log_success "✅ Script $script is available and executable"
+        elif [[ -f "$scripts_dir/$script" ]]; then
+            log_warn "⚠️  Script $script exists but is not executable"
+            ((warnings++))
+        else
+            log_error "❌ Script $script is missing"
+            ((errors++))
+        fi
+    done
+    
+    # Report summary
+    if [[ $errors -gt 0 ]]; then
+        log_error "System utilities test completed with $errors errors and $warnings warnings"
+        return $E_UTILITIES
+    elif [[ $warnings -gt 0 ]]; then
+        log_warn "System utilities test completed with $warnings warnings"
+        return $E_SUCCESS
+    else
+        log_success "System utilities test completed successfully"
+        return $E_SUCCESS
+    fi
+}
+
+# Verify user is not root
+check_not_root() {
+    if [[ $EUID -eq 0 ]]; then
+        log_error "This script should not be run as root"
+        return $E_PERMISSION
+    fi
+    return $E_SUCCESS
+}
+
+# Check if the script is sourced
+is_sourced() {
+    [[ "${BASH_SOURCE[0]}" != "${0}" ]]
 }
 
 # Main execution
-case "${1:-install}" in
-    "install")
-        install_system_utilities
-        ;;
-    "file-managers")
-        install_file_managers
-        ;;
-    "package-managers")
-        install_package_managers
-        ;;
-    "volume-control")
-        install_volume_control
-        ;;
-    "monitoring")
-        install_monitoring_tools
-        ;;
-    "configure")
-        configure_system_defaults
-        ;;
-    "test")
-        test_system_utilities
-        ;;
-    *)
-        echo "Usage: $0 {install|file-managers|package-managers|volume-control|monitoring|configure|test}"
-        exit 1
-        ;;
-esac
+main() {
+    # Skip if sourced
+    if is_sourced; then
+        return $E_SUCCESS
+    fi
+    
+    local operation="${1:-install}"
+    local exit_code=$E_SUCCESS
+    
+    # Check if running as root
+    if ! check_not_root; then
+        exit $E_PERMISSION
+    fi
+    
+    # Execute requested operation
+    case "$operation" in
+        "install")
+            install_system_utilities
+            exit_code=$?
+            ;;
+        "file-managers")
+            install_file_managers
+            exit_code=$?
+            ;;
+        "package-managers")
+            install_package_managers
+            exit_code=$?
+            ;;
+        "volume-control")
+            install_volume_control
+            exit_code=$?
+            ;;
+        "monitoring")
+            install_monitoring_tools
+            exit_code=$?
+            ;;
+        "configure")
+            configure_system_defaults
+            exit_code=$?
+            ;;
+        "test")
+            test_system_utilities
+            exit_code=$?
+            ;;
+        "help")
+            echo "Usage: $0 {install|file-managers|package-managers|volume-control|monitoring|configure|test|help}"
+            echo ""
+            echo "Operations:"
+            echo "  install           - Install all system utilities (default)"
+            echo "  file-managers     - Install only file managers"
+            echo "  package-managers  - Install only package managers"
+            echo "  volume-control    - Install only volume control"
+            echo "  monitoring        - Install only monitoring tools"
+            echo "  configure         - Configure system defaults"
+            echo "  test              - Test system utilities installation"
+            echo "  help              - Show this help message"
+            exit_code=$E_SUCCESS
+            ;;
+        *)
+            log_error "Invalid operation: $operation"
+            echo "Usage: $0 {install|file-managers|package-managers|volume-control|monitoring|configure|test|help}"
+            exit_code=$E_GENERAL
+            ;;
+    esac
+    
+    # Return with appropriate exit code
+    if [[ $exit_code -eq $E_SUCCESS ]]; then
+        log_success "Operation '$operation' completed successfully"
+    else
+        log_error "Operation '$operation' failed with code $exit_code"
+    fi
+    
+    return $exit_code
+}
+
+# Run main function
+main "$@"
+exit $?
 

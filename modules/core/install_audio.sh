@@ -1,21 +1,86 @@
 #!/bin/bash
 # HyprSupreme-Builder - Audio System Installation Module
 
-source "$(dirname "$0")/../common/functions.sh"
+# Set strict error handling
+set -o errexit  # Exit on error
+set -o pipefail # Exit if any command in a pipe fails
+set -o nounset  # Exit on undefined variables
+
+# Define error codes
+readonly E_SUCCESS=0
+readonly E_GENERAL=1
+readonly E_PERMISSION=2
+readonly E_DEPENDENCY=3
+readonly E_SERVICE=4
+readonly E_DIRECTORY=5
+readonly E_CONFIG=6
+
+# Path to the script
+readonly SCRIPT_PATH="$(readlink -f "$0")"
+readonly SCRIPT_DIR="$(dirname "$SCRIPT_PATH")"
+
+# Source common functions
+if [[ ! -f "${SCRIPT_DIR}/../common/functions.sh" ]]; then
+    echo "ERROR: Required file not found: ${SCRIPT_DIR}/../common/functions.sh"
+    exit $E_DEPENDENCY
+fi
+
+source "${SCRIPT_DIR}/../common/functions.sh"
+
+# Error handling function
+handle_error() {
+    local exit_code=$1
+    local error_message="${2:-Unknown error}"
+    local error_source="${3:-$SCRIPT_PATH}"
+    
+    log_error "Error in $error_source: $error_message (code: $exit_code)"
+    
+    # Clean up any temporary resources if needed
+    
+    # Return the exit code
+    return $exit_code
+}
+
+# Trap errors
+trap 'handle_error $? "Script interrupted" "$BASH_SOURCE:$LINENO"' ERR
+trap 'log_warn "Script received SIGINT - operation canceled"; exit $E_GENERAL' INT
+trap 'log_warn "Script received SIGTERM - operation canceled"; exit $E_GENERAL' TERM
 
 install_audio() {
     log_info "Installing audio system..."
     
+    # Check if running as root
+    if [[ $EUID -eq 0 ]]; then
+        log_error "This script should not be run as root"
+        return $E_PERMISSION
+    fi
+    
+    # Check for essential dependencies
+    if ! command -v pacman &> /dev/null; then
+        log_error "Package manager not found (pacman is required)"
+        return $E_DEPENDENCY
+    fi
+    
     # Install PipeWire audio stack
-    install_pipewire
+    if ! install_pipewire; then
+        log_error "Failed to install PipeWire audio stack"
+        return $E_GENERAL
+    fi
     
     # Install audio tools and utilities
-    install_audio_tools
+    if ! install_audio_tools; then
+        log_error "Failed to install audio tools"
+        return $E_GENERAL
+    fi
     
     # Configure audio integration
-    configure_audio_integration
+    if ! configure_audio_integration; then
+        log_error "Failed to configure audio integration"
+        return $E_GENERAL
+    fi
     
     log_success "Audio system installation completed"
+    return $E_SUCCESS
 }
 
 install_pipewire() {
@@ -47,14 +112,51 @@ install_pipewire() {
         "bluez-plugins"
     )
     
-    install_packages "${packages[@]}"
+    # Install packages with error handling
+    if ! install_packages "${packages[@]}"; then
+        log_error "Failed to install PipeWire packages"
+        return $E_DEPENDENCY
+    fi
     
-    # Enable and start PipeWire services
-    systemctl --user enable pipewire.socket
-    systemctl --user enable pipewire-pulse.socket
-    systemctl --user enable wireplumber.service
+    # Verify installation
+    if ! command -v pipewire &> /dev/null; then
+        log_error "PipeWire installation failed: pipewire command not found"
+        return $E_DEPENDENCY
+    fi
+    
+    log_info "Enabling PipeWire services..."
+    
+    # Check if systemd user instance is available
+    if ! systemctl --user status &> /dev/null; then
+        log_error "Systemd user instance not available"
+        return $E_SERVICE
+    fi
+    
+    # Enable and start PipeWire services with error handling
+    if ! systemctl --user enable pipewire.socket &> /dev/null; then
+        log_warn "Failed to enable pipewire.socket, trying to continue..."
+    fi
+    
+    if ! systemctl --user enable pipewire-pulse.socket &> /dev/null; then
+        log_warn "Failed to enable pipewire-pulse.socket, trying to continue..."
+    fi
+    
+    if ! systemctl --user enable wireplumber.service &> /dev/null; then
+        log_warn "Failed to enable wireplumber.service, trying to continue..."
+    fi
+    
+    # Verify services are enabled
+    local error_count=0
+    systemctl --user is-enabled pipewire.socket &> /dev/null || ((error_count++))
+    systemctl --user is-enabled pipewire-pulse.socket &> /dev/null || ((error_count++))
+    systemctl --user is-enabled wireplumber.service &> /dev/null || ((error_count++))
+    
+    if [[ $error_count -gt 0 ]]; then
+        log_warn "Some PipeWire services could not be enabled ($error_count errors)"
+    fi
     
     log_success "PipeWire installation completed"
+    return $E_SUCCESS
 }
 
 install_audio_tools() {
@@ -98,44 +200,101 @@ install_audio_tools() {
         "pamixer"
     )
     
-    # Install basic tools
-    install_packages "${basic_tools[@]}"
+    # Install basic tools with error handling
+    log_info "Installing basic audio tools..."
+    if ! install_packages "${basic_tools[@]}"; then
+        log_error "Failed to install basic audio tools"
+        return $E_DEPENDENCY
+    fi
     
-    # Ask for advanced tools
-    if whiptail --yesno "Install advanced audio tools (EasyEffects, qpwgraph, audio production tools)?" 10 70; then
-        install_packages "${advanced_tools[@]}"
-        log_info "Advanced audio tools installed"
+    # Verify critical tools are installed
+    if ! command -v pamixer &> /dev/null || ! command -v pavucontrol &> /dev/null; then
+        log_error "Critical audio tools (pamixer, pavucontrol) installation failed"
+        return $E_DEPENDENCY
+    fi
+    
+    # Ask for advanced tools if whiptail is available
+    if command -v whiptail &> /dev/null; then
+        if whiptail --yesno "Install advanced audio tools (EasyEffects, qpwgraph, audio production tools)?" 10 70; then
+            log_info "Installing advanced audio tools..."
+            if ! install_packages "${advanced_tools[@]}"; then
+                log_warn "Some advanced audio tools could not be installed"
+                # Continue anyway as these are optional
+            else
+                log_info "Advanced audio tools installed"
+            fi
+        fi
+    else
+        log_warn "whiptail not found, skipping advanced tools selection"
     fi
     
     log_success "Audio tools installation completed"
+    return $E_SUCCESS
 }
 
 configure_audio_integration() {
     log_info "Configuring audio integration..."
     
-    # Create audio scripts directory
+    # Create audio scripts directory with error handling
     local scripts_dir="$HOME/.config/hypr/scripts"
-    mkdir -p "$scripts_dir"
+    if [[ ! -d "$scripts_dir" ]]; then
+        log_info "Creating scripts directory: $scripts_dir"
+        if ! mkdir -p "$scripts_dir" 2>/dev/null; then
+            log_error "Failed to create scripts directory: $scripts_dir"
+            return $E_DIRECTORY
+        fi
+    else
+        log_info "Scripts directory already exists: $scripts_dir"
+    fi
+    
+    # Check write permissions
+    if [[ ! -w "$scripts_dir" ]]; then
+        log_error "No write permission for scripts directory: $scripts_dir"
+        return $E_PERMISSION
+    fi
     
     # Create audio control script
-    create_audio_control_script
+    if ! create_audio_control_script; then
+        log_error "Failed to create audio control script"
+        return $E_CONFIG
+    fi
     
     # Create audio device manager script
-    create_audio_device_script
+    if ! create_audio_device_script; then
+        log_error "Failed to create audio device manager script"
+        return $E_CONFIG
+    fi
     
     # Create media control script
-    create_media_control_script
+    if ! create_media_control_script; then
+        log_error "Failed to create media control script"
+        return $E_CONFIG
+    fi
     
     # Configure PipeWire
-    configure_pipewire
+    if ! configure_pipewire; then
+        log_error "Failed to configure PipeWire"
+        return $E_CONFIG
+    fi
     
     log_success "Audio integration configured"
+    return $E_SUCCESS
 }
 
 create_audio_control_script() {
     local scripts_dir="$HOME/.config/hypr/scripts"
+    local script_file="$scripts_dir/audio-control.sh"
     
-    cat > "$scripts_dir/audio-control.sh" << 'EOF'
+    log_info "Creating audio control script..."
+    
+    # Check if file exists and is writable
+    if [[ -f "$script_file" && ! -w "$script_file" ]]; then
+        log_error "Cannot write to existing file: $script_file"
+        return $E_PERMISSION
+    fi
+    
+    # Create the script with error handling
+    if ! cat > "$script_file" << 'EOF'
 #!/bin/bash
 # Audio Control Script for HyprSupreme
 
@@ -227,14 +386,35 @@ case "$1" in
         ;;
 esac
 EOF
+    then
+        log_error "Failed to write audio control script"
+        return $E_CONFIG
+    fi
     
-    chmod +x "$scripts_dir/audio-control.sh"
+    # Make script executable
+    if ! chmod +x "$script_file" 2>/dev/null; then
+        log_error "Failed to make audio control script executable"
+        return $E_PERMISSION
+    fi
+    
+    log_info "Audio control script created successfully"
+    return $E_SUCCESS
 }
 
 create_audio_device_script() {
     local scripts_dir="$HOME/.config/hypr/scripts"
+    local script_file="$scripts_dir/audio-devices.sh"
     
-    cat > "$scripts_dir/audio-devices.sh" << 'EOF'
+    log_info "Creating audio device manager script..."
+    
+    # Check if file exists and is writable
+    if [[ -f "$script_file" && ! -w "$script_file" ]]; then
+        log_error "Cannot write to existing file: $script_file"
+        return $E_PERMISSION
+    fi
+    
+    # Create the script with error handling
+    if ! cat > "$script_file" << 'EOF'
 #!/bin/bash
 # Audio Device Manager for HyprSupreme
 
@@ -277,7 +457,7 @@ test_audio() {
     speaker-test -t sine -f 1000 -l 1 &
     local test_pid=$!
     sleep 2
-    kill $test_pid 2>/dev/null
+    kill $test_pid 2> /dev/null
     notify-send "Audio Test" "Test completed"
 }
 
@@ -294,23 +474,44 @@ case "$1" in
         ;;
 esac
 EOF
+    then
+        log_error "Failed to write audio device manager script"
+        return $E_CONFIG
+    fi
     
-    chmod +x "$scripts_dir/audio-devices.sh"
+    # Make script executable
+    if ! chmod +x "$script_file" 2>/dev/null; then
+        log_error "Failed to make audio device manager script executable"
+        return $E_PERMISSION
+    fi
+    
+    log_info "Audio device manager script created successfully"
+    return $E_SUCCESS
 }
 
 create_media_control_script() {
     local scripts_dir="$HOME/.config/hypr/scripts"
+    local script_file="$scripts_dir/media-control.sh"
     
-    cat > "$scripts_dir/media-control.sh" << 'EOF'
+    log_info "Creating media control script..."
+    
+    # Check if file exists and is writable
+    if [[ -f "$script_file" && ! -w "$script_file" ]]; then
+        log_error "Cannot write to existing file: $script_file"
+        return $E_PERMISSION
+    fi
+    
+    # Create the script with error handling
+    if ! cat > "$script_file" << 'EOF'
 #!/bin/bash
 # Media Control Script for HyprSupreme
 
 # Get current media info
 get_media_info() {
-    local player_status=$(playerctl status 2>/dev/null)
-    local player_name=$(playerctl metadata --format "{{ playerName }}" 2>/dev/null)
-    local title=$(playerctl metadata --format "{{ title }}" 2>/dev/null)
-    local artist=$(playerctl metadata --format "{{ artist }}" 2>/dev/null)
+    local player_status=$(playerctl status 2> /dev/null)
+    local player_name=$(playerctl metadata --format "{{ playerName }}" 2> /dev/null)
+    local title=$(playerctl metadata --format "{{ title }}" 2> /dev/null)
+    local artist=$(playerctl metadata --format "{{ artist }}" 2> /dev/null)
     
     if [ -n "$title" ]; then
         echo "${player_name}: ${artist} - ${title} [${player_status}]"
@@ -370,19 +571,55 @@ case "$1" in
         ;;
 esac
 EOF
+    then
+        log_error "Failed to write media control script"
+        return $E_CONFIG
+    fi
     
-    chmod +x "$scripts_dir/media-control.sh"
+    # Make script executable
+    if ! chmod +x "$script_file" 2>/dev/null; then
+        log_error "Failed to make media control script executable"
+        return $E_PERMISSION
+    fi
+    
+    log_info "Media control script created successfully"
+    return $E_SUCCESS
 }
 
 configure_pipewire() {
     log_info "Configuring PipeWire..."
     
-    # Create PipeWire config directory
-    mkdir -p "$HOME/.config/pipewire"
-    mkdir -p "$HOME/.config/wireplumber"
+    # Create PipeWire config directories with error handling
+    local pipewire_dir="$HOME/.config/pipewire"
+    local wireplumber_dir="$HOME/.config/wireplumber"
+    local config_file="$pipewire_dir/pipewire.conf"
     
-    # Create basic PipeWire configuration
-    cat > "$HOME/.config/pipewire/pipewire.conf" << 'EOF'
+    # Create PipeWire config directory
+    if [[ ! -d "$pipewire_dir" ]]; then
+        if ! mkdir -p "$pipewire_dir" 2>/dev/null; then
+            log_error "Failed to create PipeWire config directory: $pipewire_dir"
+            return $E_DIRECTORY
+        fi
+    fi
+    
+    # Create WirePlumber config directory
+    if [[ ! -d "$wireplumber_dir" ]]; then
+        if ! mkdir -p "$wireplumber_dir" 2>/dev/null; then
+            log_error "Failed to create WirePlumber config directory: $wireplumber_dir"
+            return $E_DIRECTORY
+        fi
+    fi
+    
+    # Check write permissions
+    if [[ ! -w "$pipewire_dir" ]]; then
+        log_error "No write permission for PipeWire config directory: $pipewire_dir"
+        return $E_PERMISSION
+    fi
+    
+    # Create basic PipeWire configuration with error handling
+    log_info "Creating PipeWire configuration..."
+    
+    if ! cat > "$config_file" << 'EOF'
 # PipeWire Configuration for HyprSupreme
 context.properties = {
     default.clock.rate = 48000
@@ -426,10 +663,33 @@ context.modules = [
     { name = libpipewire-module-session-manager }
 ]
 EOF
+    then
+        log_error "Failed to write PipeWire configuration"
+        return $E_CONFIG
+    fi
     
     # Create audio restart script
     local scripts_dir="$HOME/.config/hypr/scripts"
-    cat > "$scripts_dir/audio-restart.sh" << 'EOF'
+    local restart_script="$scripts_dir/audio-restart.sh"
+    
+    log_info "Creating audio restart script..."
+    
+    # Check if scripts directory exists
+    if [[ ! -d "$scripts_dir" ]]; then
+        if ! mkdir -p "$scripts_dir" 2>/dev/null; then
+            log_error "Failed to create scripts directory: $scripts_dir"
+            return $E_DIRECTORY
+        fi
+    fi
+    
+    # Check write permissions
+    if [[ ! -w "$scripts_dir" ]]; then
+        log_error "No write permission for scripts directory: $scripts_dir"
+        return $E_PERMISSION
+    fi
+    
+    # Create restart script with error handling
+    if ! cat > "$restart_script" << 'EOF'
 #!/bin/bash
 # Audio System Restart Script for HyprSupreme
 
@@ -463,22 +723,33 @@ case "$1" in
         ;;
 esac
 EOF
+    then
+        log_error "Failed to write audio restart script"
+        return $E_CONFIG
+    fi
     
-    chmod +x "$scripts_dir/audio-restart.sh"
+    # Make script executable
+    if ! chmod +x "$restart_script" 2>/dev/null; then
+        log_error "Failed to make audio restart script executable"
+        return $E_PERMISSION
+    fi
     
     log_success "PipeWire configuration completed"
+    return $E_SUCCESS
 }
 
 # Test audio installation
 test_audio() {
     log_info "Testing audio system..."
+    local errors=0
+    local warnings=0
     
-    # Check PipeWire
+    # Check PipeWire installation
     if command -v pipewire &> /dev/null; then
         log_success "✅ PipeWire is installed"
     else
         log_error "❌ PipeWire not found"
-        return 1
+        ((errors++))
     fi
     
     # Check audio controls
@@ -486,7 +757,7 @@ test_audio() {
         log_success "✅ Audio control tools available"
     else
         log_error "❌ Audio control tools not found"
-        return 1
+        ((errors++))
     fi
     
     # Check volume control GUI
@@ -494,38 +765,151 @@ test_audio() {
         log_success "✅ Volume control GUI available"
     else
         log_warn "⚠️  Volume control GUI not found"
+        ((warnings++))
     fi
     
     # Test audio functionality
     if pgrep -x "pipewire" > /dev/null; then
         log_success "✅ PipeWire is running"
+        
+        # Check if PipeWire services are active
+        if systemctl --user is-active pipewire.service &>/dev/null; then
+            log_success "✅ PipeWire service is active"
+        else
+            log_warn "⚠️  PipeWire service is not active"
+            ((warnings++))
+        fi
+        
+        # Check for audio devices
+        if pactl list sinks &>/dev/null && [[ $(pactl list sinks | grep -c "Sink") -gt 0 ]]; then
+            log_success "✅ Audio output devices detected"
+        else
+            log_warn "⚠️  No audio output devices detected"
+            ((warnings++))
+        fi
     else
         log_warn "⚠️  PipeWire not running (normal if not in graphical environment)"
+        ((warnings++))
     fi
     
-    return 0
+    # Check script files
+    local scripts_dir="$HOME/.config/hypr/scripts"
+    local required_scripts=("audio-control.sh" "audio-devices.sh" "media-control.sh" "audio-restart.sh")
+    
+    for script in "${required_scripts[@]}"; do
+        if [[ -x "$scripts_dir/$script" ]]; then
+            log_success "✅ Script $script is available and executable"
+        elif [[ -f "$scripts_dir/$script" ]]; then
+            log_warn "⚠️  Script $script exists but is not executable"
+            ((warnings++))
+        else
+            log_error "❌ Script $script is missing"
+            ((errors++))
+        fi
+    done
+    
+    # Check PipeWire configuration
+    if [[ -f "$HOME/.config/pipewire/pipewire.conf" ]]; then
+        log_success "✅ PipeWire configuration exists"
+    else
+        log_warn "⚠️  PipeWire configuration is missing"
+        ((warnings++))
+    fi
+    
+    # Report summary
+    if [[ $errors -gt 0 ]]; then
+        log_error "Audio system test completed with $errors errors and $warnings warnings"
+        return $E_GENERAL
+    elif [[ $warnings -gt 0 ]]; then
+        log_warn "Audio system test completed with $warnings warnings"
+        return $E_SUCCESS
+    else
+        log_success "Audio system test completed successfully"
+        return $E_SUCCESS
+    fi
+}
+
+# Verify user is not root
+check_not_root() {
+    if [[ $EUID -eq 0 ]]; then
+        log_error "This script should not be run as root"
+        return $E_PERMISSION
+    fi
+    return $E_SUCCESS
+}
+
+# Check if the script is sourced
+is_sourced() {
+    [[ "${BASH_SOURCE[0]}" != "${0}" ]]
 }
 
 # Main execution
-case "${1:-install}" in
-    "install")
-        install_audio
-        ;;
-    "pipewire")
-        install_pipewire
-        ;;
-    "tools")
-        install_audio_tools
-        ;;
-    "configure")
-        configure_audio_integration
-        ;;
-    "test")
-        test_audio
-        ;;
-    *)
-        echo "Usage: $0 {install|pipewire|tools|configure|test}"
-        exit 1
-        ;;
-esac
+main() {
+    # Skip if sourced
+    if is_sourced; then
+        return $E_SUCCESS
+    fi
+    
+    local operation="${1:-install}"
+    local exit_code=$E_SUCCESS
+    
+    # Check if running as root
+    if ! check_not_root; then
+        exit $E_PERMISSION
+    fi
+    
+    # Execute requested operation
+    case "$operation" in
+        "install")
+            install_audio
+            exit_code=$?
+            ;;
+        "pipewire")
+            install_pipewire
+            exit_code=$?
+            ;;
+        "tools")
+            install_audio_tools
+            exit_code=$?
+            ;;
+        "configure")
+            configure_audio_integration
+            exit_code=$?
+            ;;
+        "test")
+            test_audio
+            exit_code=$?
+            ;;
+        "help")
+            echo "Usage: $0 {install|pipewire|tools|configure|test|help}"
+            echo ""
+            echo "Operations:"
+            echo "  install    - Install the complete audio system (default)"
+            echo "  pipewire   - Install only PipeWire audio stack"
+            echo "  tools      - Install audio tools and utilities"
+            echo "  configure  - Configure audio integration"
+            echo "  test       - Test audio installation"
+            echo "  help       - Show this help message"
+            exit_code=$E_SUCCESS
+            ;;
+        *)
+            log_error "Invalid operation: $operation"
+            echo "Usage: $0 {install|pipewire|tools|configure|test|help}"
+            exit_code=$E_GENERAL
+            ;;
+    esac
+    
+    # Return with appropriate exit code
+    if [[ $exit_code -eq $E_SUCCESS ]]; then
+        log_success "Operation '$operation' completed successfully"
+    else
+        log_error "Operation '$operation' failed with code $exit_code"
+    fi
+    
+    return $exit_code
+}
+
+# Run main function if script is executed directly
+main "$@"
+exit $?
 
