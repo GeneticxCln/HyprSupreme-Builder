@@ -7,7 +7,7 @@ mod themes;
 mod plugins;
 
 use config::Config;
-use themes::{Theme, ThemeManager, ThemeFormat};
+use themes::{ThemeManager, ThemeFormat};
 use plugins::{PluginManager, PluginState};
 
 /// HyprSupreme-Builder: A tool for managing Hyprland configurations
@@ -59,6 +59,18 @@ enum Commands {
         /// Specific component to update
         #[clap(short = 'm', long)]
         component: Option<String>,
+    },
+
+    /// Theme management commands
+    Theme {
+        #[clap(subcommand)]
+        command: ThemeCommands,
+    },
+    
+    /// Plugin management commands
+    Plugin {
+        #[clap(subcommand)]
+        command: PluginCommands,
     },
 }
 
@@ -140,7 +152,7 @@ fn setup() -> Result<()> {
     tracing_subscriber::fmt::init();
     
     // Initialize theme and plugin managers
-    let theme_manager = ThemeManager::default();
+    let _theme_manager = ThemeManager::default();
     let mut plugin_manager = PluginManager::default();
     plugin_manager.initialize()?;
     
@@ -195,7 +207,7 @@ async fn build_command(config: Option<PathBuf>, output: Option<PathBuf>) -> Resu
     println!("Resolving variables and generating configuration files...");
     
     // Example of variable resolution
-    if let Some(example_var) = profile.variables.get("terminal") {
+    if let Some(_) = profile.variables.get("terminal") {
         let resolved = config.resolve_variables(&format!("Terminal: ${{terminal}}"), None);
         println!("Example variable resolution: {}", resolved);
     }
@@ -210,7 +222,7 @@ async fn build_command(config: Option<PathBuf>, output: Option<PathBuf>) -> Resu
 async fn update_command(config: Option<PathBuf>, component: Option<String>) -> Result<()> {
     let config_path = config.unwrap_or_else(|| PathBuf::from("hyprsupreme.toml"));
     
-    match component {
+    match &component {
         Some(comp) => println!("Updating component '{}' in {:?}", comp, config_path),
         None => println!("Updating all components in {:?}", config_path),
     }
@@ -220,7 +232,7 @@ async fn update_command(config: Option<PathBuf>, component: Option<String>) -> R
         .wrap_err_with(|| format!("Failed to load configuration from: {:?}", config_path))?;
     
     // Check if we're updating a specific component
-    if let Some(comp_name) = component {
+    if let Some(ref comp_name) = component {
         println!("Focusing on component: {}", comp_name);
         
         // Example of updating theme variables if the component is "theme"
@@ -282,7 +294,7 @@ async fn main() -> Result<()> {
                     }
                 },
                 ThemeCommands::Show { name } => {
-                    let mut theme_manager = ThemeManager::default();
+                    let theme_manager = ThemeManager::default();
                     match theme_manager.loader().load_theme(&name) {
                         Ok(theme) => {
                             println!("Theme: {}", theme.name);
@@ -366,7 +378,7 @@ async fn main() -> Result<()> {
                             PluginState::Enabled => "enabled",
                             PluginState::Installed => "installed",
                             PluginState::NotInstalled => "not installed",
-                            PluginState::Error(ref err) => "error",
+                            PluginState::Error(_) => "error",
                         };
                         
                         println!("  - {} (v{}) [{}]", plugin.manifest.name, plugin.manifest.version, status);
