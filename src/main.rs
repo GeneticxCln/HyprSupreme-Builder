@@ -60,7 +60,6 @@ enum Commands {
         #[clap(short = 'm', long)]
         component: Option<String>,
     },
-
     /// Theme management commands
     Theme {
         #[clap(subcommand)]
