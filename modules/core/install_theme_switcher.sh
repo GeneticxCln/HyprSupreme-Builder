@@ -331,7 +331,7 @@ apply_waybar_theme() {
     # Apply waybar theme if available
     if [ -f "$waybar_config/themes/${theme_name}.css" ]; then
         cp "$waybar_config/themes/${theme_name}.css" "$waybar_config/style.css"
-        killall waybar 2>/dev/null
+        killall waybar 2> /dev/null
         waybar &
     fi
 }
@@ -495,7 +495,7 @@ set_wallpaper() {
     if command -v hyprpaper &> /dev/null; then
         echo "wallpaper = ,$wallpaper_path" > "$HOME/.config/hypr/hyprpaper.conf"
         echo "splash = false" >> "$HOME/.config/hypr/hyprpaper.conf"
-        killall hyprpaper 2>/dev/null
+        killall hyprpaper 2> /dev/null
         hyprpaper &
     elif command -v feh &> /dev/null; then
         feh --bg-fill "$wallpaper_path"
@@ -597,7 +597,7 @@ start_auto_theme_service() {
 stop_auto_theme_service() {
     if [ -f "$HOME/.cache/auto-theme-monitor.pid" ]; then
         local pid=$(cat "$HOME/.cache/auto-theme-monitor.pid")
-        kill "$pid" 2>/dev/null
+        kill "$pid" 2> /dev/null
         rm -f "$HOME/.cache/auto-theme-monitor.pid"
     fi
     pkill -f "auto-theme-monitor"
@@ -750,7 +750,7 @@ test_theme_switcher() {
     fi
     
     # Check if default themes exist
-    local theme_count=$(ls "$HOME/.config/hypr/themes"/*.conf 2>/dev/null | wc -l)
+    local theme_count=$(ls "$HOME/.config/hypr/themes"/*.conf 2> /dev/null | wc -l)
     if [ "$theme_count" -gt 0 ]; then
         log_success "✅ Default themes available ($theme_count themes)"
     else

@@ -323,18 +323,27 @@ check_aur_helper() {
     echo "${INFO} Using AUR helper: $AUR_HELPER" | tee -a "$LOG"
 }
 
-# Install yay
+# Install yay with improved dependency handling and cleanup
 install_yay() {
+    # Check for git dependency
     if ! command -v git &> /dev/null; then
         if confirm_package_installation "git"; then
-            if [[ "$UNATTENDED" == "true" ]]; then
-                sudo pacman -S --noconfirm git
-            else
-                sudo pacman -S git
+            if ! install_package "git"; then
+                echo "${ERROR} Failed to install git" | tee -a "$LOG"
+                return 1
             fi
         else
             echo "${ERROR} Git is required to install yay" | tee -a "$LOG"
-            exit 1
+            return 1
+        fi
+    fi
+    
+    # Check for base-devel
+    if ! pacman -Qi base-devel &> /dev/null; then
+        echo "${NOTE} Installing base-devel..." | tee -a "$LOG"
+        if ! sudo pacman -S --needed base-devel; then
+            echo "${ERROR} Failed to install base-devel" | tee -a "$LOG"
+            return 1
         fi
     fi
     
@@ -345,21 +354,137 @@ install_yay() {
         case "$response" in
             [nN][oO]|[nN])
                 echo "${ERROR} yay installation cancelled by user" | tee -a "$LOG"
-                exit 1
+                return 1
                 ;;
         esac
     fi
     
-    cd /tmp
-    git clone https://aur.archlinux.org/yay.git
-    cd yay
-    if [[ "$UNATTENDED" == "true" ]]; then
-        makepkg -si --noconfirm
-    else
-        makepkg -si
+    # Create a clean temporary directory
+    local yay_temp_dir="/tmp/yay-install-$$"
+    mkdir -p "$yay_temp_dir"
+    
+    # Set up cleanup trap
+    trap 'rm -rf "$yay_temp_dir"' EXIT
+    
+    # Check if directory was created successfully
+    if [ ! -d "$yay_temp_dir" ]; then
+        echo "${ERROR} Failed to create temporary directory for yay installation" | tee -a "$LOG"
+        return 1
     fi
-    cd "$OLDPWD"
+    
+    cd "$yay_temp_dir" || {
+        echo "${ERROR} Failed to change to temporary directory" | tee -a "$LOG"
+        return 1
+    }
+    
+    echo "${INFO} Cloning yay repository..." | tee -a "$LOG"
+    if ! git clone https://aur.archlinux.org/yay.git; then
+        echo "${ERROR} Failed to clone yay repository" | tee -a "$LOG"
+        cd "$OLDPWD" || true
+        return 1
+    fi
+    
+    cd yay || {
+        echo "${ERROR} Failed to enter yay directory" | tee -a "$LOG"
+        cd "$OLDPWD" || true
+        return 1
+    }
+    
+    # Check for additional build dependencies
+    echo "${INFO} Checking for build dependencies..." | tee -a "$LOG"
+    local build_deps=$(grep -oP 'depends=\(\K[^)]+' PKGBUILD | tr -d "'" | tr ' ' '\n' | sort -u)
+    for dep in $build_deps; do
+        if ! pacman -Qi "$dep" &> /dev/null; then
+            echo "${NOTE} Installing build dependency: $dep" | tee -a "$LOG"
+            if ! install_package "$dep"; then
+                echo "${WARN} Failed to install build dependency: $dep" | tee -a "$LOG"
+                # Continue anyway, makepkg will catch missing deps
+            fi
+        fi
+    done
+    
+    echo "${INFO} Building and installing yay..." | tee -a "$LOG"
+    if [[ "$UNATTENDED" == "true" ]]; then
+        if ! makepkg -si --noconfirm; then
+            echo "${ERROR} Failed to build and install yay" | tee -a "$LOG"
+            cd "$OLDPWD" || true
+            return 1
+        fi
+    else
+        if ! makepkg -si; then
+            echo "${ERROR} Failed to build and install yay" | tee -a "$LOG"
+            cd "$OLDPWD" || true
+            return 1
+        fi
+    fi
+    
+    # Return to original directory
+    cd "$OLDPWD" || true
+    
+    # Verify yay was installed correctly
+    if ! command -v yay &> /dev/null; then
+        echo "${ERROR} yay installation failed - command not found" | tee -a "$LOG"
+        return 1
+    fi
+    
+    echo "${OK} yay installed successfully" | tee -a "$LOG"
     AUR_HELPER="yay"
+    return 0
+}
+
+# Enhanced package installation with signature validation and conflict resolution
+install_package() {
+    local pkg="$1"
+    local attempts=3
+    local attempt=1
+    
+    # Check package signature first
+    if ! sudo pacman-key --check "$pkg" &> /dev/null; then
+        echo "${WARN} Package signature verification failed for $pkg" | tee -a "$LOG"
+        if [[ "$UNATTENDED" != "true" ]]; then
+            echo "${INFO} Continue anyway? [y/N]"
+            read -r response
+            if [[ ! "$response" =~ ^[Yy] ]]; then
+                return 1
+            fi
+        fi
+    fi
+    
+    while [ $attempt -le $attempts ]; do
+        echo "${NOTE} Installing $pkg (attempt $attempt/$attempts)..." | tee -a "$LOG"
+        
+        # Check for conflicts first
+        local conflicts=$(pacman -Qi "$pkg" 2>/dev/null | grep "Conflicts With" | cut -d: -f2)
+        if [ -n "$conflicts" ]; then
+            echo "${WARN} Package $pkg conflicts with: $conflicts" | tee -a "$LOG"
+            if [[ "$UNATTENDED" != "true" ]]; then
+                echo "${INFO} Resolve conflicts? [Y/n]"
+                read -r response
+                if [[ "$response" =~ ^[Nn] ]]; then
+                    return 1
+                fi
+            fi
+            # Remove conflicting packages
+            for conflict in $conflicts; do
+                sudo pacman -R --noconfirm "$conflict" || true
+            done
+        fi
+        
+        # Attempt installation with timeout
+        if timeout 300 sudo pacman -S $([[ "$UNATTENDED" == "true" ]] && echo "--noconfirm") "$pkg"; then
+            return 0
+        fi
+        
+        echo "${WARN} Package installation failed, retrying..." | tee -a "$LOG"
+        if ! sudo pacman -Syy; then
+            echo "${WARN} Failed to refresh package database" | tee -a "$LOG"
+            sleep 5  # Wait longer between attempts
+        fi
+        attempt=$((attempt + 1))
+        sleep 2
+    done
+    
+    return 1
 }
 
 # Install required packages
@@ -374,34 +499,78 @@ install_dependencies() {
         "unzip"
         "base-devel"
     )
-
+    
     if confirm_package_installation "${packages[@]}"; then
+        local install_failed=false
+        local failed_packages=()
+        
         for pkg in "${packages[@]}"; do
-            if ! pacman -Qi "$pkg" 6e /dev/null; then
-                echo "${NOTE} Installing $pkg..." | tee -a "$LOG"
-                if [[ "$UNATTENDED" == "true" ]]; then
-                    sudo pacman -S --noconfirm "$pkg" || {
-                        echo "${ERROR} Failed to install $pkg" | tee -a "$LOG"
-                        exit 1
-                    }
-                else
-                    sudo pacman -S "$pkg" || {
-                        echo "${ERROR} Failed to install $pkg" | tee -a "$LOG"
-                        exit 1
-                    }
+            if ! pacman -Qi "$pkg" &> /dev/null; then
+                if ! install_package "$pkg"; then
+                    echo "${ERROR} Failed to install $pkg" | tee -a "$LOG"
+                    install_failed=true
+                    failed_packages+=("$pkg")
                 fi
             fi
         done
+        
+        if [ "$install_failed" = true ]; then
+            echo "${ERROR} Failed to install the following packages: ${failed_packages[*]}" | tee -a "$LOG"
+            echo "${INFO} Attempting to fix package database..." | tee -a "$LOG"
+            
+            # Try to fix package database
+            sudo pacman -Syy
+            
+            # Retry failed packages
+            for pkg in "${failed_packages[@]}"; do
+                echo "${NOTE} Retrying installation of $pkg..." | tee -a "$LOG"
+                if [[ "$UNATTENDED" == "true" ]]; then
+                    if ! sudo pacman -S --noconfirm "$pkg"; then
+                        echo "${ERROR} Failed to install $pkg again" | tee -a "$LOG"
+                        if [[ "$UNATTENDED" == "true" ]]; then
+                            return 1
+                        else
+                            echo "${INFO} Do you want to continue without $pkg? [y/N]"
+                            read -r response
+                            case "$response" in
+                                [yY][eE][sS]|[yY])
+                                    echo "${WARN} Continuing without $pkg" | tee -a "$LOG"
+                                    ;;
+                                *)
+                                    echo "${ERROR} Installation cancelled" | tee -a "$LOG"
+                                    return 1
+                                    ;;
+                            esac
+                        fi
+                    fi
+                else
+                    if ! sudo pacman -S "$pkg"; then
+                        echo "${ERROR} Failed to install $pkg again" | tee -a "$LOG"
+                        echo "${INFO} Do you want to continue without $pkg? [y/N]"
+                        read -r response
+                        case "$response" in
+                            [yY][eE][sS]|[yY])
+                                echo "${WARN} Continuing without $pkg" | tee -a "$LOG"
+                                ;;
+                            *)
+                                echo "${ERROR} Installation cancelled" | tee -a "$LOG"
+                                return 1
+                                ;;
+                        esac
+                    fi
+                fi
+            done
+        fi
     else
         echo "${ERROR} Essential packages installation cancelled" | tee -a "$LOG"
-        exit 1
+        return 1
     fi
     
     # Try to install whiptail (might not be available on all distros)
-    if ! pacman -Qi "libnewt" 6e /dev/null; then
+    if ! pacman -Qi "libnewt" &> /dev/null; then
         echo "${NOTE} Installing dialog tools..." | tee -a "$LOG"
         if [[ "$UNATTENDED" == "true" ]]; then
-            sudo pacman -S --noconfirm libnewt 2e/dev/null || {
+            sudo pacman -S --noconfirm libnewt 2>/dev/null || {
                 echo "${WARN} Could not install whiptail, using simple fallback menus" | tee -a "$LOG"
                 USE_SIMPLE_MENUS=true
             }
@@ -414,7 +583,7 @@ install_dependencies() {
                     USE_SIMPLE_MENUS=true
                     ;;
                 *)
-                    sudo pacman -S libnewt 2e/dev/null || {
+                    sudo pacman -S libnewt 2>/dev/null || {
                         echo "${WARN} Could not install whiptail, using simple fallback menus" | tee -a "$LOG"
                         USE_SIMPLE_MENUS=true
                     }
@@ -744,64 +913,109 @@ load_preset() {
     echo "${OK} Loaded preset: $preset" | tee -a "$LOG"
 }
 
+# Git clone with retry function
+git_clone_with_retry() {
+    local repo="$1"
+    local dest="$2"
+    local attempts=3
+    local attempt=1
+    
+    while [ $attempt -le $attempts ]; do
+        echo "${INFO} Cloning $repo (attempt $attempt/$attempts)..." | tee -a "$LOG"
+        if git clone --depth=1 "$repo" "$dest"; then
+            return 0
+        fi
+        
+        echo "${WARN} Git clone failed (attempt $attempt/$attempts), retrying..." | tee -a "$LOG"
+        rm -rf "$dest"
+        attempt=$((attempt + 1))
+        sleep 2
+    done
+    
+    echo "${ERROR} Failed to clone repository after $attempts attempts: $repo" | tee -a "$LOG"
+    return 1
+}
+
 # Download configuration sources
 download_configs() {
     echo "${INFO} Downloading configuration sources..." | tee -a "$LOG"
-    mkdir -p sources
+    if ! mkdir -p sources; then
+        echo "${ERROR} Failed to create sources directory" | tee -a "$LOG"
+        return 1
+    fi
+    
+    local download_success=true
     
     for config in $(echo $SELECTED_CONFIGS | tr -d '"'); do
         case "$config" in
             "jakoolit")
                 if [ ! -d "sources/jakoolit" ]; then
                     echo "${NOTE} Downloading JaKooLit configuration..." | tee -a "$LOG"
-                    if ! git clone --depth=1 https://github.com/JaKooLit/Arch-Hyprland.git sources/jakoolit; then
+                    if ! git_clone_with_retry "https://github.com/JaKooLit/Arch-Hyprland.git" "sources/jakoolit"; then
                         echo "${ERROR} Failed to clone JaKooLit Arch-Hyprland repository" | tee -a "$LOG"
-                        exit 1
+                        download_success=false
+                        continue
                     fi
-                    if ! git clone --depth=1 https://github.com/JaKooLit/Hyprland-Dots.git sources/jakoolit-dots; then
+                    if ! git_clone_with_retry "https://github.com/JaKooLit/Hyprland-Dots.git" "sources/jakoolit-dots"; then
                         echo "${ERROR} Failed to clone JaKooLit Hyprland-Dots repository" | tee -a "$LOG"
-                        exit 1
+                        download_success=false
                     fi
                 fi
                 ;;
             "ml4w")
                 if [ ! -d "sources/ml4w" ]; then
                     echo "${NOTE} Downloading ML4W configuration..." | tee -a "$LOG"
-                    if ! git clone --depth=1 https://github.com/mylinuxforwork/dotfiles.git sources/ml4w; then
+                    if ! git_clone_with_retry "https://github.com/mylinuxforwork/dotfiles.git" "sources/ml4w"; then
                         echo "${ERROR} Failed to clone ML4W dotfiles repository" | tee -a "$LOG"
-                        exit 1
+                        download_success=false
                     fi
                 fi
                 ;;
             "hyde")
                 if [ ! -d "sources/hyde" ]; then
                     echo "${NOTE} Downloading HyDE configuration..." | tee -a "$LOG"
-                    if ! git clone --depth=1 https://github.com/prasanthrangan/hyprdots.git sources/hyde; then
+                    if ! git_clone_with_retry "https://github.com/prasanthrangan/hyprdots.git" "sources/hyde"; then
                         echo "${ERROR} Failed to clone HyDE hyprdots repository" | tee -a "$LOG"
-                        exit 1
+                        download_success=false
                     fi
                 fi
                 ;;
             "end4")
                 if [ ! -d "sources/end4" ]; then
                     echo "${NOTE} Downloading End-4 configuration..." | tee -a "$LOG"
-                    if ! git clone --depth=1 https://github.com/end-4/dots-hyprland.git sources/end4; then
+                    if ! git_clone_with_retry "https://github.com/end-4/dots-hyprland.git" "sources/end4"; then
                         echo "${ERROR} Failed to clone End-4 dots-hyprland repository" | tee -a "$LOG"
-                        exit 1
+                        download_success=false
                     fi
                 fi
                 ;;
             "prasanta")
                 if [ ! -d "sources/prasanta" ]; then
                     echo "${NOTE} Downloading Prasanta configuration..." | tee -a "$LOG"
-                    if ! git clone --depth=1 https://github.com/prasanthrangan/hyprdots.git sources/prasanta; then
+                    if ! git_clone_with_retry "https://github.com/prasanthrangan/hyprdots.git" "sources/prasanta"; then
                         echo "${ERROR} Failed to clone Prasanta hyprdots repository" | tee -a "$LOG"
-                        exit 1
+                        download_success=false
                     fi
                 fi
                 ;;
         esac
     done
+    
+    if [ "$download_success" = false ]; then
+        echo "${WARN} Some configuration sources could not be downloaded" | tee -a "$LOG"
+        if [[ "$UNATTENDED" != "true" ]]; then
+            echo "${INFO} Do you want to continue with the available configurations? [Y/n]"
+            read -r response
+            case "$response" in
+                [nN][oO]|[nN])
+                    echo "${ERROR} Installation cancelled by user" | tee -a "$LOG"
+                    return 1
+                    ;;
+            esac
+        fi
+    fi
+    
+    return 0
 }
 
 # Install components
@@ -882,50 +1096,317 @@ install_components() {
     done
 }
 
+# Enhanced process management utility with improved zombie handling and cleanup
+start_process() {
+    local process_name="$1"
+    local command="$2"
+    local timeout="${3:-30}"  # Default 30 second timeout
+    local cleanup_zombies=true
+    
+    # Cleanup zombie processes
+    if [ "$cleanup_zombies" = true ]; then
+        echo "${INFO} Checking for zombie processes..." | tee -a "$LOG"
+        local zombies=$(ps -A -ostat,ppid | grep -e '[zZ]' | awk '{print $2}')
+        if [ -n "$zombies" ]; then
+            echo "${WARN} Found zombie processes, cleaning up..." | tee -a "$LOG"
+            echo "$zombies" | xargs -r kill -9 2>/dev/null || true
+        fi
+    fi
+    
+    # Create process group for better cleanup
+    set -m 2>/dev/null || true
+    
+    # Kill existing process with proper signal handling
+    if pgrep -x "$process_name" > /dev/null; then
+        echo "${INFO} Stopping existing $process_name process..." | tee -a "$LOG"
+        
+        # Get the process group ID
+        local pgid=$(ps -o pgid= -p $(pgrep -x "$process_name" | head -1) 2>/dev/null | tr -d ' ')
+        
+        # Try graceful termination first
+        pkill -TERM -x "$process_name"
+        
+        # Wait for process to terminate gracefully
+        local wait_count=0
+        while pgrep -x "$process_name" > /dev/null && [ $wait_count -lt 5 ]; do
+            sleep 1
+            wait_count=$((wait_count + 1))
+        done
+        
+        # Force kill if still running
+        if pgrep -x "$process_name" > /dev/null; then
+            echo "${WARN} Process did not terminate gracefully, forcing kill..." | tee -a "$LOG"
+            pkill -KILL -x "$process_name"
+            sleep 1
+            
+            # Kill entire process group if still running
+            if [ -n "$pgid" ] && pgrep -x "$process_name" > /dev/null; then
+                echo "${WARN} Process still running, killing process group..." | tee -a "$LOG"
+                kill -KILL -$pgid 2>/dev/null || true
+            fi
+        fi
+        
+        # Kill any remaining children
+        local children=$(pgrep -P $(pgrep -x "$process_name" 2>/dev/null) 2>/dev/null)
+        if [ -n "$children" ]; then
+            echo "${WARN} Killing child processes..." | tee -a "$LOG"
+            echo "$children" | xargs -r kill -KILL 2>/dev/null || true
+        fi
+    fi
+    
+    # Start process with timeout in new process group
+    echo "${INFO} Starting $process_name with $timeout second timeout..." | tee -a "$LOG"
+    timeout --foreground "$timeout" setsid "$command" &
+    local pid=$!
+    
+    # Register cleanup handler
+    trap "kill -TERM -$pid 2>/dev/null || kill -TERM $pid 2>/dev/null" EXIT
+    
+    # Wait for process to start
+    local wait_time=0
+    while [ $wait_time -lt 10 ]; do
+        if kill -0 $pid 2>/dev/null; then
+            # Check if process is actually responsive
+            if [ -d "/proc/$pid" ]; then
+                echo "${OK} $process_name started successfully with PID $pid" | tee -a "$LOG"
+                return 0
+            fi
+        fi
+        sleep 1
+        wait_time=$((wait_time + 1))
+    done
+    
+    # Process failed to start or timed out
+    echo "${ERROR} Failed to start $process_name or process exited prematurely" | tee -a "$LOG"
+    kill -KILL -$pid 2>/dev/null || kill -KILL $pid 2>/dev/null || true
+    return 1
+}
+
+# Error recovery function
+recover_from_error() {
+    local error_code="$1"
+    local stage="$2"
+    
+    echo "${WARN} Error occurred during $stage (code: $error_code)" | tee -a "$LOG"
+    
+    case "$stage" in
+        "packages")
+            echo "${INFO} Attempting to fix package database..." | tee -a "$LOG"
+            sudo pacman -Syy
+            ;;
+        "config")
+            echo "${INFO} Restoring configuration from backup..." | tee -a "$LOG"
+            if [ -d "$CURRENT_BACKUP_DIR" ]; then
+                cp -r "$CURRENT_BACKUP_DIR"/* "$HOME/.config/"
+                echo "${OK} Restored configuration from backup" | tee -a "$LOG"
+            else
+                echo "${ERROR} No backup directory found to restore from" | tee -a "$LOG"
+            fi
+            ;;
+        "services")
+            echo "${INFO} Restarting critical services..." | tee -a "$LOG"
+            systemctl --user restart pipewire.service 2> /dev/null || true
+            systemctl --user restart wireplumber.service 2> /dev/null || true
+            ;;
+    esac
+}
+
 # Apply configurations
 apply_configurations() {
     echo "${INFO} Applying configurations..." | tee -a "$LOG"
     
     # Backup existing configs
-    backup_configs
+    if ! backup_configs; then
+        echo "${WARN} Backup failed, do you want to continue? [y/N]" | tee -a "$LOG"
+        if [[ "$UNATTENDED" != "true" ]]; then
+            read -r response
+            case "$response" in
+                [yY][eE][sS]|[yY])
+                    echo "${WARN} Continuing without backup" | tee -a "$LOG"
+                    ;;
+                *)
+                    echo "${ERROR} Installation cancelled" | tee -a "$LOG"
+                    return 1
+                    ;;
+            esac
+        else
+            echo "${WARN} Unattended mode: continuing without backup" | tee -a "$LOG"
+        fi
+    fi
     
     # Apply selected configurations
+    local config_success=true
+    
     for config in $(echo $SELECTED_CONFIGS | tr -d '"'); do
         echo "${NOTE} Applying $config configuration..." | tee -a "$LOG"
-        ./modules/core/apply_config.sh "$config"
+        if ! ./modules/core/apply_config.sh "$config"; then
+            echo "${ERROR} Failed to apply $config configuration" | tee -a "$LOG"
+            config_success=false
+            
+            # Attempt recovery
+            recover_from_error $? "config"
+            
+            if [[ "$UNATTENDED" != "true" ]]; then
+                echo "${INFO} Do you want to continue with other configurations? [Y/n]"
+                read -r response
+                case "$response" in
+                    [nN][oO]|[nN])
+                        echo "${ERROR} Configuration application cancelled by user" | tee -a "$LOG"
+                        return 1
+                        ;;
+                esac
+            fi
+        fi
     done
+    
+    if [ "$config_success" = false ]; then
+        echo "${WARN} Some configurations could not be applied" | tee -a "$LOG"
+    fi
     
     # Apply features
     apply_features
+    
+    return 0
 }
 
-# Backup existing configurations
+# Backup existing configurations with integrity verification, size check and compression
 backup_configs() {
     echo "${INFO} Creating backup of existing configurations..." | tee -a "$LOG"
     
     # Use the comprehensive backup system
     if [[ -f "modules/common/backup.sh" ]]; then
         BACKUP_DIR=$(bash modules/common/backup.sh backup "pre-install")
+        if [[ $? -ne 0 || -z "$BACKUP_DIR" ]]; then
+            echo "${ERROR} Comprehensive backup failed" | tee -a "$LOG"
+            return 1
+        fi
         echo "${OK} Comprehensive backup created at: $BACKUP_DIR" | tee -a "$LOG"
         export CURRENT_BACKUP_DIR="$BACKUP_DIR"
     else
         # Fallback to simple backup if backup module not available
         echo "${WARN} Backup module not found, using simple backup" | tee -a "$LOG"
-        BACKUP_DIR="$HOME/.config/hyprland-backup-$(date +%Y%m%d-%H%M%S)"
-        mkdir -p "$BACKUP_DIR"
         
-        # Backup directories if they exist
+        # Calculate total size of files to backup
+        local total_size=0
         local dirs=(".config/hypr" ".config/waybar" ".config/rofi" ".config/kitty" ".config/ags")
+        for dir in "${dirs[@]}"; do
+            if [ -d "$HOME/$dir" ]; then
+                local size=$(du -sk "$HOME/$dir" 2>/dev/null | cut -f1)
+                if [ -n "$size" ]; then
+                    total_size=$((total_size + size))
+                fi
+            fi
+        done
+        
+        # Check if we have enough space (need 2x the size for safety)
+        local free_space=$(df -k "$HOME" 2>/dev/null | awk 'NR==2 {print $4}')
+        if [ -n "$free_space" ] && [ $((total_size * 2)) -gt "$free_space" ]; then
+            echo "${ERROR} Not enough space for backup" | tee -a "$LOG"
+            echo "${INFO} Required: $((total_size * 2))KB, Available: ${free_space}KB" | tee -a "$LOG"
+            if [[ "$UNATTENDED" != "true" ]]; then
+                echo "${INFO} Continue anyway? [y/N]"
+                read -r response
+                if [[ ! "$response" =~ ^[Yy] ]]; then
+                    return 1
+                fi
+            else
+                return 1
+            fi
+        fi
+        
+        local backup_dir="$HOME/.config/hyprland-backup-$(date +%Y%m%d-%H%M%S)"
+        
+        # Create backup directory with proper permissions
+        if ! install -d -m 700 "$backup_dir"; then
+            echo "${ERROR} Failed to create secure backup directory" | tee -a "$LOG"
+            return 1
+        fi
+        
+        # Validate backup directory
+        if [ ! -d "$backup_dir" ] || [ ! -w "$backup_dir" ]; then
+            echo "${ERROR} Backup directory not created or not writable" | tee -a "$LOG"
+            return 1
+        fi
+        
+        # Backup with checksums
+        local backup_success=true
         
         for dir in "${dirs[@]}"; do
             if [ -d "$HOME/$dir" ]; then
-                cp -r "$HOME/$dir" "$BACKUP_DIR/"
+                echo "${INFO} Backing up $dir..." | tee -a "$LOG"
+                if ! cp -r "$HOME/$dir" "$backup_dir/"; then
+                    echo "${ERROR} Failed to backup $dir" | tee -a "$LOG"
+                    backup_success=false
+                    continue
+                fi
+                
+                # Create checksum for backup validation
+                if command -v sha256sum &> /dev/null; then
+                    echo "${INFO} Creating integrity checksums for $dir..." | tee -a "$LOG"
+                    if ! (cd "$backup_dir" && find "$(basename "$dir")" -type f -exec sha256sum {} + > "$(basename "$dir").sha256" 2>/dev/null); then
+                        echo "${WARN} Failed to create checksums for $dir" | tee -a "$LOG"
+                    fi
+                fi
+                
                 echo "${OK} Backed up $dir" | tee -a "$LOG"
             fi
         done
         
-        echo "${OK} Simple backup created at: $BACKUP_DIR" | tee -a "$LOG"
-        export CURRENT_BACKUP_DIR="$BACKUP_DIR"
+        # Verify backup integrity
+        local integrity_check=true
+        for dir in "${dirs[@]}"; do
+            if [ -f "$backup_dir/$(basename "$dir").sha256" ]; then
+                echo "${INFO} Verifying backup integrity for $dir..." | tee -a "$LOG"
+                if ! (cd "$backup_dir" && sha256sum -c "$(basename "$dir").sha256" &> /dev/null); then
+                    echo "${ERROR} Backup verification failed for $dir" | tee -a "$LOG"
+                    integrity_check=false
+                fi
+            fi
+        done
+        
+        # Add compression for large backups (more than 100MB)
+        if [ $total_size -gt 102400 ]; then
+            echo "${INFO} Large backup detected ($total_size KB), using compression..." | tee -a "$LOG"
+            local compressed_file="${backup_dir}.tar.gz"
+            if (cd "$(dirname "$backup_dir")" && tar -czf "$(basename "$compressed_file")" "$(basename "$backup_dir")"); then
+                echo "${OK} Backup compressed to: $compressed_file" | tee -a "$LOG"
+                # Only remove original if compression successful
+                if [ -f "$compressed_file" ]; then
+                    rm -rf "$backup_dir"
+                    backup_dir="$compressed_file"
+                fi
+            else
+                echo "${WARN} Compression failed, keeping uncompressed backup" | tee -a "$LOG"
+            fi
+        fi
+        
+        if [ "$backup_success" = true ] && [ "$integrity_check" = true ]; then
+            echo "${OK} Backup created and verified at: $backup_dir" | tee -a "$LOG"
+            export CURRENT_BACKUP_DIR="$backup_dir"
+            BACKUP_DIR="$backup_dir"
+        else
+            echo "${WARN} Backup completed with warnings/errors at: $backup_dir" | tee -a "$LOG"
+            export CURRENT_BACKUP_DIR="$backup_dir"
+            BACKUP_DIR="$backup_dir"
+            if [ "$integrity_check" = false ]; then
+                echo "${ERROR} Backup integrity verification failed" | tee -a "$LOG"
+                if [[ "$UNATTENDED" != "true" ]]; then
+                    echo "${INFO} Continue with unverified backup? [y/N]"
+                    read -r response
+                    case "$response" in
+                        [yY][eE][sS]|[yY])
+                            echo "${WARN} Continuing with unverified backup" | tee -a "$LOG"
+                            ;;
+                        *)
+                            echo "${ERROR} Installation cancelled due to backup verification failure" | tee -a "$LOG"
+                            return 1
+                            ;;
+                    esac
+                else
+                    echo "${WARN} Unattended mode: continuing with unverified backup" | tee -a "$LOG"
+                fi
+            fi
+        fi
     fi
 }
 

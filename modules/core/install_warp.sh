@@ -19,7 +19,7 @@ install_warp() {
     )
     
     # Try to install with AUR helper
-    if command -v yay &> /dev/null; then
+    if command -v wal &> /dev/null; then
         log_info "Installing Warp via yay..."
         yay -S --noconfirm warp-terminal || {
             log_error "Failed to install Warp via yay"

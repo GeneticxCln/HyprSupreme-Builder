@@ -1,24 +1,153 @@
 #!/bin/bash
 # HyprSupreme-Builder - Network Management Installation Module
 
-source "$(dirname "$0")/../common/functions.sh"
+# Set strict error handling
+set -o errexit  # Exit on error
+set -o pipefail # Exit if any command in a pipe fails
+set -o nounset  # Exit on undefined variables
+
+# Define error codes
+readonly E_SUCCESS=0
+readonly E_GENERAL=1
+readonly E_PERMISSION=2
+readonly E_DEPENDENCY=3
+readonly E_SERVICE=4
+readonly E_DIRECTORY=5
+readonly E_CONFIG=6
+readonly E_NETWORK=7  # Network-specific errors
+
+# Path to the script
+readonly SCRIPT_PATH="$(readlink -f "$0")"
+readonly SCRIPT_DIR="$(dirname "$SCRIPT_PATH")"
+
+# Source common functions
+if [[ ! -f "${SCRIPT_DIR}/../common/functions.sh" ]]; then
+    echo "ERROR: Required file not found: ${SCRIPT_DIR}/../common/functions.sh"
+    exit $E_DEPENDENCY
+fi
+
+source "${SCRIPT_DIR}/../common/functions.sh"
+
+# Error handling function
+handle_error() {
+    local exit_code=$1
+    local error_message="${2:-Unknown error}"
+    local error_source="${3:-$SCRIPT_PATH}"
+    
+    log_error "Error in $error_source: $error_message (code: $exit_code)"
+    
+    # Clean up any temporary resources if needed
+    
+    # Return the exit code
+    return $exit_code
+}
+
+# Network-specific error handler
+handle_network_error() {
+    local error_type="$1"
+    local error_message="$2"
+    
+    case "$error_type" in
+        "connection")
+            log_error "Network connection error: $error_message"
+            return $E_NETWORK
+            ;;
+        "dns")
+            log_error "DNS resolution error: $error_message"
+            return $E_NETWORK
+            ;;
+        "service")
+            log_error "Network service error: $error_message"
+            return $E_SERVICE
+            ;;
+        "config")
+            log_error "Network configuration error: $error_message"
+            return $E_CONFIG
+            ;;
+        *)
+            log_error "Unknown network error: $error_message"
+            return $E_GENERAL
+            ;;
+    esac
+}
+
+# Test network connectivity
+test_connectivity() {
+    log_info "Testing network connectivity..."
+    
+    # Test internet connectivity (Google DNS)
+    if ! ping -c 1 -W 2 8.8.8.8 &> /dev/null; then
+        log_warn "Internet connectivity test failed"
+        return 1
+    fi
+    
+    # Test DNS resolution
+    if ! nslookup google.com &> /dev/null; then
+        log_warn "DNS resolution test failed"
+        return 2
+    fi
+    
+    log_success "Network connectivity tests passed"
+    return 0
+}
+
+# Trap errors
+trap 'handle_error $? "Script interrupted" "$BASH_SOURCE:$LINENO"' ERR
+trap 'log_warn "Script received SIGINT - operation canceled"; exit $E_GENERAL' INT
+trap 'log_warn "Script received SIGTERM - operation canceled"; exit $E_GENERAL' TERM
 
 install_network() {
     log_info "Installing network management system..."
     
+    # Check if running as root
+    if [[ $EUID -eq 0 ]]; then
+        log_error "This script should not be run as root"
+        return $E_PERMISSION
+    fi
+    
+    # Check for essential dependencies
+    if ! command -v pacman &> /dev/null; then
+        log_error "Package manager not found (pacman is required)"
+        return $E_DEPENDENCY
+    fi
+    
     # Install NetworkManager and tools
-    install_network_manager
+    if ! install_network_manager; then
+        log_error "Failed to install NetworkManager"
+        return $E_GENERAL
+    fi
     
     # Install WiFi tools and drivers
-    install_wifi_tools
+    if ! install_wifi_tools; then
+        log_error "Failed to install WiFi tools"
+        return $E_GENERAL
+    fi
     
     # Install network GUI tools
-    install_network_gui
+    if ! install_network_gui; then
+        log_error "Failed to install network GUI tools"
+        return $E_GENERAL
+    fi
     
     # Configure network integration
-    configure_network_integration
+    if ! configure_network_integration; then
+        log_error "Failed to configure network integration"
+        return $E_GENERAL
+    fi
+    
+    # Test network functionality if services are running
+    if systemctl is-active --quiet NetworkManager.service; then
+        log_info "Testing network functionality..."
+        if ! test_connectivity; then
+            log_warn "Network connectivity tests failed, but installation completed"
+            # Don't return error - network might not be available during installation
+        else
+            log_success "Network connectivity tests passed"
+        fi
+    fi
     
     log_success "Network management system installation completed"
+    return $E_SUCCESS
 }
 
 install_network_manager() {
@@ -52,17 +181,57 @@ install_network_manager() {
         "curl"
     )
     
-    install_packages "${packages[@]}"
+    # Install packages with error handling
+    if ! install_packages "${packages[@]}"; then
+        log_error "Failed to install NetworkManager packages"
+        return $E_DEPENDENCY
+    fi
     
-    # Enable NetworkManager service
-    sudo systemctl enable NetworkManager.service
-    sudo systemctl start NetworkManager.service || log_warn "Could not start NetworkManager (may need reboot)"
+    # Verify installation
+    if ! command -v nmcli &> /dev/null; then
+        log_error "NetworkManager installation failed: nmcli command not found"
+        return $E_DEPENDENCY
+    fi
     
-    # Disable conflicting services
-    sudo systemctl disable dhcpcd.service 2>/dev/null || true
-    sudo systemctl stop dhcpcd.service 2>/dev/null || true
+    log_info "Enabling NetworkManager service..."
+    
+    # Check sudo access
+    if ! sudo -n true 2>/dev/null; then
+        log_warn "Sudo access required to enable NetworkManager service"
+    fi
+    
+    # Enable NetworkManager service with error handling
+    if ! sudo systemctl enable NetworkManager.service &>/dev/null; then
+        log_error "Failed to enable NetworkManager service"
+        return $E_SERVICE
+    fi
+    
+    # Start NetworkManager service
+    if ! sudo systemctl start NetworkManager.service &>/dev/null; then
+        log_warn "Could not start NetworkManager service (may need reboot)"
+        # Continue anyway as this isn't critical - service will start on next boot
+    fi
+    
+    # Verify service is enabled
+    if ! systemctl is-enabled NetworkManager.service &>/dev/null; then
+        log_warn "NetworkManager service is not enabled properly"
+    fi
+    
+    # Disable conflicting services with error handling
+    log_info "Disabling conflicting network services..."
+    
+    if systemctl is-active --quiet dhcpcd.service; then
+        if ! sudo systemctl disable dhcpcd.service &>/dev/null; then
+            log_warn "Failed to disable dhcpcd service"
+        fi
+        
+        if ! sudo systemctl stop dhcpcd.service &>/dev/null; then
+            log_warn "Failed to stop dhcpcd service"
+        fi
+    fi
     
     log_success "NetworkManager installation completed"
+    return $E_SUCCESS
 }
 
 install_wifi_tools() {
@@ -83,28 +252,62 @@ install_wifi_tools() {
         "iwd"
     )
     
+    local install_errors=0
+    local installed_pkgs=0
+    
     # Install WiFi packages (some may not be available)
     for pkg in "${wifi_packages[@]}"; do
+        # Check if package exists in repositories
         if pacman -Si "$pkg" &> /dev/null; then
-            install_packages "$pkg" || log_warn "Could not install $pkg"
+            if install_packages "$pkg"; then
+                ((installed_pkgs++))
+                log_info "Successfully installed: $pkg"
+            else
+                log_warn "Could not install $pkg"
+                ((install_errors++))
+            fi
         else
             log_warn "Package $pkg not available in repositories"
         fi
     done
     
     # Check for specific WiFi hardware and install drivers
-    detect_wifi_hardware
+    if ! detect_wifi_hardware; then
+        log_warn "WiFi hardware detection had issues"
+    fi
+    
+    # Verify we have basic WiFi utilities
+    if ! command -v iw &> /dev/null; then
+        log_warn "Basic WiFi utility 'iw' not found"
+    fi
+    
+    # Check if we installed any packages
+    if [[ $installed_pkgs -eq 0 ]]; then
+        log_warn "No WiFi packages were installed"
+        # Continue anyway as this isn't critical
+    fi
     
     log_success "WiFi tools installation completed"
+    return $E_SUCCESS
 }
 
 detect_wifi_hardware() {
     log_info "Detecting WiFi hardware..."
+    local driver_install_errors=0
     
-    # Get WiFi device info
-    local wifi_devices=$(lspci | grep -i "network\|wifi\|wireless" || true)
+    # Get WiFi device info - use lspci if available, otherwise try ip link
+    local wifi_devices=""
     
-    if [ -n "$wifi_devices" ]; then
+    if command -v lspci &> /dev/null; then
+        wifi_devices=$(lspci | grep -i "network\|wifi\|wireless" || true)
+    fi
+    
+    # If lspci didn't find anything, try ip link for wireless interfaces
+    if [[ -z "$wifi_devices" ]] && command -v ip &> /dev/null; then
+        wifi_devices=$(ip link | grep -i "wlan\|wireless" || true)
+    fi
+    
+    if [[ -n "$wifi_devices" ]]; then
         log_info "Detected WiFi hardware:"
         echo "$wifi_devices" | while read -r line; do
             log_info "  $line"
@@ -113,38 +316,81 @@ detect_wifi_hardware() {
         # Install specific drivers based on detected hardware
         if echo "$wifi_devices" | grep -qi "broadcom"; then
             log_info "Broadcom WiFi detected, ensuring drivers are installed..."
-            install_packages "broadcom-wl" || log_warn "Could not install Broadcom drivers"
+            if ! install_packages "broadcom-wl"; then
+                log_warn "Could not install Broadcom drivers"
+                ((driver_install_errors++))
+            fi
         fi
         
         if echo "$wifi_devices" | grep -qi "realtek"; then
-            log_info "Realtek WiFi detected..."
+            log_info "Realtek WiFi detected, ensuring firmware is installed..."
             # Realtek drivers usually work out of box with linux-firmware
+            if ! install_packages "linux-firmware"; then
+                log_warn "Could not install Realtek firmware"
+                ((driver_install_errors++))
+            fi
         fi
         
         if echo "$wifi_devices" | grep -qi "intel"; then
             log_info "Intel WiFi detected, ensuring firmware is installed..."
-            install_packages "linux-firmware" || log_warn "Could not install Intel firmware"
+            if ! install_packages "linux-firmware"; then
+                log_warn "Could not install Intel firmware"
+                ((driver_install_errors++))
+            fi
+        fi
+        
+        if echo "$wifi_devices" | grep -qi "atheros"; then
+            log_info "Atheros WiFi detected, ensuring firmware is installed..."
+            if ! install_packages "linux-firmware"; then
+                log_warn "Could not install Atheros firmware"
+                ((driver_install_errors++))
+            fi
+        fi
+        
+        # Verify WiFi drivers are loaded
+        if command -v lsmod &> /dev/null; then
+            local wifi_modules=$(lsmod | grep -i "iwl\|rtw\|ath\|wl\|brcm" || true)
+            if [[ -n "$wifi_modules" ]]; then
+                log_info "WiFi kernel modules loaded:"
+                echo "$wifi_modules" | while read -r line; do
+                    log_info "  $line"
+                done
+            else
+                log_warn "No WiFi kernel modules detected"
+            fi
         fi
     else
         log_warn "No WiFi hardware detected or WiFi hardware info unavailable"
+        return 1
     fi
+    
+    if [[ $driver_install_errors -gt 0 ]]; then
+        log_warn "Some WiFi drivers could not be installed ($driver_install_errors errors)"
+        return 1
+    fi
+    
+    return $E_SUCCESS
 }
 
 install_network_gui() {
     log_info "Installing network GUI tools..."
     
     local gui_tools=()
+    local selection=""
     
-    # Check user preference for network GUI
+    # Check user preference for network GUI if whiptail is available
     if command -v whiptail &> /dev/null; then
-        local selection=$(whiptail --title "Network GUI Tools" \
+        log_info "Presenting GUI tool selection dialog..."
+        
+        # Use a subshell to prevent script exit on dialog cancel
+        selection=$(whiptail --title "Network GUI Tools" \
             --checklist "Choose network management GUI tools:" 15 70 6 \
             "nm-applet" "NetworkManager system tray applet (recommended)" ON \
             "nm-connection-editor" "NetworkManager connection editor" ON \
             "iwgtk" "Lightweight WiFi GUI" OFF \
             "connman-gtk" "ConnMan GTK frontend" OFF \
             "wicd-gtk" "Alternative network manager" OFF \
-            3>&1 1>&2 2>&3)
+            3>&1 1>&2 2>&3 || echo "")
         
         if [[ $selection == *"nm-applet"* ]]; then
             gui_tools+=("network-manager-applet")
@@ -166,42 +412,96 @@ install_network_gui() {
             gui_tools+=("wicd-gtk")
         fi
     else
-        # Default selection
+        # Default selection if whiptail is not available
+        log_warn "whiptail not found, using default selection"
         gui_tools=("network-manager-applet" "nm-connection-editor")
     fi
     
+    # Install selected GUI tools
     if [ ${#gui_tools[@]} -gt 0 ]; then
-        install_packages "${gui_tools[@]}"
-        log_success "Network GUI tools installed"
+        log_info "Installing selected network GUI tools: ${gui_tools[*]}"
+        
+        if ! install_packages "${gui_tools[@]}"; then
+            log_warn "Failed to install some network GUI tools"
+            # Continue anyway as these are optional
+        else
+            log_success "Network GUI tools installed"
+        fi
+    else
+        log_warn "No network GUI tools selected"
     fi
+    
+    # Verify at least one tool is installed if any were requested
+    if [ ${#gui_tools[@]} -gt 0 ] && ! command -v nm-applet &> /dev/null && ! command -v nm-connection-editor &> /dev/null; then
+        log_warn "No network GUI tools were successfully installed"
+    fi
+    
+    return $E_SUCCESS
 }
 
 configure_network_integration() {
     log_info "Configuring network integration..."
     
-    # Create network scripts directory
+    # Create network scripts directory with error handling
     local scripts_dir="$HOME/.config/hypr/scripts"
-    mkdir -p "$scripts_dir"
+    if [[ ! -d "$scripts_dir" ]]; then
+        log_info "Creating scripts directory: $scripts_dir"
+        if ! mkdir -p "$scripts_dir" 2>/dev/null; then
+            log_error "Failed to create scripts directory: $scripts_dir"
+            return $E_DIRECTORY
+        fi
+    else
+        log_info "Scripts directory already exists: $scripts_dir"
+    fi
+    
+    # Check write permissions
+    if [[ ! -w "$scripts_dir" ]]; then
+        log_error "No write permission for scripts directory: $scripts_dir"
+        return $E_PERMISSION
+    fi
     
     # Create network control script
-    create_network_control_script
+    if ! create_network_control_script; then
+        log_error "Failed to create network control script"
+        return $E_CONFIG
+    fi
     
     # Create WiFi manager script
-    create_wifi_manager_script
+    if ! create_wifi_manager_script; then
+        log_error "Failed to create WiFi manager script"
+        return $E_CONFIG
+    fi
     
     # Create network monitoring script
-    create_network_monitor_script
+    if ! create_network_monitor_script; then
+        log_error "Failed to create network monitoring script"
+        return $E_CONFIG
+    fi
     
     # Configure NetworkManager
-    configure_network_manager
+    if ! configure_network_manager; then
+        log_error "Failed to configure NetworkManager"
+        return $E_CONFIG
+    fi
     
     log_success "Network integration configured"
+    return $E_SUCCESS
 }
 
 create_network_control_script() {
     local scripts_dir="$HOME/.config/hypr/scripts"
+    local script_file="$scripts_dir/network-control.sh"
     
-    cat > "$scripts_dir/network-control.sh" << 'EOF'
+    log_info "Creating network control script..."
+    
+    # Check if file exists and is writable
+    if [[ -f "$script_file" && ! -w "$script_file" ]]; then
+        log_error "Cannot write to existing file: $script_file"
+        return $E_PERMISSION
+    fi
+    
+    # Create the script with error handling
+    if ! cat > "$script_file" << 'EOF'
 #!/bin/bash
 # Network Control Script for HyprSupreme
 
@@ -363,14 +663,35 @@ case "$1" in
         ;;
 esac
 EOF
+    then
+        log_error "Failed to write network control script"
+        return $E_CONFIG
+    fi
     
-    chmod +x "$scripts_dir/network-control.sh"
+    # Make script executable
+    if ! chmod +x "$script_file" 2>/dev/null; then
+        log_error "Failed to make network control script executable"
+        return $E_PERMISSION
+    fi
+    
+    log_info "Network control script created successfully"
+    return $E_SUCCESS
 }
 
 create_wifi_manager_script() {
     local scripts_dir="$HOME/.config/hypr/scripts"
+    local script_file="$scripts_dir/wifi-manager.sh"
     
-    cat > "$scripts_dir/wifi-manager.sh" << 'EOF'
+    log_info "Creating WiFi manager script..."
+    
+    # Check if file exists and is writable
+    if [[ -f "$script_file" && ! -w "$script_file" ]]; then
+        log_error "Cannot write to existing file: $script_file"
+        return $E_PERMISSION
+    fi
+    
+    # Create the script with error handling
+    if ! cat > "$script_file" << 'EOF'
 #!/bin/bash
 # WiFi Manager Script for HyprSupreme
 
@@ -448,14 +769,35 @@ case "$1" in
         ;;
 esac
 EOF
+    then
+        log_error "Failed to write WiFi manager script"
+        return $E_CONFIG
+    fi
     
-    chmod +x "$scripts_dir/wifi-manager.sh"
+    # Make script executable
+    if ! chmod +x "$script_file" 2>/dev/null; then
+        log_error "Failed to make WiFi manager script executable"
+        return $E_PERMISSION
+    fi
+    
+    log_info "WiFi manager script created successfully"
+    return $E_SUCCESS
 }
 
 create_network_monitor_script() {
     local scripts_dir="$HOME/.config/hypr/scripts"
+    local script_file="$scripts_dir/network-monitor.sh"
     
-    cat > "$scripts_dir/network-monitor.sh" << 'EOF'
+    log_info "Creating network monitor script..."
+    
+    # Check if file exists and is writable
+    if [[ -f "$script_file" && ! -w "$script_file" ]]; then
+        log_error "Cannot write to existing file: $script_file"
+        return $E_PERMISSION
+    fi
+    
+    # Create the script with error handling
+    if ! cat > "$script_file" << 'EOF'
 #!/bin/bash
 # Network Monitor Script for HyprSupreme
 
@@ -541,31 +883,79 @@ case "$1" in
         ;;
 esac
 EOF
+    then
+        log_error "Failed to write network monitor script"
+        return $E_CONFIG
+    fi
     
-    chmod +x "$scripts_dir/network-monitor.sh"
+    # Make script executable
+    if ! chmod +x "$script_file" 2>/dev/null; then
+        log_error "Failed to make network monitor script executable"
+        return $E_PERMISSION
+    fi
+    
+    log_info "Network monitor script created successfully"
+    return $E_SUCCESS
 }
 
 configure_network_manager() {
     log_info "Configuring NetworkManager..."
     
-    # Create NetworkManager configuration
-    sudo mkdir -p /etc/NetworkManager/conf.d
+    # Check sudo access
+    if ! sudo -n true 2>/dev/null; then
+        log_warn "Sudo access required to configure NetworkManager settings"
+    fi
     
-    # Configure WiFi backend
-    sudo tee /etc/NetworkManager/conf.d/wifi-backend.conf > /dev/null << 'EOF'
+    # Create NetworkManager configuration directory with error handling
+    if ! sudo mkdir -p /etc/NetworkManager/conf.d 2>/dev/null; then
+        log_error "Failed to create NetworkManager configuration directory"
+        return $E_DIRECTORY
+    fi
+    
+    # Configure WiFi backend with error handling
+    log_info "Configuring WiFi backend..."
+    if ! sudo tee /etc/NetworkManager/conf.d/wifi-backend.conf > /dev/null << 'EOF'
 [device]
 wifi.backend=wpa_supplicant
 EOF
+    then
+        log_error "Failed to write WiFi backend configuration"
+        return $E_CONFIG
+    fi
     
-    # Configure DNS
-    sudo tee /etc/NetworkManager/conf.d/dns.conf > /dev/null << 'EOF'
+    # Configure DNS with error handling
+    log_info "Configuring DNS settings..."
+    if ! sudo tee /etc/NetworkManager/conf.d/dns.conf > /dev/null << 'EOF'
 [main]
 dns=systemd-resolved
 EOF
+    then
+        log_error "Failed to write DNS configuration"
+        return $E_CONFIG
+    fi
     
     # Create network restart script
     local scripts_dir="$HOME/.config/hypr/scripts"
-    cat > "$scripts_dir/network-restart.sh" << 'EOF'
+    local restart_script="$scripts_dir/network-restart.sh"
+    
+    log_info "Creating network restart script..."
+    
+    # Check if scripts directory exists
+    if [[ ! -d "$scripts_dir" ]]; then
+        if ! mkdir -p "$scripts_dir" 2>/dev/null; then
+            log_error "Failed to create scripts directory: $scripts_dir"
+            return $E_DIRECTORY
+        fi
+    fi
+    
+    # Check write permissions
+    if [[ ! -w "$scripts_dir" ]]; then
+        log_error "No write permission for scripts directory: $scripts_dir"
+        return $E_PERMISSION
+    fi
+    
+    # Create restart script with error handling
+    if ! cat > "$restart_script" << 'EOF'
 #!/bin/bash
 # Network Restart Script for HyprSupreme
 
@@ -590,36 +980,109 @@ case "$1" in
         ;;
 esac
 EOF
+    then
+        log_error "Failed to write network restart script"
+        return $E_CONFIG
+    fi
     
-    chmod +x "$scripts_dir/network-restart.sh"
+    # Make script executable
+    if ! chmod +x "$restart_script" 2>/dev/null; then
+        log_error "Failed to make network restart script executable"
+        return $E_PERMISSION
+    fi
+    
+    # Restart NetworkManager to apply configuration changes
+    log_info "Restarting NetworkManager service to apply changes..."
+    if ! sudo systemctl restart NetworkManager.service &>/dev/null; then
+        log_warn "Failed to restart NetworkManager service"
+        # Continue anyway as this isn't critical
+    fi
+    
+    # Verify configuration files exist
+    if [[ ! -f "/etc/NetworkManager/conf.d/wifi-backend.conf" ]]; then
+        log_warn "WiFi backend configuration file not found"
+    fi
+    
+    if [[ ! -f "/etc/NetworkManager/conf.d/dns.conf" ]]; then
+        log_warn "DNS configuration file not found"
+    fi
     
     log_success "NetworkManager configuration completed"
+    return $E_SUCCESS
 }
 
 # Test network installation
 test_network() {
     log_info "Testing network system..."
+    local errors=0
+    local warnings=0
     
     # Check if NetworkManager is available
     if command -v nmcli &> /dev/null; then
         log_success "✅ NetworkManager is available"
     else
         log_error "❌ NetworkManager not found"
-        return 1
+        ((errors++))
     fi
     
     # Check if NetworkManager service is active
     if systemctl is-active --quiet NetworkManager.service; then
         log_success "✅ NetworkManager service is active"
+        
+        # Check NetworkManager daemon status
+        if nmcli general status &>/dev/null; then
+            log_success "✅ NetworkManager daemon is responding"
+            
+            # Check network connectivity if NetworkManager is running
+            local nm_connectivity=$(nmcli networking connectivity 2>/dev/null || echo "unknown")
+            if [[ "$nm_connectivity" == "full" ]]; then
+                log_success "✅ Network connectivity: full"
+            elif [[ "$nm_connectivity" == "limited" ]]; then
+                log_warn "⚠️  Network connectivity: limited"
+                ((warnings++))
+            elif [[ "$nm_connectivity" == "none" || "$nm_connectivity" == "unknown" ]]; then
+                log_warn "⚠️  Network connectivity: none/unknown"
+                ((warnings++))
+            fi
+            
+            # Check active connections
+            local active_connections=$(nmcli connection show --active 2>/dev/null | grep -v "NAME" | wc -l)
+            if [[ $active_connections -gt 0 ]]; then
+                log_success "✅ Active network connections: $active_connections"
+            else
+                log_warn "⚠️  No active network connections"
+                ((warnings++))
+            fi
+        else
+            log_warn "⚠️  NetworkManager daemon is not responding properly"
+            ((warnings++))
+        fi
     else
         log_warn "⚠️  NetworkManager service not active (may need to be started)"
+        ((warnings++))
     fi
     
     # Check WiFi capability
-    if nmcli radio wifi &> /dev/null; then
-        log_success "✅ WiFi capability available"
+    if command -v nmcli &> /dev/null && nmcli radio wifi &> /dev/null; then
+        local wifi_status=$(nmcli radio wifi 2>/dev/null)
+        if [[ "$wifi_status" == "enabled" ]]; then
+            log_success "✅ WiFi is enabled"
+            
+            # Check for WiFi devices
+            local wifi_devices=$(nmcli device status 2>/dev/null | grep -c "wifi")
+            if [[ $wifi_devices -gt 0 ]]; then
+                log_success "✅ WiFi devices detected: $wifi_devices"
+            else
+                log_warn "⚠️  No WiFi devices detected"
+                ((warnings++))
+            fi
+        else
+            log_warn "⚠️  WiFi is disabled"
+            ((warnings++))
+        fi
     else
-        log_warn "⚠️  WiFi capability not available"
+        log_warn "⚠️  WiFi capability not available or cannot be checked"
+        ((warnings++))
     fi
     
     # Check network GUI tools
@@ -636,34 +1099,167 @@ test_network() {
     
     if ! $gui_found; then
         log_warn "⚠️  No network GUI tools found"
+        ((warnings++))
     fi
     
-    return 0
+    # Check script files
+    local scripts_dir="$HOME/.config/hypr/scripts"
+    local required_scripts=("network-control.sh" "wifi-manager.sh" "network-monitor.sh" "network-restart.sh")
+    
+    for script in "${required_scripts[@]}"; do
+        if [[ -x "$scripts_dir/$script" ]]; then
+            log_success "✅ Script $script is available and executable"
+        elif [[ -f "$scripts_dir/$script" ]]; then
+            log_warn "⚠️  Script $script exists but is not executable"
+            ((warnings++))
+        else
+            log_error "❌ Script $script is missing"
+            ((errors++))
+        fi
+    done
+    
+    # Check NetworkManager configuration
+    if [[ -f "/etc/NetworkManager/conf.d/wifi-backend.conf" ]]; then
+        log_success "✅ WiFi backend configuration exists"
+    else
+        log_warn "⚠️  WiFi backend configuration is missing"
+        ((warnings++))
+    fi
+    
+    if [[ -f "/etc/NetworkManager/conf.d/dns.conf" ]]; then
+        log_success "✅ DNS configuration exists"
+    else
+        log_warn "⚠️  DNS configuration is missing"
+        ((warnings++))
+    fi
+    
+    # Run internet connectivity test if possible
+    if command -v ping &> /dev/null && systemctl is-active --quiet NetworkManager.service; then
+        log_info "Running connectivity tests..."
+        
+        # Test internet connectivity (Google DNS)
+        if ping -c 1 -W 2 8.8.8.8 &> /dev/null; then
+            log_success "✅ Internet connectivity test passed"
+        else
+            log_warn "⚠️  Internet connectivity test failed"
+            ((warnings++))
+        fi
+        
+        # Test DNS resolution if nslookup is available
+        if command -v nslookup &> /dev/null; then
+            if nslookup google.com &> /dev/null; then
+                log_success "✅ DNS resolution test passed"
+            else
+                log_warn "⚠️  DNS resolution test failed"
+                ((warnings++))
+            fi
+        fi
+    fi
+    
+    # Report summary
+    if [[ $errors -gt 0 ]]; then
+        log_error "Network system test completed with $errors errors and $warnings warnings"
+        return $E_GENERAL
+    elif [[ $warnings -gt 0 ]]; then
+        log_warn "Network system test completed with $warnings warnings"
+        return $E_SUCCESS
+    else
+        log_success "Network system test completed successfully"
+        return $E_SUCCESS
+    fi
+}
+
+# Verify user is not root
+check_not_root() {
+    if [[ $EUID -eq 0 ]]; then
+        log_error "This script should not be run as root"
+        return $E_PERMISSION
+    fi
+    return $E_SUCCESS
+}
+
+# Check if the script is sourced
+is_sourced() {
+    [[ "${BASH_SOURCE[0]}" != "${0}" ]]
 }
 
 # Main execution
-case "${1:-install}" in
-    "install")
-        install_network
-        ;;
-    "manager")
-        install_network_manager
-        ;;
-    "wifi")
-        install_wifi_tools
-        ;;
-    "gui")
-        install_network_gui
-        ;;
-    "configure")
-        configure_network_integration
-        ;;
-    "test")
-        test_network
-        ;;
-    *)
-        echo "Usage: $0 {install|manager|wifi|gui|configure|test}"
-        exit 1
-        ;;
-esac
+main() {
+    # Skip if sourced
+    if is_sourced; then
+        return $E_SUCCESS
+    fi
+    
+    local operation="${1:-install}"
+    local exit_code=$E_SUCCESS
+    
+    # Check if running as root
+    if ! check_not_root; then
+        exit $E_PERMISSION
+    fi
+    
+    # Execute requested operation
+    case "$operation" in
+        "install")
+            install_network
+            exit_code=$?
+            ;;
+        "manager")
+            install_network_manager
+            exit_code=$?
+            ;;
+        "wifi")
+            install_wifi_tools
+            exit_code=$?
+            ;;
+        "gui")
+            install_network_gui
+            exit_code=$?
+            ;;
+        "configure")
+            configure_network_integration
+            exit_code=$?
+            ;;
+        "test")
+            test_network
+            exit_code=$?
+            ;;
+        "connectivity")
+            test_connectivity
+            exit_code=$?
+            ;;
+        "help")
+            echo "Usage: $0 {install|manager|wifi|gui|configure|test|connectivity|help}"
+            echo ""
+            echo "Operations:"
+            echo "  install      - Install the complete network management system (default)"
+            echo "  manager      - Install only NetworkManager"
+            echo "  wifi         - Install WiFi tools and drivers"
+            echo "  gui          - Install network GUI tools"
+            echo "  configure    - Configure network integration"
+            echo "  test         - Test network installation"
+            echo "  connectivity - Test network connectivity"
+            echo "  help         - Show this help message"
+            exit_code=$E_SUCCESS
+            ;;
+        *)
+            log_error "Invalid operation: $operation"
+            echo "Usage: $0 {install|manager|wifi|gui|configure|test|connectivity|help}"
+            exit_code=$E_GENERAL
+            ;;
+    esac
+    
+    # Return with appropriate exit code
+    if [[ $exit_code -eq $E_SUCCESS ]]; then
+        log_success "Operation '$operation' completed successfully"
+    else
+        log_error "Operation '$operation' failed with code $exit_code"
+    fi
+    
+    return $exit_code
+}
+
+# Run main function if script is executed directly
+main "$@"
+exit $?
 
