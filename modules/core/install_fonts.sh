@@ -15,8 +15,17 @@ readonly ERR_FONT_VERIFICATION=54    # Font verification failed
 readonly ERR_FONT_AUR=55             # AUR font installation failed
 readonly ERR_PERMISSIONS=1           # Permission/sudo error
 
-# Source common functions
-source "$(dirname "$0")/../common/functions.sh"
+# Source common functions with robust path resolution
+readonly SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
+readonly SCRIPT_DIR="$(dirname "${SCRIPT_PATH}")"
+readonly FUNCTIONS_PATH="${SCRIPT_DIR}/../common/functions.sh"
+
+if [[ ! -f "${FUNCTIONS_PATH}" ]]; then
+    echo "Error: Required functions file not found: ${FUNCTIONS_PATH}" >&2
+    exit 1
+fi
+
+source "${FUNCTIONS_PATH}"
 
 # Default paths and configuration
 FONT_CONFIG_DIR="$HOME/.config/fontconfig"

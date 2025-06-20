@@ -1,16 +1,17 @@
 #!/bin/bash
 # HyprSupreme-Builder - Performance Optimization Module
 
-# Add debug output to trace source path resolution
-resolved_script_path="$(readlink -f "${BASH_SOURCE[0]}")"
-resolved_dir="$(dirname "$resolved_script_path")"
-functions_path="$resolved_dir/../common/functions.sh"
-echo "Debug: Script path: $resolved_script_path"
-echo "Debug: Script directory: $resolved_dir"
-echo "Debug: Functions path: $functions_path"
-echo "Debug: Functions exists: $([[ -f "$functions_path" ]] && echo "yes" || echo "no")"
+# Use robust path resolution for sourcing common functions
+readonly SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
+readonly SCRIPT_DIR="$(dirname "${SCRIPT_PATH}")"
+readonly FUNCTIONS_PATH="${SCRIPT_DIR}/../common/functions.sh"
 
-source "$functions_path"
+if [[ ! -f "${FUNCTIONS_PATH}" ]]; then
+    echo "Error: Required functions.sh file not found at ${FUNCTIONS_PATH}" >&2
+    exit 1
+fi
+
+source "${FUNCTIONS_PATH}"
 
 # Performance optimization configuration
 PARALLEL_JOBS=${PARALLEL_JOBS:-$(nproc)}

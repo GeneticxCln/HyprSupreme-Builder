@@ -5,7 +5,23 @@ set -euo pipefail
 
 # HyprSupreme-Builder - Configuration Application Module
 
-source "$(dirname "$0")/../common/functions.sh"
+# Get absolute path to this script and its directory
+readonly SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
+readonly SCRIPT_DIR="$(dirname "${SCRIPT_PATH}")"
+readonly FUNCTIONS_PATH="${SCRIPT_DIR}/../common/functions.sh"
+
+# Ensure functions.sh exists before sourcing
+if [[ ! -f "${FUNCTIONS_PATH}" ]]; then
+    echo "ERROR: Required functions file not found: ${FUNCTIONS_PATH}" >&2
+    echo "Please ensure the common module is properly installed" >&2
+    exit 1
+fi
+
+# Source common functions
+source "${FUNCTIONS_PATH}"
+
+# Debug output (uncomment if needed)
+# echo "DEBUG: Sourced functions from: ${FUNCTIONS_PATH}" >&2
 
 apply_config() {
     local config_name="$1"
