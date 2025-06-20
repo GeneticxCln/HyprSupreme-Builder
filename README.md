@@ -10,7 +10,7 @@
 
 ---
 
-![Version](https://img.shields.io/badge/Version-2.1.0-blueviolet?style=for-the-badge&logo=semanticrelease)
+![Version](https://img.shields.io/badge/Version-2.2.0-blueviolet?style=for-the-badge&logo=semanticrelease)
 ![Release](https://img.shields.io/github/v/release/GeneticxCln/HyprSupreme-Builder?style=for-the-badge&label=⭐%20LATEST&logo=github&color=success)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge&logo=opensourceinitiative)
 ![Stars](https://img.shields.io/github/stars/GeneticxCln/HyprSupreme-Builder?style=for-the-badge&logo=github&color=yellow)
@@ -24,15 +24,15 @@
 
 ---
 
-## 🎉 **LATEST RELEASE v2.1.0 - NOW AVAILABLE!** 
+## 🎉 **LATEST RELEASE v2.2.0 - NOW AVAILABLE!** 
 
-### ✨ **[🚀 Download v2.1.0](https://github.com/GeneticxCln/HyprSupreme-Builder/releases/tag/v2.1.0)** - *Our biggest release yet!*
+### ✨ **[🚀 Download v2.2.0](https://github.com/GeneticxCln/HyprSupreme-Builder/releases/tag/v2.2.0)** - *Enhanced stability & reliability!*
 
 </div>
 
 ---
 
-## 🌟 **What's New in v2.1.0**
+## 🌟 **What's New in v2.2.0**
 
 <div align="center">
 
@@ -44,56 +44,56 @@
 <tr>
 <td width="50%">
 
-### 🤖 **AI Update Manager**
-- Intelligent system update management
-- Automated dependency resolution
-- Smart conflict detection & resolution
-- Predictive maintenance scheduling
+### 🛡️ **Enhanced Error Handling**
+- Comprehensive error recovery system
+- Specific error codes for all scenarios
+- Detailed error messages with suggestions
+- Improved error logging with context
 
-### ⚡ **GPU Optimization**
-- Advanced driver detection
-- Hardware-specific optimizations
-- Performance monitoring
-- GPU-specific presets
+### 🧪 **Test Coverage Expansion**
+- Unit tests for all core modules
+- Integration tests for cross-module features
+- Automated system validation
+- Performance regression testing
 
-### 🌐 **Community Platform**
-- Web-based configuration interface
-- Theme sharing & discovery
-- Community collaboration tools
-- Remote system management
+### 📱 **Hardware Support**
+- Extended GPU compatibility (latest NVIDIA/AMD)
+- Improved multi-monitor handling
+- Better laptop-specific optimizations
+- Enhanced high-DPI display support
 
-### 💾 **Smart Backup System**
-- Point-in-time recovery
-- Incremental backups
-- Automated cleanup
-- Configuration validation
+### 💾 **Installation State Management**
+- Detailed installation state tracking
+- Resume capability for interrupted installs
+- Validation of installation success
+- Improved rollback mechanisms
 
 </td>
 <td width="50%">
 
-### 🔧 **Enhanced Installation**
-- Unattended installation mode
-- Better conflict resolution
-- Cross-distribution support
-- Dependency management
+### 🔧 **Installation Reliability**
+- Improved dependency validation
+- Better cross-distribution support
+- Enhanced script robustness
+- More detailed progress reporting
 
-### 🖥️ **Warp Terminal Integration**
-- Full AI terminal support
-- Smart terminal detection
-- Custom theme integration
-- Performance profiles
+### 🌐 **Network Management**
+- Enhanced WiFi hardware detection
+- Improved mobile hotspot functionality
+- Better connection diagnostics
+- Advanced network monitoring tools
 
-### 🐳 **Docker Support**
-- Containerized deployment
-- Development environments
-- Multi-service configuration
-- Isolated testing
+### 🔊 **Audio System Improvements**
+- Reliable PipeWire integration
+- Better device management
+- Enhanced media controls
+- Automatic device switching
 
-### 🧪 **Testing Framework**
-- Comprehensive test suite
-- Performance benchmarking
-- Configuration validation
-- Error recovery testing
+### 🖥️ **System Integration**
+- Better desktop environment cohesion
+- Improved notification handling
+- Enhanced theming consistency
+- Internationalization improvements
 
 </td>
 </tr>
@@ -221,7 +221,8 @@ open http://localhost:5000
 ## 📚 Documentation
 
 ### 📖 **Comprehensive Guides**
-- **[📋 Installation Guide](INSTALLATION_GUIDE.md)** - Complete setup instructions with prerequisites 🆕
+- **[📋 Installation Guide](INSTALLATION_GUIDE.md)** - Complete setup instructions with prerequisites
+- **[📝 Release Notes v2.2.0](RELEASE_NOTES_v2.2.0.md)** - Detailed changes in the latest version 🆕
 - **[Keybindings Reference](KEYBINDINGS_REFERENCE.md)** - Complete keyboard shortcuts guide
 - **[Community Commands](COMMUNITY_COMMANDS.md)** - CLI and web interface usage
 - **[Resolution Functions](RESOLUTION_FUNCTIONS.md)** - Multi-monitor setup guide
@@ -308,16 +309,18 @@ HyprSupreme-Builder/
 ## 🛠️ **Requirements**
 
 ### 📋 **System Requirements**
-- **OS**: Linux (Arch, Ubuntu 20.04+, Fedora 35+)
+- **OS**: Linux (Arch, Ubuntu 22.04+, Fedora 37+)
 - **Desktop**: Wayland-compatible
 - **RAM**: 4GB minimum, 8GB recommended
 - **Storage**: 2GB free space
+- **CPU**: Dual-core minimum, Quad-core recommended
 
 ### 📦 **Dependencies**
-- Python 3.8+
+- Python 3.9+
 - Hyprland 0.35+
 - Waybar, Rofi, Warp Terminal
 - Git, Curl, Wget
+- NetworkManager, PipeWire
 
 ## 🤝 **Contributing**
 
