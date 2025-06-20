@@ -13,8 +13,20 @@ readonly EXIT_VALIDATION_ERROR=4
 readonly EXIT_PYTHON_ERROR=5
 readonly EXIT_CONFIG_ERROR=6
 
+# Get absolute path to this script
+readonly SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
+readonly SCRIPT_DIR="$(dirname "${SCRIPT_PATH}")"
+readonly FUNCTIONS_PATH="${SCRIPT_DIR}/../common/functions.sh"
+
 # Load common functions
-if ! source "$(dirname "$0")/../common/functions.sh"; then
+if [[ ! -f "${FUNCTIONS_PATH}" ]]; then
+    echo "Error: Common functions file not found at ${FUNCTIONS_PATH}" >&2
+    exit "${EXIT_GENERAL_ERROR}"
+fi
+
+echo "Debug: Sourcing functions from ${FUNCTIONS_PATH}" >&2
+
+if ! source "${FUNCTIONS_PATH}"; then
     echo "Error: Failed to source common functions" >&2
     exit "${EXIT_GENERAL_ERROR}"
 fi

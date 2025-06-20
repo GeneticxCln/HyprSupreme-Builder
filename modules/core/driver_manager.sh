@@ -5,7 +5,19 @@
 
 set -euo pipefail
 
-source "$(dirname "$0")/../common/functions.sh"
+# Use readlink to get the absolute path of this script
+readonly SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
+readonly SCRIPT_DIR="$(dirname "${SCRIPT_PATH}")"
+readonly FUNCTIONS_PATH="${SCRIPT_DIR}/../common/functions.sh"
+
+# Check if functions.sh exists before sourcing
+if [[ ! -f "${FUNCTIONS_PATH}" ]]; then
+    echo "Error: Required file functions.sh not found at ${FUNCTIONS_PATH}"
+    echo "Please make sure you're running this script from the correct directory"
+    exit 1
+fi
+
+source "${FUNCTIONS_PATH}"
 
 # Driver manager configuration
 DRIVER_LOG="/var/log/hyprsupreme-driver-manager.log"

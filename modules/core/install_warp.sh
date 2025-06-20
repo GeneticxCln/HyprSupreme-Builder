@@ -1,7 +1,16 @@
 #!/bin/bash
 # HyprSupreme-Builder - Warp Terminal Installation Module
 
-source "$(dirname "$0")/../common/functions.sh"
+readonly SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
+readonly SCRIPT_DIR="$(dirname "${SCRIPT_PATH}")"
+readonly FUNCTIONS_PATH="${SCRIPT_DIR}/../common/functions.sh"
+
+if [[ ! -f "${FUNCTIONS_PATH}" ]]; then
+    echo "Error: Required functions file not found: ${FUNCTIONS_PATH}" >&2
+    exit 1
+fi
+
+source "${FUNCTIONS_PATH}"
 
 install_warp() {
     log_info "Installing Warp terminal and dependencies..."

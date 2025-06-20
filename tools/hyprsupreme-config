@@ -3,10 +3,22 @@
 # A tool for managing and customizing your HyprSupreme installation
 
 VERSION="1.0.0"
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+# Get the absolute path of this script, resolving symlinks
+readonly SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
+readonly SCRIPT_DIR="$(dirname "${SCRIPT_PATH}")"
+readonly PROJECT_ROOT="$(dirname "${SCRIPT_DIR}")"
+readonly FUNCTIONS_PATH="${PROJECT_ROOT}/modules/common/functions.sh"
 
-source "$PROJECT_ROOT/modules/common/functions.sh"
+# Check if functions.sh exists before sourcing
+if [[ -f "${FUNCTIONS_PATH}" ]]; then
+    source "${FUNCTIONS_PATH}"
+else
+    echo "Error: Could not find functions.sh at ${FUNCTIONS_PATH}"
+    echo "Current script path: ${SCRIPT_PATH}"
+    echo "Script directory: ${SCRIPT_DIR}"
+    echo "Project root: ${PROJECT_ROOT}"
+    exit 1
+fi
 
 print_banner() {
     echo -e "${MAGENTA}"
