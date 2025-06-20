@@ -68,3 +68,8 @@ user_settings.json
 *.backup
 *.bak
 backups/
+
+
+# Added by cargo
+
+/target
