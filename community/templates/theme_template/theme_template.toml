@@ -1,0 +1,79 @@
+# HyprSupreme-Builder Theme Template
+# This is a template for creating new themes for HyprSupreme-Builder.
+# Save this file with your theme name (e.g., mytheme.toml)
+
+# Theme metadata
+name = "your-theme-name"          # Required: Unique identifier for your theme
+version = "1.0.0"                 # Required: Theme version using semantic versioning
+author = "Your Name"              # Required: Theme author name
+description = "A beautiful theme" # Optional: Short description of your theme
+homepage = ""                     # Optional: Theme homepage or repository URL
+license = "MIT"                   # Optional: Theme license
+
+# Colors section
+# These colors will be used throughout the Hyprland configuration
+[colors]
+background = "#1a1b26"  # Main background color
+foreground = "#c0caf5"  # Main text color
+accent = "#7aa2f7"      # Primary accent color
+accent2 = "#bb9af7"     # Secondary accent color
+surface = "#24283b"     # Surface/panel background color
+border = "#444b6a"      # Window border color
+error = "#f7768e"       # Error/warning color
+success = "#9ece6a"     # Success color
+warning = "#e0af68"     # Warning color
+inactive = "#565f89"    # Inactive elements color
+
+# Terminal colors
+term_black = "#32344a"
+term_red = "#f7768e"
+term_green = "#9ece6a" 
+term_yellow = "#e0af68"
+term_blue = "#7aa2f7"
+term_magenta = "#bb9af7"
+term_cyan = "#7dcfff"
+term_white = "#a9b1d6"
+term_bright_black = "#444b6a"
+term_bright_red = "#ff7a93"
+term_bright_green = "#b9f27c"
+term_bright_yellow = "#ff9e64"
+term_bright_blue = "#7da6ff"
+term_bright_magenta = "#bb9af7"
+term_bright_cyan = "#7dcfff"
+term_bright_white = "#c0caf5"
+
+# Variables section
+# These variables will be used to customize the Hyprland configuration
+[variables]
+font = "JetBrains Mono Nerd Font"   # Main font
+font_size = "10"                    # Font size
+font_size_mono = "10"               # Monospace font size
+icon_theme = "Papirus-Dark"         # Icon theme
+cursor_theme = "Bibata-Modern-Ice"  # Cursor theme
+wallpaper = "themes/default.jpg"    # Default wallpaper path
+border_size = "2"                   # Border size in pixels
+border_radius = "8"                 # Border radius for rounded corners
+gaps_in = "5"                       # Inner gaps
+gaps_out = "10"                     # Outer gaps
+shadow_size = "3"                   # Shadow size
+shadow_opacity = "0.5"              # Shadow opacity
+blur_size = "8"                     # Blur size
+blur_passes = "2"                   # Blur passes
+transparency = "0.9"                # Window transparency
+
+# Hyprland section
+# These settings will be applied directly to Hyprland
+[hyprland]
+animations = true                   # Enable animations
+blur = true                         # Enable blur
+shadows = true                      # Enable shadows
+transparency = true                 # Enable transparency
+
+# Advanced section
+# These are advanced settings for the theme
+[advanced]
+plugin_compatibility = ["auto-theme", "dynamic-wallpaper"]  # Compatible plugins
+wallpaper_style = "center"          # Wallpaper style: center, stretch, tile
+color_scheme = "dark"               # Color scheme: dark, light
+animation_style = "smooth"          # Animation style: smooth, fast, minimal
+extension_support = true            # Support theme extensions

@@ -1,0 +1,71 @@
+# HyprSupreme-Builder Preset: Hybrid
+# Balanced configuration with good visuals and performance
+
+# Configuration sources to include
+configs=(
+    "jakoolit"
+    "ml4w"
+)
+
+# Components to install
+components:
+  - hyprland
+  - waybar
+  - rofi
+  - warp
+    "themes"
+    "fonts"
+    "scripts"
+    "wallpapers"
+)
+
+# Features to enable
+features=(
+    "animations"
+    "rounded"
+    "transparency"
+    "workspace_swipe"
+    "performance"
+)
+
+# Specific settings for balanced setup
+animation_style="medium"
+blur_strength="medium"
+shadow_size="medium"
+corner_radius="10"
+transparency_level="0.92"
+
+# Performance balanced with visuals
+vfr="true"
+vrr="1"
+direct_scanout="true"
+power_save="true"
+
+# Balanced priorities
+fps_limit="75"
+optimization_level="balanced"
+disable_effects_gaming="true"
+adaptive_sync="true"
+
+# Workspace organization
+workspace_1="Main"
+workspace_2="Web"
+workspace_3="Dev"
+workspace_4="Media"
+workspace_5="Gaming"
+workspace_6="Misc"
+
+# Theme preferences for balanced setup
+default_theme="tokyo-night"     # Balanced theme that works well in all lighting
+auto_wallpaper="true"           # Change based on time of day
+wallpaper_effects="subtle"
+dynamic_theming="true"
+
+# Audio balanced settings
+pipewire_quantum="128"
+pipewire_rate="48000"
+audio_latency="medium"
+
+# Memory management
+memory_pressure_handler="enabled"
+background_blur_adaptive="true"

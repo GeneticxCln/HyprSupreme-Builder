@@ -1,0 +1,72 @@
+# HyprSupreme-Builder Preset: Default
+# General-purpose configuration suitable for most users
+
+# Configuration sources to include
+configs=(
+    "jakoolit"
+    "ml4w"
+)
+
+# Components to install
+components:
+  - hyprland
+  - waybar
+  - rofi
+  - warp
+    "themes"
+    "fonts"
+    "scripts"
+    "wallpapers"
+)
+
+# Features to enable
+features=(
+    "animations"
+    "blur"
+    "rounded"
+    "transparency"
+    "workspace_swipe"
+)
+
+# Default settings
+animation_style="default"
+blur_strength="medium"
+shadow_size="medium"
+corner_radius="8"
+transparency_level="0.90"
+
+# Default behavior
+focus_follows_mouse="true"
+gaps_in="5"
+gaps_out="10"
+border_size="2"
+smart_gaps="true"
+smart_borders="true"
+
+# Default workspace setup
+workspace_1="Main"
+workspace_2="Web"
+workspace_3="Work"
+workspace_4="Media"
+workspace_5="Chat"
+workspace_6="System"
+
+# Theme preferences
+default_theme="catppuccin-macchiato"
+auto_wallpaper="true"
+wallpaper_effects="true"
+accent_color="#8aadf4"
+icon_theme="Papirus"
+cursor_theme="Bibata-Modern-Classic"
+
+# Performance settings
+fps_limit="60"
+optimization_level="balanced"
+power_save="auto"
+
+# Default keyboard shortcuts
+terminal="SUPER, Return"
+launcher="SUPER, D"
+file_manager="SUPER, E"
+browser="SUPER, B"
+close_window="SUPER, Q"
