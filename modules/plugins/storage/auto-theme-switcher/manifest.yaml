@@ -1,0 +1,91 @@
+# Auto Theme Switcher Plugin for HyprSupreme
+# Automatically switches themes based on time of day
+
+# Basic plugin information
+name: "auto-theme-switcher"
+display_name: "Auto Theme Switcher"
+version: "1.0.0"
+author: "HyprSupreme Team"
+description: "Automatically switches between light and dark themes based on time of day"
+homepage: "https://github.com/GeneticxCln/HyprSupreme-Builder"
+license: "MIT"
+
+# Dependencies
+dependencies:
+  hyprsupreme: ">=2.0.0"
+  suntime: ">=1.0.0"
+
+# Plugin hooks
+hooks:
+  - name: "startup"
+    script: "scripts/startup.sh"
+    description: "Initializes the theme switcher and applies the correct theme"
+    
+  - name: "shutdown"
+    script: "scripts/shutdown.sh"
+    description: "Cleans up and stops any background processes"
+    
+  - name: "hourly"
+    script: "scripts/check_time.sh"
+    description: "Checks if theme should be changed based on time"
+
+# Plugin commands
+commands:
+  - name: "toggle"
+    script: "scripts/toggle.sh"
+    description: "Toggles automatic theme switching on/off"
+    usage: "hyprsupreme plugin auto-theme-switcher toggle"
+    
+  - name: "status"
+    script: "scripts/status.sh"
+    description: "Shows current status of the theme switcher"
+    usage: "hyprsupreme plugin auto-theme-switcher status"
+    
+  - name: "set-themes"
+    script: "scripts/set_themes.sh"
+    description: "Set the light and dark themes to use"
+    usage: "hyprsupreme plugin auto-theme-switcher set-themes [light-theme] [dark-theme]"
+    
+  - name: "set-times"
+    script: "scripts/set_times.sh"
+    description: "Set the times for switching themes"
+    usage: "hyprsupreme plugin auto-theme-switcher set-times [day-start-time] [night-start-time]"
+
+# Configuration
+config:
+  # Default configuration
+  enabled: true
+  
+  # Plugin settings
+  settings:
+    light_theme: "catppuccin-latte"
+    dark_theme: "tokyo-night"
+    day_starts: "07:00"
+    night_starts: "19:00"
+    use_location: true  # Use geolocation for sunrise/sunset
+    latitude: 0
+    longitude: 0
+    transition: "instant"  # instant, fade, or smooth
+    
+  # Hyprland integration
+  hyprland:
+    keybinds:
+      - "bind = SUPER SHIFT, T, exec, hyprsupreme plugin auto-theme-switcher toggle"
+    exec:
+      - "exec-once = hyprsupreme plugin auto-theme-switcher startup"
+
+# Plugin capabilities
+capabilities:
+  - "theming"
+  - "scheduling"
+  - "geolocation"
+  - "configuration"
+
+# Installation requirements
+requires:
+  commands:
+    - "bash"
+    - "jq"
+    - "curl"
+  packages:
+    - "geoclue2" # Optional for location-based sunrise/sunset

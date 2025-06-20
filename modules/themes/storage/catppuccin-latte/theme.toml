@@ -1,0 +1,109 @@
+# Catppuccin Latte Theme for HyprSupreme-Builder
+# A soothing pastel theme for Hyprland
+
+# Theme metadata
+name = "catppuccin-latte"
+version = "1.0.0"
+author = "HyprSupreme Team"
+description = "Soothing pastel theme with bright background (Latte variant)"
+homepage = "https://github.com/GeneticxCln/HyprSupreme-Builder"
+license = "MIT"
+
+# Colors section
+[colors]
+# Catppuccin Latte palette
+background = "#eff1f5"  # Base
+foreground = "#4c4f69"  # Text
+accent = "#8839ef"      # Mauve (primary accent)
+accent2 = "#ea76cb"     # Pink (secondary accent)
+surface = "#e6e9ef"     # Surface0
+border = "#acb0be"      # Surface2
+error = "#d20f39"       # Red
+success = "#40a02b"     # Green
+warning = "#df8e1d"     # Yellow
+inactive = "#9ca0b0"    # Overlay0
+
+# Special colors
+rosewater = "#dc8a78"
+flamingo = "#dd7878"
+pink = "#ea76cb"
+mauve = "#8839ef"
+red = "#d20f39"
+maroon = "#e64553"
+peach = "#fe640b"
+yellow = "#df8e1d"
+green = "#40a02b"
+teal = "#179299"
+sky = "#04a5e5"
+sapphire = "#209fb5"
+blue = "#1e66f5"
+lavender = "#7287fd"
+
+# Terminal colors
+term_black = "#e6e9ef"   # Surface0
+term_red = "#d20f39"     # Red
+term_green = "#40a02b"   # Green
+term_yellow = "#df8e1d"  # Yellow
+term_blue = "#1e66f5"    # Blue
+term_magenta = "#8839ef" # Mauve
+term_cyan = "#04a5e5"    # Sky
+term_white = "#4c4f69"   # Text
+term_bright_black = "#acb0be"  # Surface2
+term_bright_red = "#d20f39"    # Red
+term_bright_green = "#40a02b"  # Green
+term_bright_yellow = "#df8e1d" # Yellow
+term_bright_blue = "#1e66f5"   # Blue
+term_bright_magenta = "#8839ef"# Mauve
+term_bright_cyan = "#04a5e5"   # Sky
+term_bright_white = "#4c4f69"  # Text
+
+# Variables section
+[variables]
+font = "JetBrains Mono Nerd Font"   # Main font
+font_size = "10"                    # Font size
+font_size_mono = "10"               # Monospace font size
+icon_theme = "Papirus-Light"        # Icon theme
+cursor_theme = "Catppuccin-Latte-Mauve" # Cursor theme
+wallpaper = "wallpaper-light.png"   # Default wallpaper path
+border_size = "2"                   # Border size in pixels
+border_radius = "8"                 # Border radius for rounded corners
+gaps_in = "5"                       # Inner gaps
+gaps_out = "10"                     # Outer gaps
+shadow_size = "2"                   # Shadow size
+shadow_opacity = "0.3"              # Shadow opacity
+blur_size = "4"                     # Blur size
+blur_passes = "2"                   # Blur passes
+transparency = "0.95"               # Window transparency
+
+# Hyprland section
+[hyprland]
+animations = true                   # Enable animations
+blur = true                         # Enable blur
+shadows = true                      # Enable shadows
+transparency = true                 # Enable transparency
+
+# Animation settings
+animation_style = "smooth"
+animation_speed = "7"
+animation_curve = "default"
+
+# Color settings specific to Hyprland
+active_border = "$mauve"
+inactive_border = "$surface"
+group_border = "$surface"
+group_border_active = "$pink"
+
+# Advanced section
+[advanced]
+plugin_compatibility = ["auto-theme-switcher", "workspace-manager"]
+wallpaper_style = "fill"
+color_scheme = "light"
+extension_support = true
+gtk_theme = "Catppuccin-Latte-Standard-Mauve-Light"
+cursor_size = "24"
+
+# GTK and Qt integration
+[integration]
+gtk_theme = "Catppuccin-Latte-Standard-Mauve-Light"
+qt_theme = "Catppuccin-Latte"
+icon_size = "24"

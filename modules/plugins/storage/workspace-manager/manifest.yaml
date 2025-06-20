@@ -1,0 +1,119 @@
+# Workspace Manager Plugin for HyprSupreme
+# Manages workspaces with dynamic naming and layouts
+
+# Basic plugin information
+name: "workspace-manager"
+display_name: "Workspace Manager"
+version: "1.0.0"
+author: "HyprSupreme Team"
+description: "Dynamic workspace naming and layout management for Hyprland"
+homepage: "https://github.com/GeneticxCln/HyprSupreme-Builder"
+license: "MIT"
+
+# Dependencies
+dependencies:
+  hyprsupreme: ">=2.0.0"
+
+# Plugin hooks
+hooks:
+  - name: "startup"
+    script: "scripts/startup.sh"
+    description: "Initializes the workspace manager"
+    
+  - name: "workspace-change"
+    script: "scripts/workspace_changed.sh"
+    description: "Triggered when workspace changes"
+    
+  - name: "window-open"
+    script: "scripts/window_opened.sh"
+    description: "Triggered when a new window opens"
+    
+  - name: "window-close"
+    script: "scripts/window_closed.sh"
+    description: "Triggered when a window closes"
+
+# Plugin commands
+commands:
+  - name: "rename"
+    script: "scripts/rename_workspace.sh"
+    description: "Rename a workspace"
+    usage: "hyprsupreme plugin workspace-manager rename [workspace-id] [new-name]"
+    
+  - name: "layout"
+    script: "scripts/set_layout.sh"
+    description: "Set the layout for a workspace"
+    usage: "hyprsupreme plugin workspace-manager layout [workspace-id] [layout]"
+    
+  - name: "list"
+    script: "scripts/list_workspaces.sh"
+    description: "List all workspaces and their configurations"
+    usage: "hyprsupreme plugin workspace-manager list"
+    
+  - name: "create"
+    script: "scripts/create_workspace.sh"
+    description: "Create a new workspace with specific settings"
+    usage: "hyprsupreme plugin workspace-manager create [name] [layout] [monitor]"
+
+# Configuration
+config:
+  # Default configuration
+  enabled: true
+  
+  # Plugin settings
+  settings:
+    dynamic_names: true
+    icon_support: true
+    persist_names: true
+    default_layout: "dwindle"
+    auto_arrange: true
+    workspace_icons: {
+      "1": "",
+      "2": "",
+      "3": "",
+      "4": "",
+      "5": "",
+      "6": "",
+      "7": "",
+      "8": "",
+      "9": "",
+      "10": ""
+    }
+    app_icons: {
+      "Firefox": "",
+      "Chromium": "",
+      "Google-chrome": "",
+      "kitty": "",
+      "Alacritty": "",
+      "Code": "",
+      "code-oss": "",
+      "discord": "",
+      "Spotify": "",
+      "Steam": "",
+      "Thunar": "",
+      "dolphin": "",
+      "gimp": ""
+    }
+    
+  # Hyprland integration
+  hyprland:
+    keybinds:
+      - "bind = SUPER, grave, exec, hyprsupreme plugin workspace-manager rename $(hyprctl activeworkspace -j | jq -r '.id')"
+      - "bind = SUPER ALT, l, exec, hyprsupreme plugin workspace-manager layout $(hyprctl activeworkspace -j | jq -r '.id') dwindle"
+      - "bind = SUPER ALT, m, exec, hyprsupreme plugin workspace-manager layout $(hyprctl activeworkspace -j | jq -r '.id') master"
+    exec:
+      - "exec-once = hyprsupreme plugin workspace-manager startup"
+
+# Plugin capabilities
+capabilities:
+  - "workspaces"
+  - "layout-control"
+  - "window-management"
+  - "keybinds"
+
+# Installation requirements
+requires:
+  commands:
+    - "bash"
+    - "jq"
+    - "hyprctl"
+  packages: []

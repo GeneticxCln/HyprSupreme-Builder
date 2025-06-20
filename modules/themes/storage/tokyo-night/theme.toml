@@ -1,0 +1,92 @@
+# Tokyo Night Theme for HyprSupreme-Builder
+# A dark blue theme inspired by the Tokyo Night VSCode theme
+
+# Theme metadata
+name = "tokyo-night"
+version = "1.0.0"
+author = "HyprSupreme Team"
+description = "A dark blue theme inspired by the Tokyo Night VSCode theme"
+homepage = "https://github.com/GeneticxCln/HyprSupreme-Builder"
+license = "MIT"
+
+# Colors section
+[colors]
+background = "#1a1b26"  # Main background color
+foreground = "#c0caf5"  # Main text color
+accent = "#7aa2f7"      # Primary accent color
+accent2 = "#bb9af7"     # Secondary accent color
+surface = "#24283b"     # Surface/panel background color
+border = "#444b6a"      # Window border color
+error = "#f7768e"       # Error/warning color
+success = "#9ece6a"     # Success color
+warning = "#e0af68"     # Warning color
+inactive = "#565f89"    # Inactive elements color
+
+# Terminal colors
+term_black = "#32344a"
+term_red = "#f7768e"
+term_green = "#9ece6a" 
+term_yellow = "#e0af68"
+term_blue = "#7aa2f7"
+term_magenta = "#bb9af7"
+term_cyan = "#7dcfff"
+term_white = "#a9b1d6"
+term_bright_black = "#444b6a"
+term_bright_red = "#ff7a93"
+term_bright_green = "#b9f27c"
+term_bright_yellow = "#ff9e64"
+term_bright_blue = "#7da6ff"
+term_bright_magenta = "#bb9af7"
+term_bright_cyan = "#7dcfff"
+term_bright_white = "#c0caf5"
+
+# Variables section
+[variables]
+font = "JetBrains Mono Nerd Font"   # Main font
+font_size = "10"                    # Font size
+font_size_mono = "10"               # Monospace font size
+icon_theme = "Papirus-Dark"         # Icon theme
+cursor_theme = "Bibata-Modern-Ice"  # Cursor theme
+wallpaper = "wallpaper.jpg"         # Default wallpaper path
+border_size = "2"                   # Border size in pixels
+border_radius = "8"                 # Border radius for rounded corners
+gaps_in = "5"                       # Inner gaps
+gaps_out = "10"                     # Outer gaps
+shadow_size = "3"                   # Shadow size
+shadow_opacity = "0.5"              # Shadow opacity
+blur_size = "8"                     # Blur size
+blur_passes = "2"                   # Blur passes
+transparency = "0.9"                # Window transparency
+
+# Hyprland section
+[hyprland]
+animations = true                   # Enable animations
+blur = true                         # Enable blur
+shadows = true                      # Enable shadows
+transparency = true                 # Enable transparency
+
+# Animation settings
+animation_style = "smooth"
+animation_speed = "8"
+animation_curve = "default"
+
+# Color settings specific to Hyprland
+active_border = "$accent"
+inactive_border = "$inactive"
+group_border = "$surface"
+group_border_active = "$accent2"
+
+# Advanced section
+[advanced]
+plugin_compatibility = ["auto-theme-switcher", "workspace-manager"]
+wallpaper_style = "fill"
+color_scheme = "dark"
+extension_support = true
+gtk_theme = "TokyoNight-Dark"
+cursor_size = "24"
+
+# GTK and Qt integration
+[integration]
+gtk_theme = "TokyoNight-Dark"
+qt_theme = "TokyoNight"
+icon_size = "24"

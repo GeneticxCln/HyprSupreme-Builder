@@ -1,3 +1,106 @@
+<h1 align="center">👨‍💻 Hello, I'm GeneticxCln! 🚀</h1>
+
+<p align="center">
+  <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&size=22&duration=3000&pause=1000&color=38BDAE&center=true&vCenter=true&width=440&lines=Linux+Enthusiast;Open+Source+Contributor;Systems+Developer;Always+Learning" alt="Typing SVG" />
+</p>
+
+<p align="center">
+  <a href="https://github.com/GeneticxCln"><img src="https://img.shields.io/github/followers/GeneticxCln?label=Followers&style=social" alt="GitHub Followers"></a>
+  <img src="https://komarev.com/ghpvc/?username=GeneticxCln&color=brightgreen&style=flat-square&label=Profile+Views" alt="Profile Views">
+  <a href="https://github.com/GeneticxCln/HyprSupreme-Builder"><img src="https://img.shields.io/github/stars/GeneticxCln/HyprSupreme-Builder?style=social" alt="HyprSupreme-Builder Stars"></a>
+</p>
+
+---
+
+## 🧠 About Me
+
+I'm a passionate systems developer specializing in Linux customization and automation. My journey in software development is driven by creating elegant solutions for complex problems and contributing to the open-source community. Currently working on enhancing desktop environments for Linux systems with a focus on performance and user experience.
+
+> "The best way to predict the future is to create it." 
+
+Working from my CachyOS Linux system, I aim to build tools that make Linux more accessible and customizable for everyone.
+
+---
+
+## 🛠️ Skills & Technologies
+
+<p align="center">
+  <!-- Programming Languages -->
+  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
+  <img src="https://img.shields.io/badge/Shell_Script-121011?style=for-the-badge&logo=gnu-bash&logoColor=white" alt="Shell Script" />
+  <img src="https://img.shields.io/badge/Rust-000000?style=for-the-badge&logo=rust&logoColor=white" alt="Rust" />
+  <!-- Tools & Frameworks -->
+  <img src="https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white" alt="Git" />
+  <img src="https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" />
+  <!-- Operating Systems -->
+  <img src="https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Linux" />
+  <img src="https://img.shields.io/badge/Arch_Linux-1793D1?style=for-the-badge&logo=arch-linux&logoColor=white" alt="Arch Linux" />
+</p>
+
+### Areas of Expertise
+- 🖥️ Linux System Administration
+- 🚀 Performance Optimization
+- 🔧 DevOps & Automation
+- 🔄 CI/CD Pipelines
+- 🎨 Desktop Environment Customization
+- 🐧 Linux Distribution Development
+
+---
+
+## 📊 GitHub Stats
+
+<p align="center">
+  <img src="https://github-readme-stats.vercel.app/api?username=GeneticxCln&show_icons=true&theme=tokyonight&hide_border=true" alt="GeneticxCln's GitHub Stats" width="48%" />
+  <img src="https://github-readme-streak-stats.herokuapp.com/?user=GeneticxCln&theme=tokyonight&hide_border=true" alt="GeneticxCln's GitHub Streak" width="48%" />
+</p>
+
+<p align="center">
+  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=GeneticxCln&layout=compact&theme=tokyonight&hide_border=true" alt="GeneticxCln's Top Languages" width="58%" />
+</p>
+
+---
+
+## 🔥 Featured Projects
+
+<a href="https://github.com/GeneticxCln/HyprSupreme-Builder">
+  <img align="center" src="https://github-readme-stats.vercel.app/api/pin/?username=GeneticxCln&repo=HyprSupreme-Builder&theme=tokyonight&hide_border=true" alt="HyprSupreme-Builder" />
+</a>
+
+### 🚀 HyprSupreme-Builder
+
+A comprehensive tool for building optimized Hyprland desktop environments on Arch-based Linux distributions. Features automated installation, performance tuning, and a collection of pre-configured dotfiles for a seamless experience.
+
+**Key Features:**
+- 🔄 Automated environment setup
+- ⚙️ Extensive configuration options
+- 🎨 Customizable theming
+- 🛠️ Performance optimization tools
+- 📦 Package management integration
+
+---
+
+## 📈 Activity Graph
+
+<p align="center">
+  <img src="https://github-readme-activity-graph.vercel.app/graph?username=GeneticxCln&theme=tokyo-night&hide_border=true" alt="GeneticxCln's Contribution Graph" width="100%" />
+</p>
+
+---
+
+## 📫 Connect With Me
+
+<p align="center">
+  <a href="mailto:geneticxcln@example.com"><img src="https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Email" /></a>
+  <a href="https://github.com/GeneticxCln"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a>
+  <a href="https://www.linkedin.com/in/geneticxcln/"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a>
+</p>
+
+---
+
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&height=100&section=footer" alt="Wave Footer" />
+</p>
+
 <div align="center">
 
 ![HyprSupreme-Builder Banner](.github/assets/animated-banner.svg)
