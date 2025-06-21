@@ -1,0 +1,42 @@
+{
+  "name": "advanced-testing-platform",
+  "version": "2.0.0",
+  "description": "Cutting-edge testing platform with Chaos Engineering, A/B Testing, AI Test Generation, and Performance Optimization",
+  "main": "example-integration.js",
+  "scripts": {
+    "start": "node example-integration.js",
+    "chaos": "node chaos-monkey-demo.js",
+    "ab-test": "node ab-testing-demo.js",
+    "ai-tests": "node ai-testing-demo.js",
+    "performance": "node performance-demo.js",
+    "dashboard": "node unified-dashboard.js",
+    "demo": "node complete-demo.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "body-parser": "^1.20.2",
+    "compression": "^1.7.4",
+    "helmet": "^7.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3",
+    "nodemon": "^3.0.1"
+  },
+  "keywords": [
+    "chaos-engineering",
+    "ab-testing",
+    "ai-testing",
+    "performance-optimization",
+    "testing-framework",
+    "quality-assurance",
+    "automation",
+    "machine-learning"
+  ],
+  "author": "Advanced Testing Platform",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "api-integration-testing",
+  "version": "1.0.0",
+  "description": "Sample API for integration testing with Postman, Supertest, and RestAssured",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "jest",
+    "test:integration": "jest --testNamePattern='Integration'"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "body-parser": "^1.20.2"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3"
+  },
+  "keywords": ["api", "testing", "integration", "postman", "supertest", "restassured"],
+  "author": "Integration Testing Demo",
+  "license": "MIT"
+}

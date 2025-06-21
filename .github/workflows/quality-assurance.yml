@@ -1,0 +1,292 @@
+name: Quality Assurance Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run tests daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run unit tests
+        run: npm run test:unit
+      
+      - name: Generate coverage report
+        run: npm run test:coverage
+      
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage/lcov.info
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Start API server
+        run: |
+          npm start &
+          sleep 5
+      
+      - name: Run Supertest integration tests
+        run: npm run test:integration
+      
+      - name: Install Newman (Postman CLI)
+        run: npm install -g newman
+      
+      - name: Run Postman collection tests
+        run: newman run postman/API-Integration-Tests.postman_collection.json
+
+  restassured-tests:
+    name: RestAssured Tests (Java)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+      
+      - name: Setup Node.js (for API server)
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install Node.js dependencies
+        run: npm ci
+      
+      - name: Start API server
+        run: |
+          npm start &
+          sleep 5
+      
+      - name: Run RestAssured tests
+        run: |
+          cd restassured
+          mvn test
+      
+      - name: Publish test results
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: RestAssured Tests
+          path: restassured/target/surefire-reports/*.xml
+          reporter: java-junit
+
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Start application
+        run: |
+          npm start &
+          sleep 5
+      
+      - name: Run E2E tests
+        run: npm run test:e2e
+        # Uncomment if using Cypress
+        # uses: cypress-io/github-action@v5
+        # with:
+        #   start: npm start
+        #   wait-on: 'http://localhost:3000'
+
+  performance-tests:
+    name: Performance Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Start API server
+        run: |
+          npm start &
+          sleep 5
+      
+      - name: Install Artillery
+        run: npm install -g artillery
+      
+      - name: Run performance tests
+        run: npm run test:performance
+      
+      - name: Upload performance results
+        uses: actions/upload-artifact@v3
+        with:
+          name: performance-results
+          path: performance-results.json
+
+  security-tests:
+    name: Security Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run security audit
+        run: npm audit --audit-level moderate
+      
+      - name: Run Snyk security scan
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+
+  cross-browser-tests:
+    name: Cross-Browser Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        browser: [chrome, firefox, edge]
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Start application
+        run: |
+          npm start &
+          sleep 5
+      
+      - name: Run cross-browser tests
+        run: npm run test:browser:${{ matrix.browser }}
+
+  quality-gate:
+    name: Quality Gate
+    needs: [unit-tests, integration-tests, restassured-tests, e2e-tests, performance-tests, security-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check all tests passed
+        run: |
+          echo "🎉 All quality gates passed!"
+          echo "✅ Unit tests completed successfully"
+          echo "✅ Integration tests completed successfully"
+          echo "✅ RestAssured tests completed successfully"
+          echo "✅ E2E tests completed successfully"
+          echo "✅ Performance tests completed successfully"
+          echo "✅ Security tests completed successfully"
+          echo ""
+          echo "🚀 Ready for deployment!"
+
+  deploy-staging:
+    name: Deploy to Staging
+    needs: [quality-gate]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+    steps:
+      - name: Deploy to staging environment
+        run: |
+          echo "🚀 Deploying to staging environment..."
+          # Add your deployment commands here
+
+  deploy-production:
+    name: Deploy to Production
+    needs: [quality-gate]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    steps:
+      - name: Deploy to production environment
+        run: |
+          echo "🚀 Deploying to production environment..."
+          # Add your deployment commands here
+      
+      - name: Notify team
+        run: |
+          echo "📢 Production deployment completed successfully!"
+          # Add notification logic here (Slack, email, etc.)
+
+  test-reporting:
+    name: Generate Test Report
+    needs: [unit-tests, integration-tests, restassured-tests, e2e-tests, performance-tests, security-tests]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Generate comprehensive test report
+        run: |
+          echo "# 📊 Test Execution Report" > test-report.md
+          echo "" >> test-report.md
+          echo "**Date:** $(date)" >> test-report.md
+          echo "**Commit:** ${{ github.sha }}" >> test-report.md
+          echo "**Branch:** ${{ github.ref_name }}" >> test-report.md
+          echo "" >> test-report.md
+          echo "## Test Results" >> test-report.md
+          echo "" >> test-report.md
+          echo "- ✅ Unit Tests: ${{ needs.unit-tests.result }}" >> test-report.md
+          echo "- ✅ Integration Tests: ${{ needs.integration-tests.result }}" >> test-report.md
+          echo "- ✅ RestAssured Tests: ${{ needs.restassured-tests.result }}" >> test-report.md
+          echo "- ✅ E2E Tests: ${{ needs.e2e-tests.result }}" >> test-report.md
+          echo "- ✅ Performance Tests: ${{ needs.performance-tests.result }}" >> test-report.md
+          echo "- ✅ Security Tests: ${{ needs.security-tests.result }}" >> test-report.md
+      
+      - name: Upload test report
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-report
+          path: test-report.md
