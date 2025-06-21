@@ -14,7 +14,7 @@
 [![Version](https://img.shields.io/badge/Version-4.0.0-blueviolet?style=for-the-badge&logo=semanticrelease)](https://github.com/GeneticxCln/HyprSupreme-Builder/releases/tag/v4.0.0)
 [![Release](https://img.shields.io/github/v/release/GeneticxCln/HyprSupreme-Builder?style=for-the-badge&label=⭐%20LATEST&logo=github&color=success)](https://github.com/GeneticxCln/HyprSupreme-Builder/releases/latest)
 [![Tests](https://img.shields.io/badge/Tests-100%25%20PASS-brightgreen?style=for-the-badge&logo=check&logoColor=white)](#-comprehensive-testing)
-[![Production](https://img.shields.io/badge/Status-PRODUCTION%20READY-success?style=for-the-badge&logo=rocket)](#-whats-new-in-v300---production-release)
+[![Production](https://img.shields.io/badge/Status-PRODUCTION%20READY-success?style=for-the-badge&logo=rocket)](#-whats-new-in-v400---major-release)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge&logo=opensourceinitiative)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/GeneticxCln/HyprSupreme-Builder?style=for-the-badge&logo=github&color=yellow)](https://github.com/GeneticxCln/HyprSupreme-Builder/stargazers)
 [![Forks](https://img.shields.io/github/forks/GeneticxCln/HyprSupreme-Builder?style=for-the-badge&logo=github&color=blue)](https://github.com/GeneticxCln/HyprSupreme-Builder/network/members)
@@ -250,7 +250,8 @@ open http://localhost:5000
 
 ### 📖 **Comprehensive Guides**
 - **[📋 Installation Guide](INSTALLATION_GUIDE.md)** - Complete setup instructions with prerequisites
-- **[📝 Release Notes v3.0.0](RELEASE_NOTES_v3.0.0.md)** - Detailed changes in the latest version 🆕
+- **[📝 Release Notes v4.0.0](RELEASE_NOTES_v4.0.0.md)** - Detailed changes in the latest version 🆕
+- **[📝 Release Notes v3.0.0](RELEASE_NOTES_v3.0.0.md)** - Previous stable version notes
 - **[Keybindings Reference](KEYBINDINGS_REFERENCE.md)** - Complete keyboard shortcuts guide
 - **[Community Commands](COMMUNITY_COMMANDS.md)** - CLI and web interface usage
 - **[Resolution Functions](RESOLUTION_FUNCTIONS.md)** - Multi-monitor setup guide
