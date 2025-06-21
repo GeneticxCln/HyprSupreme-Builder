@@ -17,9 +17,8 @@ clap = { version = "4.4", features = ["derive"] }
 dialoguer = "0.11"
 indicatif = "0.17"
 
-# Async runtime and networking
-tokio = { version = "1.32", features = ["full"] }
-reqwest = { version = "0.12", features = ["json"] }
+# Networking
+reqwest = { version = "0.12", features = ["json", "blocking"] }
 
 # Serialization and data formats
 serde = { version = "1.0", features = ["derive"] }
@@ -48,5 +47,5 @@ lazy_static = "1.5"
 semver = "1.0"
 
 # Python bindings
-pyo3 = { version = "0.20", features = ["extension-module"] }
-pyo3-build-config = "0.20"
+pyo3 = { version = "0.22", features = ["extension-module"] }
+pyo3-build-config = "0.22"

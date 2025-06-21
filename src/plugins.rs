@@ -659,6 +659,10 @@ impl PluginManager {
 
 impl Default for PluginManager {
     fn default() -> Self {
-        Self::new()
+        PluginManager {
+            loader: PluginLoader::new(),
+            plugins: HashMap::new(),
+            enabled_plugins: Vec::new(),
+        }
     }
 }

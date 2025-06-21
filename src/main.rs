@@ -150,15 +150,10 @@ fn setup() -> Result<()> {
     // Setup logging
     tracing_subscriber::fmt::init();
     
-    // Initialize theme and plugin managers
-    let _theme_manager = ThemeManager::default();
-    let mut plugin_manager = PluginManager::default();
-    plugin_manager.initialize()?;
-    
     Ok(())
 }
 
-async fn init_command(dir: PathBuf, template: String) -> Result<()> {
+fn init_command(dir: PathBuf, template: String) -> Result<()> {
     println!("Initializing new configuration in {:?} using template '{}'", dir, template);
     
     // Create directory if it doesn't exist
@@ -183,7 +178,7 @@ async fn init_command(dir: PathBuf, template: String) -> Result<()> {
     Ok(())
 }
 
-async fn build_command(config: Option<PathBuf>, output: Option<PathBuf>) -> Result<()> {
+fn build_command(config: Option<PathBuf>, output: Option<PathBuf>) -> Result<()> {
     let config_path = config.unwrap_or_else(|| PathBuf::from("hyprsupreme.toml"));
     let output_dir = output.unwrap_or_else(|| PathBuf::from("build"));
     
@@ -218,7 +213,7 @@ async fn build_command(config: Option<PathBuf>, output: Option<PathBuf>) -> Resu
     Ok(())
 }
 
-async fn update_command(config: Option<PathBuf>, component: Option<String>) -> Result<()> {
+fn update_command(config: Option<PathBuf>, component: Option<String>) -> Result<()> {
     let config_path = config.unwrap_or_else(|| PathBuf::from("hyprsupreme.toml"));
     
     match &component {
@@ -257,8 +252,7 @@ async fn update_command(config: Option<PathBuf>, component: Option<String>) -> R
     Ok(())
 }
 
-#[tokio::main]
-async fn main() -> Result<()> {
+fn main() -> Result<()> {
     // Setup error handling and logging
     setup().wrap_err("Failed to setup application")?;
     
@@ -273,13 +267,13 @@ async fn main() -> Result<()> {
     // Handle commands
     match cli.command {
         Commands::Init { dir, template } => {
-            init_command(dir, template).await?;
+            init_command(dir, template)?;
         },
         Commands::Build { config, output } => {
-            build_command(config, output).await?;
+            build_command(config, output)?;
         },
         Commands::Update { config, component } => {
-            update_command(config, component).await?;
+            update_command(config, component)?;
         },
         Commands::Theme { command } => {
             match command {

@@ -124,7 +124,7 @@ impl ConfigGenerator {
         ConfigGenerator {}
     }
 
-    fn generate_config(&self, theme: &str, plugins: Vec<&str>, _additional_config: &str) -> PyResult<String> {
+    fn generate_config(&self, theme: &str, plugins: Vec<String>, _additional_config: &str) -> PyResult<String> {
         // Mock implementation for now
         Ok(format!("Generated config for theme: {}, plugins: {:?}", theme, plugins))
     }
@@ -137,7 +137,7 @@ impl ConfigGenerator {
 
 /// A Python module implemented in Rust.
 #[pymodule]
-fn hyprsupreme_core(_py: Python, m: &PyModule) -> PyResult<()> {
+fn hyprsupreme_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PluginManager>()?;
     m.add_class::<ThemeManager>()?;
     m.add_class::<ConfigGenerator>()?;
