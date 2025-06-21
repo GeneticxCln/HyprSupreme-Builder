@@ -1,5 +1,5 @@
 #!/bin/bash
-# HyprSupreme-Builder v2.1.1 Enhanced Edition - Quick Install Script
+# HyprSupreme-Builder v3.0.0 Enhanced Edition - Quick Install Script
 # https://github.com/GeneticxCln/HyprSupreme-Builder
 
 set -euo pipefail
@@ -29,7 +29,7 @@ print_banner() {
     echo "║                                                               ║"
     echo "║              ${ROCKET} HYPRLAND SUPREME BUILDER ${ROCKET}                  ║"
     echo "║                                                               ║"
-    echo "║          Enhanced Edition v2.1.1 - Quick Install             ║"
+    echo "║          Enhanced Edition v3.0.0 - Quick Install             ║"
     echo "║                                                               ║"
     echo "║    ${STAR} Enterprise-Grade ${STAR} Production-Ready ${STAR} Enhanced ${STAR}     ║"
     echo "║                                                               ║"
@@ -39,7 +39,7 @@ print_banner() {
 }
 
 print_features() {
-    echo -e "${CYAN}${BOLD}${STAR} What's New in v2.1.1 Enhanced Edition:${NC}"
+    echo -e "${CYAN}${BOLD}${STAR} What's New in v3.0.0 Enhanced Edition:${NC}"
     echo
     echo -e "${GREEN}${CHECK} Enterprise-grade error handling with intelligent recovery${NC}"
     echo -e "${GREEN}${CHECK} Advanced system diagnostics and health monitoring${NC}"
@@ -87,8 +87,8 @@ install_hyprsupreme() {
     fi
     
     # Clone the repository
-    echo -e "${BLUE}${INFO} Downloading HyprSupreme-Builder v2.1.1 Enhanced Edition...${NC}"
-    if ! git clone --depth 1 --branch v2.1.1-enhanced https://github.com/GeneticxCln/HyprSupreme-Builder.git "$install_dir"; then
+    echo -e "${BLUE}${INFO} Downloading HyprSupreme-Builder v3.0.0 Enhanced Edition...${NC}"
+    if ! git clone --depth 1 --branch release/v3.0.0 https://github.com/GeneticxCln/HyprSupreme-Builder.git "$install_dir"; then
         echo -e "${RED}${CROSS} Failed to clone repository${NC}"
         exit 1
     fi
@@ -191,7 +191,7 @@ main() {
     print_features
     check_requirements
     
-    echo -e "${YELLOW}${BOLD}${ROCKET} Ready to install HyprSupreme-Builder v2.1.1 Enhanced Edition${NC}"
+    echo -e "${YELLOW}${BOLD}${ROCKET} Ready to install HyprSupreme-Builder v3.0.0 Enhanced Edition${NC}"
     echo
     
     if [[ "$preset" != "unattended" ]]; then

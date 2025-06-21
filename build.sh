@@ -14,7 +14,7 @@ set -euo pipefail
 IFS=$'\n\t'
 
 # Script configuration
-readonly SCRIPT_VERSION="2.1.0-enhanced"
+readonly SCRIPT_VERSION="3.0.0-enhanced"
 readonly PROJECT_NAME="HyprSupreme-Builder"
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly TEMP_DIR=$(mktemp -d)
