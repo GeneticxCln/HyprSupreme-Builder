@@ -20,7 +20,7 @@ keywords = [
     "community", "builder", "automation"
 ]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Environment :: X11 Applications",
     "Environment :: Console",
     "Environment :: Web Environment",
