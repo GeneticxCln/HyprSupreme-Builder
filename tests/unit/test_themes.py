@@ -25,11 +25,17 @@ except ImportError:
             self.active_theme = None
         
         def load_theme(self, name):
-            return {"name": name, "colors": {}, "variables": {}}
+            return {"name": name, "colors": {"background": "#000000"}, "variables": {}}
         
         def apply_theme(self, name):
             self.active_theme = name
             return True
+        
+        def get_theme_color(self, color_name):
+            return "#ff0000"
+        
+        def get_theme_variable(self, var_name):
+            return "default_value"
     
     class ThemeLoader:
         def load_theme(self, path):

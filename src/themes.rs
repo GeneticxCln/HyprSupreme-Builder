@@ -317,6 +317,50 @@ impl ThemeManager {
         Theme::new(name)
     }
     
+    /// Get a color from the active theme
+    pub fn get_theme_color(&self, color_name: &str) -> Result<String> {
+        let active = self.active_theme.read().unwrap();
+        if let Some(theme) = active.as_ref() {
+            theme.get_color(color_name)
+                .cloned()
+                .ok_or_else(|| color_eyre::eyre::eyre!("Color not found: {}", color_name))
+        } else {
+            Err(color_eyre::eyre::eyre!("No active theme"))
+        }
+    }
+    
+    /// Get a variable from the active theme
+    pub fn get_theme_variable(&self, var_name: &str) -> Result<String> {
+        let active = self.active_theme.read().unwrap();
+        if let Some(theme) = active.as_ref() {
+            theme.get_variable(var_name)
+                .cloned()
+                .ok_or_else(|| color_eyre::eyre::eyre!("Variable not found: {}", var_name))
+        } else {
+            Err(color_eyre::eyre::eyre!("No active theme"))
+        }
+    }
+    
+    /// Get list of all themes
+    pub fn get_themes(&self) -> Vec<String> {
+        self.list_themes()
+    }
+    
+    /// Reload the current theme
+    pub fn reload_theme(&mut self) -> Result<()> {
+        let active = self.active_theme.read().unwrap();
+        if let Some(theme) = active.as_ref() {
+            let theme_name = theme.name.clone();
+            drop(active); // Release the read lock
+            
+            // Clear cache and reload
+            self.theme_cache.remove(&theme_name);
+            self.set_theme(&theme_name)
+        } else {
+            Err(color_eyre::eyre::eyre!("No active theme to reload"))
+        }
+    }
+    
     /// Save a theme to disk
     pub fn save_theme(&mut self, theme: &Theme, format: ThemeFormat) -> Result<PathBuf> {
         if let Some(config_dir) = dirs::config_dir() {

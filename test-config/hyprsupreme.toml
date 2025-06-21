@@ -1,0 +1,33 @@
+default_profile = "default"
+imports = []
+
+[metadata]
+name = "hyprsupreme-config"
+author = "HyprSupreme User"
+version = "0.1.0"
+description = "A HyprSupreme configuration"
+
+[variables]
+"color.accent" = "#7aa2f7"
+"color.background" = "#1a1b26"
+"color.foreground" = "#c0caf5"
+
+[profiles.default]
+imports = []
+
+[profiles.default.variables]
+terminal = "kitty"
+browser = "firefox"
+
+[profiles.laptop]
+imports = []
+
+[profiles.laptop.variables]
+scale = "1.5"
+
+[hyprland]
+modules = []
+keybindings = []
+autostart = []
+
+[hyprland.theme]

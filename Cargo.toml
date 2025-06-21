@@ -7,6 +7,10 @@ authors = ["Alex <alex@example.com>"]
 license = "MIT"
 repository = "https://github.com/username/hyprsupreme-builder"
 
+[lib]
+name = "hyprsupreme_builder"
+crate-type = ["cdylib"]
+
 [dependencies]
 # CLI and user interface
 clap = { version = "4.4", features = ["derive"] }
@@ -42,3 +46,7 @@ git2 = "0.18"
 regex = "1.10"
 lazy_static = "1.5"
 semver = "1.0"
+
+# Python bindings
+pyo3 = { version = "0.20", features = ["extension-module"] }
+pyo3-build-config = "0.20"

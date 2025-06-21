@@ -10,7 +10,11 @@ import json
 import argparse
 import subprocess
 import statistics
-import resource
+try:
+    import resource
+except ImportError:
+    # resource module is not available on Windows
+    resource = None
 from pathlib import Path
 from datetime import datetime
 
@@ -46,8 +50,14 @@ def log(message):
 
 def get_memory_usage():
     """Get current memory usage in MB."""
-    usage = resource.getrusage(resource.RUSAGE_SELF)
-    return usage.ru_maxrss / 1024  # Convert KB to MB
+    if resource is not None:
+        usage = resource.getrusage(resource.RUSAGE_SELF)
+        return usage.ru_maxrss / 1024  # Convert KB to MB
+    else:
+        # Fallback for Windows using psutil
+        import psutil
+        process = psutil.Process()
+        return process.memory_info().rss / (1024 * 1024)  # Convert bytes to MB
 
 
 def get_system_info():

@@ -22,19 +22,18 @@ except ImportError:
     class PluginManager:
         def __init__(self):
             self.plugins = {}
-            self.enabled_plugins = []
-        
+            
         def load_plugin(self, name):
             return {"name": name, "version": "1.0.0", "enabled": False}
         
         def enable_plugin(self, name):
-            self.enabled_plugins.append(name)
             return True
         
         def disable_plugin(self, name):
-            if name in self.enabled_plugins:
-                self.enabled_plugins.remove(name)
             return True
+        
+        def execute_command(self, plugin_name, command_name):
+            return {"status": "success", "output": "Command executed"}
     
     class PluginLoader:
         def load_plugin(self, path):

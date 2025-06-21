@@ -424,7 +424,7 @@ impl PluginManager {
     }
     
     /// Get all loaded plugins
-    pub fn get_plugins(&self) -> Vec<&Plugin> {
+    pub fn get_all_plugins(&self) -> Vec<&Plugin> {
         self.plugins.values().collect()
     }
     
@@ -597,6 +597,23 @@ impl PluginManager {
         self.plugins.remove(name);
         
         Ok(())
+    }
+    
+    /// Execute a command from a specific plugin
+    pub fn execute_command(&self, plugin_name: &str, command_name: &str, args: &[&str]) -> Result<String> {
+        let plugin = self.get_plugin(plugin_name)
+            .ok_or_else(|| color_eyre::eyre::eyre!("Plugin not found: {}", plugin_name))?;
+        
+        if !self.enabled_plugins.contains(&plugin_name.to_string()) {
+            return Err(color_eyre::eyre::eyre!("Plugin not enabled: {}", plugin_name));
+        }
+        
+        plugin.execute_command(command_name, args)
+    }
+    
+    /// Get list of plugin names
+    pub fn get_plugins(&self) -> Vec<String> {
+        self.plugins.keys().cloned().collect()
     }
     
     /// Execute a hook for all enabled plugins

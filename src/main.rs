@@ -369,20 +369,22 @@ async fn main() -> Result<()> {
             
             match command {
                 PluginCommands::List => {
-                    let plugins = plugin_manager.get_plugins();
+                    let plugin_names = plugin_manager.get_plugins();
                     
                     println!("Available plugins:");
-                    for plugin in plugins {
-                        let status = match plugin.state {
-                            PluginState::Enabled => "enabled",
-                            PluginState::Installed => "installed",
-                            PluginState::NotInstalled => "not installed",
-                            PluginState::Error(_) => "error",
-                        };
-                        
-                        println!("  - {} (v{}) [{}]", plugin.manifest.name, plugin.manifest.version, status);
-                        if let Some(desc) = &plugin.manifest.description {
-                            println!("    {}", desc);
+                    for plugin_name in plugin_names {
+                        if let Some(plugin) = plugin_manager.get_plugin(&plugin_name) {
+                            let status = match plugin.state {
+                                PluginState::Enabled => "enabled",
+                                PluginState::Installed => "installed",
+                                PluginState::NotInstalled => "not installed",
+                                PluginState::Error(_) => "error",
+                            };
+                            
+                            println!("  - {} (v{}) [{}]", plugin.manifest.name, plugin.manifest.version, status);
+                            if let Some(desc) = &plugin.manifest.description {
+                                println!("    {}", desc);
+                            }
                         }
                     }
                 },

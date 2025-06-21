@@ -52,8 +52,9 @@ class TestThemePluginConflicts:
         shutil.rmtree(self.temp_dir, ignore_errors=True)
     
     def run_hyprsupreme_command(self, *args):
-        """Run hyprsupreme command and return output."""
-        cmd = ["hyprsupreme"] + list(args)
+        """Run hyprsupreme command and return result."""
+        # Use cargo run for cross-platform compatibility
+        cmd = ["cargo", "run", "--"] + list(args)
         return subprocess.run(cmd, check=True, capture_output=True, text=True)
     
     def create_conflicting_config(self, theme_name, plugin_name):

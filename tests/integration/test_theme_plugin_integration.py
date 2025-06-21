@@ -36,6 +36,12 @@ except ImportError:
         
         def get_current_theme(self):
             return self.current_theme
+        
+        def get_theme_colors(self, theme_name):
+            return {
+                "workspace_active": "#ff0000",
+                "workspace_inactive": "#000000"
+            }
     
     class PluginManager:
         def __init__(self):
@@ -56,10 +62,28 @@ except ImportError:
         
         def get_enabled_plugins(self):
             return self.enabled_plugins
+        
+        def execute_hook(self, plugin_name, hook_name, context):
+            return {"status": "success", "output": f"Hook {hook_name} executed for {plugin_name}"}
+        
+        def execute_command(self, plugin_name, command_name, args=None):
+            return {"status": "success", "output": f"Command {command_name} executed for {plugin_name}"}
     
     class ConfigGenerator:
         def generate_config(self, theme, plugins, output_dir):
             return True
+        
+        def detect_conflicts(self, theme, plugins, output_dir):
+            # Mock conflict detection
+            conflicts = []
+            if theme == "tokyo-night" and "workspace-manager" in plugins:
+                conflicts.append({
+                    "type": "keybind",
+                    "theme": theme,
+                    "plugin": "workspace-manager",
+                    "detail": "Both define SUPER + W keybinding"
+                })
+            return conflicts
 
 
 class TestThemePluginIntegration(unittest.TestCase):
