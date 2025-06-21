@@ -11,7 +11,7 @@
 
 ---
 
-[![Version](https://img.shields.io/badge/Version-3.0.0-blueviolet?style=for-the-badge&logo=semanticrelease)](https://github.com/GeneticxCln/HyprSupreme-Builder/releases/tag/v3.0.0)
+[![Version](https://img.shields.io/badge/Version-4.0.0-blueviolet?style=for-the-badge&logo=semanticrelease)](https://github.com/GeneticxCln/HyprSupreme-Builder/releases/tag/v4.0.0)
 [![Release](https://img.shields.io/github/v/release/GeneticxCln/HyprSupreme-Builder?style=for-the-badge&label=⭐%20LATEST&logo=github&color=success)](https://github.com/GeneticxCln/HyprSupreme-Builder/releases/latest)
 [![Tests](https://img.shields.io/badge/Tests-100%25%20PASS-brightgreen?style=for-the-badge&logo=check&logoColor=white)](#-comprehensive-testing)
 [![Production](https://img.shields.io/badge/Status-PRODUCTION%20READY-success?style=for-the-badge&logo=rocket)](#-whats-new-in-v300---production-release)
@@ -28,15 +28,15 @@
 
 ---
 
-## 🎉 **PRODUCTION RELEASE v3.0.0 - NOW AVAILABLE!** 
+## 🎉 **MAJOR RELEASE v4.0.0 - NOW AVAILABLE!** 
 
-### ✨ **[🚀 Download v3.0.0](https://github.com/GeneticxCln/HyprSupreme-Builder/releases/tag/v3.0.0)** - *Enterprise-grade release with comprehensive test coverage and production-ready architecture!*
+### ✨ **[🚀 Download v4.0.0](https://github.com/GeneticxCln/HyprSupreme-Builder/releases/tag/v4.0.0)** - *Next-generation release with enhanced features, improved performance, and extended compatibility!*
 
 </div>
 
 ---
 
-## 🌟 **What's New in v3.0.0 - PRODUCTION RELEASE**
+## 🌟 **What's New in v4.0.0 - MAJOR RELEASE**
 
 <div align="center">
 
