@@ -1,6 +1,5 @@
 use pyo3::prelude::*;
 use pyo3::exceptions::PyRuntimeError;
-use std::collections::HashMap;
 
 mod plugins;
 mod themes;
@@ -125,12 +124,12 @@ impl ConfigGenerator {
         ConfigGenerator {}
     }
 
-    fn generate_config(&self, theme: &str, plugins: Vec<&str>, additional_config: &str) -> PyResult<String> {
+    fn generate_config(&self, theme: &str, plugins: Vec<&str>, _additional_config: &str) -> PyResult<String> {
         // Mock implementation for now
         Ok(format!("Generated config for theme: {}, plugins: {:?}", theme, plugins))
     }
 
-    fn detect_conflicts(&self, config1: &str, config2: &str) -> PyResult<Vec<String>> {
+    fn detect_conflicts(&self, _config1: &str, _config2: &str) -> PyResult<Vec<String>> {
         // Mock implementation for now
         Ok(vec!["No conflicts detected".to_string()])
     }
