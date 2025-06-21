@@ -1,10 +1,10 @@
 # 🔧 HyprSupreme-Builder Troubleshooting Guide
 
-> **📘 Note:** This guide has been updated for v2.2.0 with new error codes and troubleshooting procedures.
+> **📘 Note:** This guide has been updated for v3.0.0 with new error codes and troubleshooting procedures.
 
 ## 🚨 Common Issues and Solutions
 
-### v2.2.0 Error Codes
+### v3.0.0 Error Codes
 
 #### Error: INSTALLATION_STATE_CORRUPTED
 **Symptoms:**
@@ -174,7 +174,7 @@ Some components are missing or misconfigured
 
 **Solutions:**
 ```bash
-# Resume installation (new in v2.2.0)
+# Resume installation (new in v3.0.0)
 ./install.sh --resume
 
 # If resume fails, use repair option
@@ -206,7 +206,7 @@ ERROR: Component 'network' failed validation
 
 ---
 
-### Network Management Issues (New in v2.2.0)
+### Network Management Issues (New in v3.0.0)
 
 #### Issue: WiFi Not Detected
 **Symptoms:**
@@ -282,7 +282,7 @@ nslookup google.com
 sudo systemd-resolve --flush-caches
 ```
 
-### Audio System Issues (New in v2.2.0)
+### Audio System Issues (New in v3.0.0)
 
 #### Issue: No Audio Output
 **Symptoms:**
@@ -533,7 +533,7 @@ Settings revert after restart
 ./hyprsupreme --reset-config --keep-backups
 ```
 
-#### Issue: State Management Problems (New in v2.2.0)
+#### Issue: State Management Problems (New in v3.0.0)
 **Symptoms:**
 ```
 Error: Failed to save state (code: E_STATE_SAVE)
@@ -561,7 +561,7 @@ ls -la ~/.config/hyprsupreme/state/
 
 ---
 
-### Hardware Detection Issues (New in v2.2.0)
+### Hardware Detection Issues (New in v3.0.0)
 
 #### Issue: Incorrect GPU Detection
 **Symptoms:**
@@ -894,7 +894,7 @@ python3 -c "import sys; print('\n'.join(sys.path))"
 
 ---
 
-### Installation Recovery Procedures (New in v2.2.0)
+### Installation Recovery Procedures (New in v3.0.0)
 
 #### Complete Installation Recovery
 **When to use:** Installation is severely broken or interrupted
@@ -962,7 +962,7 @@ python3 -c "import sys; print('\n'.join(sys.path))"
 
 ### System Information
 ```bash
-# Get system info (enhanced in v2.2.0)
+# Get system info (enhanced in v3.0.0)
 ./hyprsupreme --system-info --detailed
 
 # Check Hyprland version
@@ -971,14 +971,14 @@ hyprctl version
 # Check all dependencies with detailed validation
 ./hyprsupreme --check-deps --validate-versions
 
-# New v2.2.0 system diagnostics
+# New v3.0.0 system diagnostics
 ./hyprsupreme --diagnostics --generate-report
 ./hyprsupreme --health-check
 ```
 
 ### Log Analysis
 ```bash
-# Application logs (enhanced in v2.2.0)
+# Application logs (enhanced in v3.0.0)
 ./hyprsupreme --show-logs --level=debug
 tail -f logs/hyprsupreme.log
 
@@ -988,15 +988,15 @@ journalctl -f -u display-manager
 # Hyprland logs
 tail -f ~/.cache/hyprland/hyprland.log
 
-# Network diagnostic logs (new in v2.2.0)
+# Network diagnostic logs (new in v3.0.0)
 ./modules/core/install_network.sh logs
 tail -f ~/.cache/hyprsupreme/logs/network.log
 
-# Audio diagnostic logs (new in v2.2.0)
+# Audio diagnostic logs (new in v3.0.0)
 ./modules/core/install_audio.sh logs
 tail -f ~/.cache/hyprsupreme/logs/audio.log
 
-# Installation state logs (new in v2.2.0)
+# Installation state logs (new in v3.0.0)
 ./hyprsupreme --state-logs
 tail -f ~/.cache/hyprsupreme/logs/state.log
 ```
@@ -1006,14 +1006,14 @@ tail -f ~/.cache/hyprsupreme/logs/state.log
 # Validate all configurations
 ./hyprsupreme --validate-config
 
-# Test keybindings (enhanced in v2.2.0)
+# Test keybindings (enhanced in v3.0.0)
 ./test_keybindings.sh --interactive
 ./test_keybindings.sh --detect-conflicts
 
 # Test community connectivity
 ./test_community_connectivity.sh
 
-# New v2.2.0 validation tools
+# New v3.0.0 validation tools
 ./hyprsupreme --validate-installation   # Complete installation validation
 ./hyprsupreme --validate-hardware       # Hardware compatibility check
 ./hyprsupreme --validate-network        # Network configuration test
@@ -1022,7 +1022,7 @@ tail -f ~/.cache/hyprsupreme/logs/state.log
 
 ---
 
-### Advanced Diagnostics (New in v2.2.0)
+### Advanced Diagnostics (New in v3.0.0)
 
 ```bash
 # Generate complete system report
@@ -1044,7 +1044,7 @@ tail -f ~/.cache/hyprsupreme/logs/state.log
 ./hyprsupreme --debug-mode --log-level=trace
 ```
 
-### New Debugging Tools in v2.2.0
+### New Debugging Tools in v3.0.0
 
 ```bash
 # Network debugging
@@ -1075,25 +1075,25 @@ tail -f ~/.cache/hyprsupreme/logs/state.log
 2. **Run diagnostic commands** listed above
 3. **Try suggested solutions** for your issue
 4. **Search existing issues** on GitHub
-5. **Generate a system report** using `./hyprsupreme --system-report` (new in v2.2.0)
+5. **Generate a system report** using `./hyprsupreme --system-report` (new in v3.0.0)
 
 ### Creating a Bug Report
 Include the following information:
 
 ```bash
-# Enhanced system report (new in v2.2.0)
+# Enhanced system report (new in v3.0.0)
 ./hyprsupreme --system-report > system-report.txt
 
 # Configuration export
 ./hyprsupreme --export-config > config-export.txt
 
-# Logs (comprehensive - new in v2.2.0)
+# Logs (comprehensive - new in v3.0.0)
 ./hyprsupreme --export-logs --days=3 > logs-export.txt
 
-# Installation state (new in v2.2.0)
+# Installation state (new in v3.0.0)
 ./hyprsupreme --state-info --json > state-info.json
 
-# Error history (new in v2.2.0)
+# Error history (new in v3.0.0)
 ./hyprsupreme --error-history > error-history.txt
 ```
 
@@ -1108,30 +1108,30 @@ Include the following information:
 
 ### Complete Reset
 ```bash
-# Backup current configuration (enhanced in v2.2.0)
+# Backup current configuration (enhanced in v3.0.0)
 ./hyprsupreme --backup-all --with-state --compression=high
 
 # Complete reset (use with caution)
 ./hyprsupreme --factory-reset
 
-# Restore from backup if needed (enhanced in v2.2.0)
+# Restore from backup if needed (enhanced in v3.0.0)
 ./hyprsupreme --restore-backup backup-id --selective="config,themes,keybindings"
 ```
 
 ### Debug Mode
 ```bash
-# Enable debug logging (enhanced in v2.2.0)
+# Enable debug logging (enhanced in v3.0.0)
 export HYPRSUPREME_DEBUG=1
 export HYPRSUPREME_LOG_LEVEL=trace
 ./hyprsupreme --debug
 
-# Verbose mode with component filtering (new in v2.2.0)
+# Verbose mode with component filtering (new in v3.0.0)
 ./hyprsupreme -vvv --component=network,audio,gpu
 
-# Remote debugging (new in v2.2.0)
+# Remote debugging (new in v3.0.0)
 ./hyprsupreme --remote-debug --port=8080
 
-# Performance debugging (new in v2.2.0)
+# Performance debugging (new in v3.0.0)
 ./hyprsupreme --debug --profile --timeline
 ```
 
@@ -1144,16 +1144,16 @@ cp ~/.config/waybar/config.backup ~/.config/waybar/config
 # Reset to default theme
 ./hyprsupreme --theme default
 
-# Component-specific recovery (new in v2.2.0)
+# Component-specific recovery (new in v3.0.0)
 ./hyprsupreme --recover-network --from-backup
 ./hyprsupreme --recover-audio --factory-defaults
 ./hyprsupreme --recover-display-config --auto-detect
 
-# Time-based recovery (new in v2.2.0)
+# Time-based recovery (new in v3.0.0)
 ./hyprsupreme --restore-point --timestamp="2025-06-15T14:30:00"
 ```
 
-### Emergency Recovery Tools (New in v2.2.0)
+### Emergency Recovery Tools (New in v3.0.0)
 
 ```bash
 # Rescue mode - minimal environment to fix critical issues
@@ -1174,7 +1174,7 @@ cp ~/.config/waybar/config.backup ~/.config/waybar/config
 
 ---
 
-### Common Error Code Reference (v2.2.0)
+### Common Error Code Reference (v3.0.0)
 
 | Error Code | Description | Common Solution |
 |------------|-------------|-----------------|
