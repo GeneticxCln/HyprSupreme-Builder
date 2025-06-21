@@ -83,7 +83,7 @@ SKY_BLUE="$(tput setaf 6)"
 RESET="$(tput sgr0)"
 
 # Script version
-VERSION="3.0.0"
+VERSION="4.0.0"
 PROJECT_NAME="HyprSupreme-Builder"
 
 # Create logs directory

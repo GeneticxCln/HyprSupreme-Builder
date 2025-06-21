@@ -34,7 +34,7 @@ fi
 #=====================================
 
 readonly SCRIPT_NAME="HyprSupreme-Builder Enhanced Installer"
-readonly VERSION="3.0.0"
+readonly VERSION="4.0.0"
 readonly PROJECT_NAME="HyprSupreme-Builder"
 readonly GITHUB_REPO="GeneticxCln/HyprSupreme-Builder"
 readonly MIN_BASH_VERSION="4.0"
