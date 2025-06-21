@@ -6,13 +6,13 @@ HyprSupreme-Builder provides a RESTful API through its web interface for program
 
 **Base URL**: `http://localhost:5000/api/v1`
 
-**API Version**: v1.2 (v2.2.0 release)
+**API Version**: v1.2 (v3.0.0 release)
 
 ## Authentication
 
 Currently, the API does not require authentication when running locally. For production deployments, consider implementing proper authentication mechanisms.
 
-**New in v2.2.0**: API key authentication option is available for enhanced security:
+**New in v3.0.0**: API key authentication option is available for enhanced security:
 
 ```bash
 # Generate API key
@@ -26,7 +26,7 @@ curl -H "X-API-Key: your_api_key" http://localhost:5000/api/v1/status
 
 - **Local Development**: No rate limiting
 - **Production**: 100 requests per minute per IP (recommended)
-- **API Key Authentication**: 300 requests per minute (new in v2.2.0)
+- **API Key Authentication**: 300 requests per minute (new in v3.0.0)
 
 ---
 
@@ -41,7 +41,7 @@ Check API health status.
 ```json
 {
     "status": "healthy",
-    "version": "2.2.0",
+    "version": "3.0.0",
     "timestamp": "2025-06-20T14:30:00Z",
     "uptime": "3d 2h 15m",
     "system_load": [0.15, 0.25, 0.30]
@@ -55,7 +55,7 @@ Get detailed system status.
 ```json
 {
     "api_version": "v1.2",
-    "app_version": "2.2.0",
+    "app_version": "3.0.0"
     "database_status": "connected",
     "services": {
         "community_platform": "running",
@@ -87,7 +87,7 @@ Get detailed system status.
 
 ---
 
-### 🛠️ **Installation Management (New in v2.2.0)**
+### 🛠️ **Installation Management (New in v3.0.0)**
 
 #### `GET /api/v1/installation/status`
 Get current installation status and progress.
@@ -215,7 +215,7 @@ Get installation logs.
 }
 ```
 
-### 🔄 **State Management (New in v2.2.0)**
+### 🔄 **State Management (New in v3.0.0)**
 
 #### `GET /api/v1/state`
 Get current state information.
@@ -225,7 +225,7 @@ Get current state information.
 {
     "installation_state": {
         "status": "completed",
-        "version": "2.2.0",
+        "version": "3.0.0",
         "installed_at": "2025-06-20T12:45:23Z",
         "last_updated": "2025-06-20T14:10:15Z",
         "modifications": 3
@@ -307,7 +307,7 @@ Restore previously saved state.
 }
 ```
 
-### 🔍 **Hardware Detection (New in v2.2.0)**
+### 🔍 **Hardware Detection (New in v3.0.0)**
 
 #### `GET /api/v1/hardware`
 Get hardware information.
@@ -444,9 +444,9 @@ Get list of themes with optional filtering.
 - `order` (string): `asc` or `desc` (default: `desc`)
 - `limit` (integer): Number of results (default: 20, max: 100)
 - `offset` (integer): Pagination offset (default: 0)
-- `hardware_compatible` (boolean): Filter by hardware compatibility (new in v2.2.0)
-- `gpu` (string): Filter by GPU compatibility (nvidia, amd, intel) (new in v2.2.0)
-- `performance_profile` (string): Filter by performance profile (low, medium, high) (new in v2.2.0)
+- `hardware_compatible` (boolean): Filter by hardware compatibility (new in v3.0.0)
+- `gpu` (string): Filter by GPU compatibility (nvidia, amd, intel) (new in v3.0.0)
+- `performance_profile` (string): Filter by performance profile (low, medium, high) (new in v3.0.0)
 
 **Example Request:**
 ```bash
@@ -486,7 +486,7 @@ GET /api/v1/themes?category=minimal&sort=rating&limit=10
                 "performance_impact": "low"
             },
             "verified": true,
-            "verified_on_v2_2_0": true
+            "verified_on_v3_0_0": true
         }
     ],
     "pagination": {
@@ -590,7 +590,7 @@ Get themes created by a specific user.
 
 ---
 
-### 🌐 **Network Management (New in v2.2.0)**
+### 🌐 **Network Management (New in v3.0.0)**
 
 #### `GET /api/v1/network/status`
 Get network status and available connections.
@@ -695,7 +695,7 @@ Scan for available WiFi networks.
 }
 ```
 
-### 🔊 **Audio Management (New in v2.2.0)**
+### 🔊 **Audio Management (New in v3.0.0)**
 
 #### `GET /api/v1/audio/status`
 Get audio status and available devices.
@@ -800,7 +800,7 @@ Adjust volume for device or application.
 }
 ```
 
-### 🛡️ **Error Handling (New in v2.2.0)**
+### 🛡️ **Error Handling (New in v3.0.0)**
 
 #### `GET /api/v1/errors`
 Get error history and details.
@@ -1085,7 +1085,7 @@ X-RateLimit-Reset: 1640995200
 
 ---
 
-## SDK Examples for v2.2.0
+## SDK Examples for v3.0.0
 
 ### Python
 
@@ -1262,7 +1262,7 @@ api.getNetworkStatus().then(network => {
 
 ## Changelog
 
-### v1.2.0 (v2.2.0 Release)
+### v1.2.0 (v3.0.0 Release)
 - Added installation management endpoints
 - Added state management endpoints
 - Added hardware detection endpoints

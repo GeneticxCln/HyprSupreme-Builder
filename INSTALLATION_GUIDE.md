@@ -26,25 +26,25 @@
 - **EndeavourOS** - User-friendly Arch
 - **Manjaro** - Stable Arch derivative
 - **Garuda Linux** - Gaming-focused
-- **ArcoLinux** - Full native support *(New in v2.2.0)*
-- **Artix Linux** - Full native support *(New in v2.2.0)*
-- **BlackArch** - Full native support *(New in v2.2.0)*
+- **ArcoLinux** - Full native support *(New in v3.0.0)*
+- **Artix Linux** - Full native support *(New in v3.0.0)*
+- **BlackArch** - Full native support *(New in v3.0.0)*
 
 #### ⚠️ **Limited Support (Tier 2)**
 - **Ubuntu 22.04+** - Some manual compilation required
-- **Debian 12+** - Improved package availability *(Updated in v2.2.0)*
-- **Fedora 39+** - Better COPR repositories integration *(Updated in v2.2.0)*
-- **Fedora 38** - Good support *(Updated in v2.2.0)*
+- **Debian 12+** - Improved package availability *(Updated in v3.0.0)*
+- **Fedora 39+** - Better COPR repositories integration *(Updated in v3.0.0)*
+- **Fedora 38** - Good support *(Updated in v3.0.0)*
 - **openSUSE Leap/Tumbleweed** - Community packages
-- **Nobara 39+** - Good support *(New in v2.2.0)*
-- **Pop!_OS** - Good support *(New in v2.2.0)*
+- **Nobara 39+** - Good support *(New in v3.0.0)*
+- **Pop!_OS** - Good support *(New in v3.0.0)*
 
 #### 🧪 **Experimental (Tier 3)**
 - **Void Linux** - Advanced users only
 - **Gentoo** - Manual compilation required
 - **NixOS** - Custom derivations needed
-- **Alpine Linux** - Experimental support *(New in v2.2.0)*
-- **FreeBSD 13+** - Basic compatibility *(New in v2.2.0)*
+- **Alpine Linux** - Experimental support *(New in v3.0.0)*
+- **FreeBSD 13+** - Basic compatibility *(New in v3.0.0)*
 
 ### 🔧 **Required Tools & Dependencies**
 
@@ -59,7 +59,7 @@ git, curl, wget, unzip, base-devel (or build-essential)
 # Package managers
 pacman (Arch-based), apt (Debian-based), dnf (Fedora), zypper (openSUSE)
 
-# System utilities (new in v2.2.0)
+# System utilities (new in v3.0.0)
 systemd (or compatible init), cron/systemd-timers, dbus
 ```
 
@@ -72,14 +72,14 @@ wayland, wayland-protocols
 mesa                    # Open-source drivers
 nvidia-dkms            # NVIDIA proprietary
 amdgpu-pro             # AMD proprietary (optional)
-intel-media-driver     # Intel specific (new in v2.2.0)
+intel-media-driver     # Intel specific (new in v3.0.0)
 
 # Audio system
-pipewire, pipewire-pulse, wireplumber  # Recommended (v2.2.0 optimized)
+pipewire, pipewire-pulse, wireplumber  # Recommended (v3.0.0 optimized)
 # OR
 pulseaudio, pulseaudio-alsa            # Legacy support
 
-# Network components (new in v2.2.0)
+# Network components (new in v3.0.0)
 networkmanager         # Required for network management
 iw, wireless_tools     # WiFi utilities
 bluez, bluez-utils     # Bluetooth support
@@ -99,7 +99,7 @@ python3 (3.9+), python-pip, nodejs, npm  # Note: Now requires Python 3.9+
 # Multimedia
 gstreamer, ffmpeg, imagemagick
 
-# Enhanced functionality (new in v2.2.0)
+# Enhanced functionality (new in v3.0.0)
 flatpak                # Application management
 docker                 # Container support
 gamemode               # Gaming optimizations
@@ -117,7 +117,7 @@ gamemode               # Gaming optimizations
 # Download and run installer
 curl -fsSL https://raw.githubusercontent.com/GeneticxCln/HyprSupreme-Builder/main/install.sh | bash
 
-# OR use the new enhanced installer (v2.2.0+)
+# OR use the new enhanced installer (v3.0.0+)
 curl -fsSL https://raw.githubusercontent.com/GeneticxCln/HyprSupreme-Builder/main/install_enhanced.sh | bash
 ```
 
